@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: traveler
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ai-travel-assistant
+    username: ${postgres-user}
+    password: ${postgres-password}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      database: 2
+  profiles:
+    active: dev
+embedding:
+  manufacturer: zhipuai
+  api-key: ${EMBEDDING_API_KEY}
+  base-url: ${EMBEDDING_BASE_URL}
+  model: ${EMBEDDING_MODEL}
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-handlers-package: com.bread.traveler.typehandler
+
+
+# SpringDoc OpenAPI 核心配置 (Knife4j 会读取这些配置)
+springdoc:
+  packages-to-scan: com.bread.traveler.controller
+  api-docs:
+    # 是否启用 api-docs 功能，生产环境建议关闭
+    enabled: true
+  # Swagger UI 的配置 (Knife4j 会覆盖这个 UI，但有些配置可以共用)
+  swagger-ui:
+    path: /swagger-ui.html # Swagger UI 原始访问路径
+# Knife4j 专属增强配置
+knife4j:
+  # 是否开启 Knife4j 的增强功能
+  enable: false
+  # Knife4j 自身的文档配置
+  setting:
+    # 语言选择: zh_cn | en_us
+    language: zh_cn
+
+
+server:
+  servlet:
+    context-path: /api
