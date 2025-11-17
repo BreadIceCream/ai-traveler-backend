@@ -13,15 +13,19 @@ import java.util.UUID;
 */
 public interface UsersService extends IService<Users> {
 
-    // 基础CRUD操作（继承自IService）
-    // save(), saveBatch(), removeById(), updateById(), getById(), list(), page()
-
     /**
      * 根据用户ID查找用户
      * @param userId
      * @return
      */
     Users findUserById(UUID userId);
+
+    /**
+     * 根据用户名查找用户
+     * @param username 用户名
+     * @return 用户信息
+     */
+    Users getUserByUsername(String username);
 
     /**
      * 创建用户
@@ -32,19 +36,12 @@ public interface UsersService extends IService<Users> {
     Users createUser(String username, String preferencesText);
 
     /**
-     * 根据用户名查找用户
-     * @param username 用户名
-     * @return 用户信息
-     */
-    Users getUserByUsername(String username);
-
-    /**
      * 更新用户偏好设置
      * @param userId 用户ID
      * @param preferencesText 偏好文本
-     * @return 是否更新成功
+     * @return 更新后的Users对象
      */
-    boolean updateUserPreferences(UUID userId, String preferencesText);
+    Users updateUserPreferences(UUID userId, String preferencesText);
 
     /**
      * 查找兴趣相似用户

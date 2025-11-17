@@ -1,5 +1,6 @@
 package com.bread.traveler.controller;
 
+import com.bread.traveler.constants.Constant;
 import com.bread.traveler.entity.Pois;
 import com.bread.traveler.service.PoisService;
 import com.bread.traveler.vo.Result;
@@ -49,6 +50,17 @@ public class PoisController {
         List<Pois> pois = poisService.searchPoiFromDb(city, keywords);
         return Result.success(pois);
     }
+
+    @GetMapping("/search/semantic")
+    @Operation(summary = "语义搜索POI", description = "使用语义搜索的POI")
+    public Result semanticSearchPois(@RequestParam String queryText,
+                                     @RequestParam(required = false) String city,
+                                     @RequestParam(defaultValue = Constant.POIS_SEMANTIC_SEARCH_TOP_K) int topK) {
+        List<Pois> pois = poisService.semanticSearchPois(queryText, city, topK);
+        return Result.success(pois);
+    }
+
+
 
 
 }

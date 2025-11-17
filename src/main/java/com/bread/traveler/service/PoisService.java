@@ -44,10 +44,12 @@ public interface PoisService extends IService<Pois> {
     void asyncEmbeddingAndSave(List<Pois> poisList);
 
     /**
-     * 语义搜索POI，用于灵感激发模式（F-3.5.1）
+     * 语义搜索POI，用于灵感激发模式
      * @param queryText 查询文本
+     * @param city 城市名称
+     * @param topK 要查询的POI数量
      * @return 匹配的POI列表
      */
-    List<Pois> semanticSearchPois(String queryText);
+    List<Pois> semanticSearchPois(String queryText, String city, int topK);
 
 }

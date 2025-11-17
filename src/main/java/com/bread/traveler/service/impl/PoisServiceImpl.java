@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.constants.Constant;
@@ -18,18 +17,16 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.converter.ListOutputConverter;
-import org.springframework.ai.converter.StructuredOutputConverter;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
+import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +68,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     public Pois getPoiById(UUID poiId) {
         log.info("Getting POI by ID: {}", poiId);
         Pois pois = getById(poiId);
-        if (pois == null){
+        if (pois == null) {
             throw new BusinessException(Constant.POIS_NOT_FOUND);
         }
         return pois;
@@ -81,11 +78,11 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     public List<Pois> searchPoiFromDb(String city, String keywords) {
         log.info("Searching POIs from database: city={}, keywords={}", city, keywords);
         LambdaQueryChainWrapper<Pois> wrapper = lambdaQuery().like(Pois::getName, keywords);
-        if (city != null && !city.trim().isEmpty()){
+        if (city != null && !city.trim().isEmpty()) {
             wrapper.like(Pois::getCity, city);
         }
         List<Pois> list = wrapper.list();
-        if (list == null || list.isEmpty()){
+        if (list == null || list.isEmpty()) {
             throw new BusinessException(Constant.POIS_SEARCH_FAILED + "，请使用高德搜索尝试");
         }
         return list;
@@ -99,7 +96,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         }
         GaoDeUtils.SearchPoiParam.SearchPoiParamBuilder paramBuilder = GaoDeUtils.SearchPoiParam.builder()
                 .keywords(keywords).showFields(List.of(Constant.ShowField.BUSINESS, Constant.ShowField.PHOTOS))
-                .pageSize(5);
+                .pageSize(Constant.POIS_SEARCH_EXTERNAL_API_RETURN_NUMBER);
         if (city != null && !city.trim().isEmpty()) {
             paramBuilder.city(city).cityLimit(true);
         }
@@ -110,7 +107,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         } catch (IOException e) {
             throw new RuntimeException(Constant.POIS_SEARCH_FAILED);
         }
-        if (!Objects.equals(results.getStr("status"), "1")){
+        if (!Objects.equals(results.getStr("status"), "1")) {
             // 如果status不为1，搜索失败
             throw new BusinessException(Constant.POIS_SEARCH_FAILED + ", " + results.getStr("info"));
         }
@@ -129,14 +126,13 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         }).toList();
         try {
             List<String> descriptions = descriptionsTask.get();
-            for (int i = 0; i < parsedPois.size(); i++) {
-                Pois poi = parsedPois.get(i);
-                poi.setDescription(descriptions.get(i));
+            for (int i = 0; i < descriptions.size(); i++) {
+                parsedPois.get(i).setDescription(descriptions.get(i));
             }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(Constant.POIS_GENERATE_DESCRIPTION_FAILED);
         }
-        if (parsedPois.isEmpty()){
+        if (parsedPois.isEmpty()) {
             throw new BusinessException(Constant.POIS_SEARCH_NO_RESULT);
         }
         //异步处理embedding向量，写入数据库 todo采用消息队列
@@ -146,22 +142,25 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
 
     /**
      * 生成POI描述
+     *
      * @param poisName
      * @return
      */
-    private List<String> generateDescriptions(List<String> poisName){
+    private List<String> generateDescriptions(List<String> poisName) {
         log.info("Generating descriptions for POIs: {}", poisName);
         PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/generateDescriptionTemplate.md"));
         Prompt prompt = promptTemplate.create(Map.of("poisName", poisName));
         List<String> descriptions = zhiPuChatClientProvider.getObject().prompt(prompt)
                 .options(ChatOptions.builder().model("GLM-4-FlashX-250414").temperature(0.5).build())
-                .call().entity(new ParameterizedTypeReference<>() {});
+                .call().entity(new ParameterizedTypeReference<>() {
+                });
         log.info("Descriptions generated success!");
         return descriptions;
     }
 
     /**
      * 解析POI数据，转为POI对象
+     *
      * @param poiJson
      * @return
      */
@@ -179,7 +178,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
                 .latitude(new BigDecimal(location[1]))
                 .createdAt(OffsetDateTime.now(ZoneId.systemDefault()));
         // 设置business信息
-        if (poiJson.containsKey("business")){
+        if (poiJson.containsKey("business")) {
             JSONObject business = poiJson.getJSONObject("business");
             poisBuilder
                     .openingHours(business.getStr("opentime_week", ""))
@@ -188,7 +187,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
                     .avgCost(business.getStr("cost", ""));
         }
         // 设置图片信息
-        if (poiJson.containsKey("photos")){
+        if (poiJson.containsKey("photos")) {
             JSONArray photos = poiJson.getJSONArray("photos");
             List<String> photoUrls = new ArrayList<>();
             for (int i = 0; i < photos.size(); i++) {
@@ -202,6 +201,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
 
     /**
      * 异步处理POI生成embedding向量保存至vector_store，同时保存至poi表
+     *
      * @param poisList
      */
     @Override
@@ -210,11 +210,16 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         try {
             log.info("Async embedding and save POIs: size {}", poisList.size());
             List<Document> documents = poisList.stream().map(pois -> {
-                String textTemplate = "%s, type:%s, description:%s";
-                String text = String.format(textTemplate, pois.getName(), pois.getType(), pois.getDescription());
+                String textTemplate = "%s. Location:%s. Type:%s. Description:%s";
+                String text = String.format(textTemplate, pois.getName(), pois.getCity() + pois.getAddress(), pois.getType(), pois.getDescription());
+                Map<String, Object> metadata = new HashMap<>();
+                // 添加元数据
+                metadata.put("entity", "Pois");
                 return Document.builder()
                         .id(pois.getPoiId().toString())
-                        .metadata(BeanUtil.beanToMap(pois, new HashMap<>(), CopyOptions.create().ignoreNullValue()))
+                        .metadata(BeanUtil.beanToMap(pois, metadata,
+                                // 只保留必要字段 poiId, externalApiId, name, type, avgCost, city, rating
+                                CopyOptions.create().setIgnoreProperties(Constant.POIS_METADATA_IGNORE_FIELDS).ignoreNullValue()))
                         .text(text).build();
             }).toList();
             vectorStore.add(documents);
@@ -232,43 +237,32 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
 
 
     @Override
-    public List<Pois> semanticSearchPois(String queryText) {
-//        log.info("Performing semantic search for query: {}", queryText);
-//        if (queryText == null || queryText.trim().isEmpty()) {
-//            throw new BusinessException(Constant.POIS_SEARCH_INVALID_PARAM);
-//        }
-//        try {
-//            // 生成查询文本的向量嵌入
-//            float[] queryEmbedding = embeddingModel.embed(queryText);
-//
-//            // 使用pgvector进行向量相似度搜索
-//            // 这里使用原生SQL查询，因为MyBatis-Plus对向量搜索的支持有限 todo
-//            vectorStore.add();
-//
-//            log.info("Found {} POIs matching the query", pois.size());
-//            return pois;
-//
-//        } catch (Exception e) {
-//            log.error("Failed to perform semantic search for query: {}", queryText, e);
-//            // 如果向量搜索失败，返回空列表或fallback到文本搜索
-//            return fallbackTextSearch(queryText);
-//        }
-        return null;
-    }
-
-    /**
-     * 回退的文本搜索方法
-     */
-    private List<Pois> fallbackTextSearch(String queryText) {
-        log.warn("Falling back to text-based search for query: {}", queryText);
-        LambdaQueryWrapper<Pois> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(Pois::getName, queryText)
-               .or()
-               .like(Pois::getDescription, queryText)
-               .orderByDesc(Pois::getCreatedAt);
-
-        List<Pois> pois = list(wrapper);
-        log.info("Found {} POIs using text search", pois.size());
+    public List<Pois> semanticSearchPois(String queryText, String city, int topK) {
+        log.info("Performing semantic search pois for query: {}, {}, {}", queryText, city, topK);
+        if (queryText == null || queryText.trim().isEmpty()) {
+            throw new BusinessException(Constant.POIS_SEARCH_INVALID_PARAM);
+        }
+        // 使用vector store进行相似度搜索, 注意''单引号
+        String filterExpression = "entity == 'Pois'";
+        if (city != null && !city.trim().isEmpty()){
+            filterExpression += " && city == '%s'".formatted(city);
+        }
+        log.info("Filter expression: {}", filterExpression);
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(queryText)
+                .topK(topK)
+                .filterExpression(filterExpression).build();
+        List<Document> documents = vectorStore.similaritySearch(searchRequest);
+        if (documents == null || documents.isEmpty()) {
+            throw new BusinessException(Constant.POIS_SEARCH_NO_RESULT);
+        }
+        // 从数据库中查询POI信息
+        List<UUID> poiIds = documents.stream().map(document -> {
+            log.info("Document: {}, score: {}", document.getId(), document.getScore());
+            return UUID.fromString(document.getId());
+        }).toList();
+        List<Pois> pois = listByIds(poiIds);
+        log.info("Semantic search pois success: size {}", pois.size());
         return pois;
     }
 

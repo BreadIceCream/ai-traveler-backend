@@ -35,13 +35,9 @@ class TravelerApplicationTests {
     @Test
     void testEmbedding() {
         List<Users> users = usersService.list();
-        List<String> texts = users.stream().map(Users::getPreferencesText).toList();
-        List<float[]> embed = embeddingModel.embed(texts);
-        for (int i = 0; i < embed.size(); i++) {
-            Users user = users.get(i);
-            user.setPreferencesEmbedding(embed.get(i));
+        for (Users user : users) {
+            usersService.updateUserPreferences(user.getUserId(), user.getPreferencesText());
         }
-        usersService.updateBatchById(users);
     }
 
     @Test

@@ -5,43 +5,46 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-import com.bread.traveler.typehandler.VectorTypeHandler;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
  * 
- * @TableName users
+ * @TableName ai_recommendation_conversation
  */
-@TableName(value ="users")
+@TableName(value ="ai_recommendation_conversation")
 @Data
-public class Users implements Serializable {
+public class AiRecommendationConversation implements Serializable {
     /**
      * 
      */
-    @TableId(value = "user_id")
+    @TableId(value = "conversation_id")
+    private UUID conversationId;
+
+    /**
+     * 
+     */
+    @TableField(value = "user_id")
     private UUID userId;
 
     /**
      * 
      */
-    @TableField(value = "username")
-    private String username;
-
-    /**
-     * 
-     */
-    @TableField(value = "preferences_text")
-    private String preferencesText;
+    @TableField(value = "title")
+    private String title;
 
     /**
      * 
      */
     @TableField(value = "created_at")
     private OffsetDateTime createdAt;
+
+    /**
+     * 
+     */
+    @TableField(value = "updated_at")
+    private OffsetDateTime updatedAt;
 }

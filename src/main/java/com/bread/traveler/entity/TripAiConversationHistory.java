@@ -1,13 +1,10 @@
 package com.bread.traveler.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 import com.bread.traveler.enums.RoleType;
@@ -17,9 +14,9 @@ import lombok.Data;
  * 
  * @TableName ai_conversation_history
  */
-@TableName(value ="ai_conversation_history")
+@TableName(value ="trip_ai_conversation_history")
 @Data
-public class AiConversationHistory implements Serializable {
+public class TripAiConversationHistory implements Serializable {
     /**
      * 
      */

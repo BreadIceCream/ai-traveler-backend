@@ -10,6 +10,12 @@ public class Constant {
     public static final String POIS_SAVE_FAILED = "保存地点失败";
     public static final String POIS_SEARCH_NO_RESULT = "未找到相关地点";
     public static final String POIS_GENERATE_DESCRIPTION_FAILED = "生成描述信息失败";
+    public static final Integer POIS_SEARCH_EXTERNAL_API_RETURN_NUMBER = 3;
+    public static final String POIS_SEMANTIC_SEARCH_TOP_K = "5";
+    public static final String[] POIS_METADATA_IGNORE_FIELDS = {"address", "latitude", "longitude", "description", "openingHours", "avgVisitDuration", "createdAt", "photos", "phone"};
+    public static final String USERS_PREFERENCES_UPDATE_FAILED = "用户偏好更新失败";
+    public static final String USERS_FIND_SIMILAR_LIMIT = "5";
+    public static final String USERS_FIND_SIMILAR_NO_RESULT = "未找到相似用户";
 
     public static class ShowField{
         //设置后返回 poi 商业信息，包括营业时间、评分等
