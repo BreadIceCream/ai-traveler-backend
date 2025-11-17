@@ -10,13 +10,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.bread.traveler.enums.PoiType;
 import com.bread.traveler.typehandler.JsonbTypeHandler;
+import com.bread.traveler.typehandler.ListStringTypeHandler;
 import com.bread.traveler.typehandler.VectorTypeHandler;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * 
@@ -24,6 +29,7 @@ import lombok.Data;
  */
 @TableName(value ="pois")
 @Data
+@Builder
 public class Pois implements Serializable {
     /**
      * 
@@ -44,10 +50,13 @@ public class Pois implements Serializable {
     private String name;
 
     /**
-     * 
+     * 类型描述信息
      */
     @TableField(value = "type")
-    private PoiType type;
+    private String type;
+
+    @TableField(value = "city")
+    private String city;
 
     /**
      * 
@@ -76,14 +85,8 @@ public class Pois implements Serializable {
     /**
      * 
      */
-    @TableField(value = "description_embedding", typeHandler = VectorTypeHandler.class)
-    private float[] descriptionEmbedding;
-
-    /**
-     * 
-     */
-    @TableField(value = "opening_hours", typeHandler = JsonbTypeHandler.class)
-    private Map<String, Object> openingHours;
+    @TableField(value = "opening_hours")
+    private String openingHours;
 
     /**
      * 
@@ -94,14 +97,18 @@ public class Pois implements Serializable {
     /**
      * 
      */
-    @TableField(value = "price_level")
-    private Integer priceLevel;
+    @TableField(value = "avg_cost")
+    private String avgCost;
 
-    /**
-     * 
-     */
-    @TableField(value = "created_by_user_id")
-    private UUID createdByUserId;
+    @TableField(value = "photos", typeHandler = ListStringTypeHandler.class)
+    private List<String> photos;
+
+    @TableField(value = "phone")
+    private String phone;
+
+    @TableField(value = "rating")
+    private String rating;
+
 
     /**
      * 

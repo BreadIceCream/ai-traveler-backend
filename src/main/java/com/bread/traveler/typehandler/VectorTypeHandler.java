@@ -27,7 +27,7 @@ public class VectorTypeHandler extends BaseTypeHandler<float[]> {
             return;
         }
 
-        // 将 double[] 转换为 vector 字符串格式: [1.0,2.0,3.0]
+        // 将 float[] 转换为 vector 字符串格式: [1.0,2.0,3.0]
         String vectorStr = Arrays.toString(parameter);
 
         // 使用 PGobject 设置 vector 类型

@@ -6,17 +6,45 @@ spring:
     username: ${postgres-user}
     password: ${postgres-password}
     driver-class-name: org.postgresql.Driver
+  ai:
+    vectorstore:
+      pgvector:
+        index-type: hnsw
+        distance-type: cosine_distance
+        dimensions: 1536
+        schema-validation: true
+    chat:
+      client:
+        enabled: false
+    zhipuai:
+      api-key: ${ZHIPUAI_API_KEY}
+      chat:
+        options:
+          model: ${ZHIPUAI_CHAT_MODEL}
+      embedding:
+        api-key: ${ZHIPUAI_EMBEDDING_API_KEY}
+        options:
+          model: ${ZHIPUAI_EMBEDDING_MODEL}
+          dimensions: 1536
+
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        base-url: ${OPENAI_CHAT_BASE_URL}
+        options:
+          model: ${OPENAI_CHAT_MODEL}
+    model:
+      embedding: zhipuai
+
   data:
     redis:
       host: localhost
       database: 2
   profiles:
     active: dev
-embedding:
-  manufacturer: zhipuai
-  api-key: ${EMBEDDING_API_KEY}
-  base-url: ${EMBEDDING_BASE_URL}
-  model: ${EMBEDDING_MODEL}
+
+gaode:
+  api-key: ${GAODE_API_KEY}
 
 mybatis-plus:
   global-config:
