@@ -1,10 +1,15 @@
 package com.bread.traveler.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bread.traveler.dto.AiRecommendResponse;
 import com.bread.traveler.entity.AiRecommendationConversation;
 import com.bread.traveler.service.AiRecommendationConversationService;
 import com.bread.traveler.mapper.AiRecommendationConversationMapper;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
 * @author huang
@@ -15,6 +20,25 @@ import org.springframework.stereotype.Service;
 public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecommendationConversationMapper, AiRecommendationConversation>
     implements AiRecommendationConversationService{
 
+    @Override
+    public AiRecommendationConversation createConversation(UUID userId, String queryText) {
+        return null;
+    }
+
+    @Override
+    public AiRecommendationConversation renameConversation(UUID userId, UUID conversationId, String newTitle) {
+        return null;
+    }
+
+    @Override
+    public AiRecommendResponse handleQuery(UUID userId, UUID conversationId, String queryText) {
+        return null;
+    }
+
+    @Override
+    public List<Message> getConversationHistory(UUID userId, UUID conversationId) {
+        return List.of();
+    }
 }
 
 

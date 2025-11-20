@@ -1,7 +1,12 @@
 package com.bread.traveler.service;
 
+import com.bread.traveler.dto.AiRecommendResponse;
 import com.bread.traveler.entity.AiRecommendationConversation;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.ai.chat.messages.Message;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
 * @author huang
@@ -9,5 +14,39 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2025-11-17 22:29:15
 */
 public interface AiRecommendationConversationService extends IService<AiRecommendationConversation> {
+
+    /**
+     * 创建会话
+     * @param userId
+     * @param queryText
+     * @return
+     */
+    AiRecommendationConversation createConversation(UUID userId, String queryText);
+
+    /**
+     * 重命名会话
+     * @param userId
+     * @param conversationId
+     * @param newTitle
+     * @return
+     */
+    AiRecommendationConversation renameConversation(UUID userId, UUID conversationId, String newTitle);
+
+    /**
+     * 处理用户的对话
+     * @param userId
+     * @param conversationId
+     * @param queryText
+     * @return
+     */
+    AiRecommendResponse handleQuery(UUID userId, UUID conversationId, String queryText);
+
+    /**
+     * 获取会话历史内容
+     * @param userId
+     * @param conversationId
+     * @return
+     */
+    List<Message> getConversationHistory(UUID userId, UUID conversationId);
 
 }

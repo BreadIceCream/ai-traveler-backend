@@ -9,20 +9,24 @@ import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
 
+import com.bread.traveler.enums.NonPoiType;
 import lombok.Data;
 
 /**
  * 
- * @TableName activity
+ * @TableName non_poi_item
  */
-@TableName(value ="activity")
+@TableName(value ="non_poi_item")
 @Data
-public class Activity implements Serializable {
+public class NonPoiItem implements Serializable {
     /**
      * 
      */
-    @TableId(value = "activity_id")
-    private UUID activityId;
+    @TableId(value = "id")
+    private UUID id;
+
+    @TableField(value = "type")
+    private NonPoiType type;
 
     /**
      * 
@@ -73,9 +77,8 @@ public class Activity implements Serializable {
     private OffsetDateTime createdAt;
 
     /**
-     * 私人活动的userId
+     * userId
      */
     @TableField(value = "private_user_id")
     private UUID privateUserId;
-
 }

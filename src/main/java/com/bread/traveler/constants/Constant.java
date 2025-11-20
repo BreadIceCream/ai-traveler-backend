@@ -16,12 +16,20 @@ public class Constant {
     public static final String USERS_PREFERENCES_UPDATE_FAILED = "用户偏好更新失败";
     public static final String USERS_FIND_SIMILAR_LIMIT = "5";
     public static final String USERS_FIND_SIMILAR_NO_RESULT = "未找到相似用户";
+    public static final String WEB_SEARCH_FAILED = "网页搜索失败";
+    public static final Integer WEB_SEARCH_COUNT = 10;
 
-    public static class ShowField{
+    public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等
         public static final String BUSINESS = "business";
         //设置后返回 poi 图片相关信息
         public static final String PHOTOS = "photos";
+    }
+
+    public static class WEB_SEARCH_DOMAIN{
+        public static final String BING = "www.bing.com";
+        public static final String DIANPING = "www.dianping.com";
+        public static final String XIAOHONGSHU = "www.xiaohongshu.com";
     }
 
 }

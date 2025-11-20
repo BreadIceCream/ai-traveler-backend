@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "uvx",
+        "mcp-server-fetch"
+      ]
+    }
+  }
+}

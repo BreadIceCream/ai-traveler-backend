@@ -39,7 +39,7 @@ public class PoisController {
     @Operation(summary = "第三方API搜索POI", description = "第三方API（高德/谷歌）搜索的POI")
     public Result searchPoiFromExternalApi(@RequestParam(required = false) String city,
                                            @RequestParam String keywords) {
-        List<Pois> pois = poisService.searchPoiFromExternalApi(city, keywords);
+        List<Pois> pois = poisService.searchPoiFromExternalApiAndSave(city, keywords);
         return Result.success(pois);
     }
 

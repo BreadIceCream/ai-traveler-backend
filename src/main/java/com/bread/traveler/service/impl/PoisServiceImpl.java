@@ -12,6 +12,7 @@ import com.bread.traveler.exception.BusinessException;
 import com.bread.traveler.service.PoisService;
 import com.bread.traveler.mapper.PoisMapper;
 import com.bread.traveler.utils.GaoDeUtils;
+import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -20,8 +21,6 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.filter.Filter;
-import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,6 +36,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 /**
  * @author huang
@@ -52,8 +52,8 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     @Autowired
     private GaoDeUtils gaoDeUtils;
     @Autowired
-    @Qualifier("zhiPuChatClient")
-    private ObjectProvider<ChatClient> zhiPuChatClientProvider;
+    @Qualifier("miniTaskClient")
+    private ObjectProvider<ChatClient> miniTaskClientProvider;
     @Autowired
     @Qualifier("openAiChatClient")
     private ObjectProvider<ChatClient> openAiChatClientProvider;
@@ -89,15 +89,19 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     }
 
     @Override
-    public List<Pois> searchPoiFromExternalApi(String city, String keywords) {
+    public List<Pois> searchPoiFromExternalApiAndSave(@Nullable String city,
+                                                      String keywords,
+                                                      Integer searchNumber,
+                                                      Function<JSONArray, List<String>> generateDescriptions) {
         log.info("Searching POIs from external API: city={}, keywords={}", city, keywords);
         if (keywords == null || keywords.trim().isEmpty()) {
             throw new RuntimeException(Constant.POIS_SEARCH_INVALID_PARAM);
         }
         GaoDeUtils.SearchPoiParam.SearchPoiParamBuilder paramBuilder = GaoDeUtils.SearchPoiParam.builder()
-                .keywords(keywords).showFields(List.of(Constant.ShowField.BUSINESS, Constant.ShowField.PHOTOS))
-                .pageSize(Constant.POIS_SEARCH_EXTERNAL_API_RETURN_NUMBER);
+                .keywords(keywords).showFields(List.of(Constant.SHOW_FIELD.BUSINESS, Constant.SHOW_FIELD.PHOTOS))
+                .pageSize(searchNumber);
         if (city != null && !city.trim().isEmpty()) {
+            // 如果有城市限制，则使用城市限制
             paramBuilder.city(city).cityLimit(true);
         }
         GaoDeUtils.SearchPoiParam param = paramBuilder.build();
@@ -105,6 +109,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         try {
             results = gaoDeUtils.searchPoi(param);
         } catch (IOException e) {
+            log.error("Failed to search POIs from external API: {}", e.getMessage());
             throw new RuntimeException(Constant.POIS_SEARCH_FAILED);
         }
         if (!Objects.equals(results.getStr("status"), "1")) {
@@ -112,17 +117,11 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
             throw new BusinessException(Constant.POIS_SEARCH_FAILED + ", " + results.getStr("info"));
         }
         JSONArray pois = results.getJSONArray("pois");
-        // 解析POI数据，生成description描述信息，封装成poi对象
-        Future<List<String>> descriptionsTask = THREAD_POOL.submit(() -> {
-            List<String> poisName = pois.stream().map(poi -> {
-                JSONObject poiJson = (JSONObject) poi;
-                return poiJson.getStr("name");
-            }).toList();
-            return generateDescriptions(poisName);
-        });
+        // 解析POI数据，生成description描述信息，封装成poi对象。使用传入的generateDescriptions方法
+        Future<List<String>> descriptionsTask = THREAD_POOL.submit(() -> generateDescriptions.apply(pois));
         List<Pois> parsedPois = pois.stream().map(poi -> {
             JSONObject poiJson = (JSONObject) poi;
-            return parsePoi(poiJson);
+            return parsePoiFromGaode(poiJson);
         }).toList();
         try {
             List<String> descriptions = descriptionsTask.get();
@@ -140,18 +139,29 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         return parsedPois;
     }
 
+    @Override
+    public List<Pois> searchPoiFromExternalApiAndSave(@Nullable String city, String keywords) {
+        return this.searchPoiFromExternalApiAndSave(city, keywords,
+                Constant.POIS_SEARCH_EXTERNAL_API_RETURN_NUMBER,
+                this::defaultGenerateDescriptions);
+    }
+
     /**
      * 生成POI描述
-     *
-     * @param poisName
+     * @param pois 高德返回的POI数组（JSONArray格式）
      * @return
      */
-    private List<String> generateDescriptions(List<String> poisName) {
-        log.info("Generating descriptions for POIs: {}", poisName);
-        PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/generateDescriptionTemplate.md"));
+    private List<String> defaultGenerateDescriptions(JSONArray pois) {
+        // 获取所有POI名称
+        List<String> poisName = pois.stream().map(poi -> {
+            JSONObject poiJson = (JSONObject) poi;
+            return poiJson.getStr("name");
+        }).toList();
+        log.info("Default generate descriptions for POIs: {}", poisName);
+        PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/DefaultGenerateDescriptionTemplate.md"));
         Prompt prompt = promptTemplate.create(Map.of("poisName", poisName));
-        List<String> descriptions = zhiPuChatClientProvider.getObject().prompt(prompt)
-                .options(ChatOptions.builder().model("GLM-4-FlashX-250414").temperature(0.5).build())
+        List<String> descriptions = miniTaskClientProvider.getObject().prompt(prompt)
+                .options(ChatOptions.builder().temperature(0.5).build())
                 .call().entity(new ParameterizedTypeReference<>() {
                 });
         log.info("Descriptions generated success!");
@@ -164,7 +174,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
      * @param poiJson
      * @return
      */
-    private Pois parsePoi(JSONObject poiJson) {
+    private Pois parsePoiFromGaode(JSONObject poiJson) {
         // 设置基础信息
         String[] location = poiJson.getStr("location").split(",");
         Pois.PoisBuilder poisBuilder = Pois.builder()

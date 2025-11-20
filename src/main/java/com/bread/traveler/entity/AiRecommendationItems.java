@@ -1,15 +1,12 @@
 package com.bread.traveler.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
-import com.bread.traveler.enums.AiRecommendationEntityType;
 import lombok.Data;
 
 /**
@@ -37,10 +34,13 @@ public class AiRecommendationItems implements Serializable {
     @TableField(value = "conversation_id")
     private UUID conversationId;
 
+    @TableField(value = "version")
+    private Integer version;
+
     /**
      * 
      */
-    @TableField(value = "entity_type")
-    private AiRecommendationEntityType entityType;
+    @TableField(value = "is_poi")
+    private Boolean isPoi;
 
 }

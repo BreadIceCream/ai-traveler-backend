@@ -2,9 +2,13 @@ package com.bread.traveler.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.entity.AiRecommendationItems;
+import com.bread.traveler.entity.Pois;
 import com.bread.traveler.service.AiRecommendationItemsService;
 import com.bread.traveler.mapper.AiRecommendationItemsMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
 * @author huang
@@ -12,9 +16,37 @@ import org.springframework.stereotype.Service;
 * @createDate 2025-11-17 22:29:15
 */
 @Service
-public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendationItemsMapper, AiRecommendationItems>
-    implements AiRecommendationItemsService{
+public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendationItemsMapper, AiRecommendationItems> implements AiRecommendationItemsService{
 
+    @Override
+    public List<Pois> getPoisItems(UUID userId, UUID conversationId, Integer version) {
+        return List.of();
+    }
+
+    @Override
+    public List<Activity> getActivitiesItems(UUID userId, UUID conversationId, Integer version) {
+        return List.of();
+    }
+
+    @Override
+    public boolean addPoisToItems(UUID userId, UUID conversationId, List<UUID> poiIds) {
+        return false;
+    }
+
+    @Override
+    public boolean addActivitiesToItems(UUID userId, UUID conversationId, List<UUID> activityIds) {
+        return false;
+    }
+
+    @Override
+    public boolean removePoisFromItems(UUID userId, UUID conversationId, List<UUID> poiIds) {
+        return false;
+    }
+
+    @Override
+    public boolean removeActivitiesFromItems(UUID userId, UUID conversationId, List<UUID> activityIds) {
+        return false;
+    }
 }
 
 
