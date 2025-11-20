@@ -81,18 +81,14 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         if (city != null && !city.trim().isEmpty()) {
             wrapper.like(Pois::getCity, city);
         }
-        List<Pois> list = wrapper.list();
-        if (list == null || list.isEmpty()) {
-            throw new BusinessException(Constant.POIS_SEARCH_FAILED + "，请使用高德搜索尝试");
-        }
-        return list;
+        return wrapper.list();
     }
 
     @Override
-    public List<Pois> searchPoiFromExternalApiAndSave(@Nullable String city,
-                                                      String keywords,
-                                                      Integer searchNumber,
-                                                      Function<JSONArray, List<String>> generateDescriptions) {
+    public List<Pois> searchPoiFromExternalApiAndSaveUpdate(@Nullable String city,
+                                                            String keywords,
+                                                            Integer searchNumber,
+                                                            Function<JSONArray, List<String>> generateDescriptions) {
         log.info("Searching POIs from external API: city={}, keywords={}", city, keywords);
         if (keywords == null || keywords.trim().isEmpty()) {
             throw new RuntimeException(Constant.POIS_SEARCH_INVALID_PARAM);
@@ -135,13 +131,13 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
             throw new BusinessException(Constant.POIS_SEARCH_NO_RESULT);
         }
         //异步处理embedding向量，写入数据库 todo采用消息队列
-        THREAD_POOL.submit(() -> selfProxy.asyncEmbeddingAndSave(parsedPois));
+        THREAD_POOL.submit(() -> selfProxy.asyncEmbeddingAndSaveUpdate(parsedPois));
         return parsedPois;
     }
 
     @Override
-    public List<Pois> searchPoiFromExternalApiAndSave(@Nullable String city, String keywords) {
-        return this.searchPoiFromExternalApiAndSave(city, keywords,
+    public List<Pois> searchPoiFromExternalApiAndSaveUpdate(@Nullable String city, String keywords) {
+        return this.searchPoiFromExternalApiAndSaveUpdate(city, keywords,
                 Constant.POIS_SEARCH_EXTERNAL_API_RETURN_NUMBER,
                 this::defaultGenerateDescriptions);
     }
@@ -216,7 +212,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void asyncEmbeddingAndSave(List<Pois> poisList) {
+    public void asyncEmbeddingAndSaveUpdate(List<Pois> poisList) {
         try {
             log.info("Async embedding and save POIs: size {}", poisList.size());
             List<Document> documents = poisList.stream().map(pois -> {
@@ -232,10 +228,12 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
                                 CopyOptions.create().setIgnoreProperties(Constant.POIS_METADATA_IGNORE_FIELDS).ignoreNullValue()))
                         .text(text).build();
             }).toList();
+            // 保存或更新vectorStore中的内容,先删除旧数据,再添加新数据
+            vectorStore.delete(documents.stream().map(Document::getId).toList());
             vectorStore.add(documents);
             log.info("Async embedding success: Document size {}", documents.size());
-            if (saveBatch(poisList)) {
-                log.info("Save POIs to database success: size {}", poisList.size());
+            if (saveOrUpdateBatch(poisList)) {
+                log.info("Save or update POIs to database success: size {}", poisList.size());
             }
         } catch (Exception e) {
             // 添加日志以更方便查看错误信息

@@ -1,15 +1,15 @@
 package com.bread.traveler.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
+import com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler;
 import com.bread.traveler.enums.NonPoiType;
+import com.bread.traveler.typehandler.EnumTypeHandler;
 import lombok.Data;
 
 /**
@@ -25,7 +25,7 @@ public class NonPoiItem implements Serializable {
     @TableId(value = "id")
     private UUID id;
 
-    @TableField(value = "type")
+    @TableField(value = "type", typeHandler = EnumTypeHandler.class)
     private NonPoiType type;
 
     /**

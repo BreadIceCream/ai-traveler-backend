@@ -89,6 +89,7 @@ public interface WebSearchService extends IService<WebPage> {
     @AllArgsConstructor
     @NoArgsConstructor
     class ExtractResult {
+        String message;
         List<Pois> pois;
         List<NonPoiItem> nonPois;
     }
@@ -111,6 +112,6 @@ public interface WebSearchService extends IService<WebPage> {
      * @param webPageId
      * @return 提取的结果，包含POI和NonPoiItem的集合
      */
-    ExtractResult extractItemsFromWebPage(UUID userId, String city, UUID webPageId);
+    ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId);
 
 }

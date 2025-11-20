@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -37,10 +38,10 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
-* @author huang
-* @description 针对表【web_page】的数据库操作Service实现
-* @createDate 2025-11-18 18:14:35
-*/
+ * @author huang
+ * @description 针对表【web_page】的数据库操作Service实现
+ * @createDate 2025-11-18 18:14:35
+ */
 @Service
 @Slf4j
 public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> implements WebSearchService {
@@ -54,6 +55,8 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     private PoisService poisService;
     @Autowired
     private NonPoiItemService nonPoiItemService;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
@@ -94,40 +97,58 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     }
 
     @Override
-    // todo 添加事务
-    public ExtractResult extractItemsFromWebPage(UUID userId, String city, UUID webPageId) {
+    public ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId) {
         log.info("Extract items from web page: {}", webPageId);
         WebPage webPage = getById(webPageId);
-        if (webPage == null){
+        if (webPage == null) {
             log.warn("Extract: Web page not found: {}", webPageId);
             return null;
         }
         // 生成prompt
         String prompt = "title:" + webPage.getName() + System.lineSeparator() + "url:" + webPage.getUrl() + System.lineSeparator() + "开始提取";
         ChatClient extractClient = extractItemsClientProvider.getObject();
-        ExtractionIntermediateResultDTO intermediateResult = extractClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {});
-        if (intermediateResult == null){
+        ExtractionIntermediateResultDTO intermediateResult = extractClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {
+        });
+        if (intermediateResult == null) {
             log.warn("Extract result is null");
             return null;
         }
+        log.info("Extract result: {}", intermediateResult);
         // 解析提取的结果，返回Pois集合和NonPoiItem集合。
         List<ExtractedPoiDTO> poiDtos = intermediateResult.getPois();
         List<ExtractedNonPoiDTO> nonPoiDtos = intermediateResult.getNonPois();
         //pois解析异步处理（涉及网络IO），同时保存
-        Future<List<Pois>> poisParseTask = THREAD_POOL.submit(() -> poiDtos.stream().map(poiDto -> {
-            // 调用高德API获取该POI的详细信息
-            String poiDtoCity = poiDto.getCity();
-            String queryCity = poiDtoCity == null || poiDtoCity.isEmpty() ? city : poiDtoCity;
-            List<Pois> pois = poisService.searchPoiFromExternalApiAndSave(queryCity, poiDto.getName(), 1,
-                    // 使用解析后的描述
-                    objects -> List.of(poiDto.getDescription()));
-            if (pois == null || pois.isEmpty()) {
-                // external API搜索失败
-                log.warn("Extract: Pois search not found: {}", poiDto.getName());
-                return null;
-            }
-            return pois.getFirst();
-        }).filter(Objects::nonNull).toList());
+        Future<List<Pois>> poisParseTask = THREAD_POOL.submit(() -> {
+            // 开启事务，当线程被中断时，回滚
+            return transactionTemplate.execute(status -> {
+                try {
+                    List<Pois> results = poiDtos.stream().map(poiDto -> {
+                        if (Thread.currentThread().isInterrupted()) {
+                            throw new RuntimeException("Task Interrupted");
+                        }
+                        // 调用高德API获取该POI的详细信息
+                        String poiDtoCity = poiDto.getCity();
+                        String queryCity = poiDtoCity == null || poiDtoCity.isEmpty() ? city : poiDtoCity;
+                        List<Pois> pois = poisService.searchPoiFromExternalApiAndSaveUpdate(queryCity, poiDto.getName(), 1,
+                                // 使用解析时LLM生成的描述 todo再调用大模型生成一次描述
+                                objects -> List.of(poiDto.getDescription()));
+                        if (pois == null || pois.isEmpty()) {
+                            // external API搜索失败
+                            log.warn("Extract: Pois search not found: {}", poiDto.getName());
+                            return null;
+                        }
+                        return pois.getFirst();
+                    }).filter(Objects::nonNull).toList();
+                    return results;
+                } catch (Exception e) {
+                    log.error("Async POI processing failed, rolling back transaction.", e);
+                    // 标记事务回滚
+                    status.setRollbackOnly();
+                    // 继续抛出异常，以便外层的 Future.get() 能捕获到
+                    throw new RuntimeException("Async poi process transaction rolled back", e);
+                }
+            });
+        });
         // 非POI项解析同步处理，同时保存
         List<NonPoiItem> nonPoiItems = nonPoiDtos.stream().map(nonPoiDto -> {
             // 直接copy，并补充字段
@@ -138,16 +159,20 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
             nonPoiItem.setPrivateUserId(userId);
             return nonPoiItem;
         }).toList();
-        nonPoiItemService.saveBatch(nonPoiItems);
+        if (!nonPoiItems.isEmpty()){
+            nonPoiItemService.saveBatch(nonPoiItems);
+        }
         // 等待 pois 解析完成，返回结果
-        List<Pois> pois = null;
+        String message = "success";
+        List<Pois> pois = new ArrayList<>();
         try {
             pois = poisParseTask.get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
+            // poi事务已经回滚
             log.error("Extract: Pois parse failed", e);
-            throw new RuntimeException(e);
+            message = "部分POI提取失败";
         }
-        return new ExtractResult(pois, nonPoiItems);
+        return new ExtractResult(message, pois, nonPoiItems);
     }
 }
 

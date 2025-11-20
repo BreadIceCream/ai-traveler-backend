@@ -2,6 +2,7 @@ package com.bread.traveler.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.entity.AiRecommendationItems;
+import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.Pois;
 import com.bread.traveler.service.AiRecommendationItemsService;
 import com.bread.traveler.mapper.AiRecommendationItemsMapper;
@@ -24,17 +25,17 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
-    public List<Activity> getActivitiesItems(UUID userId, UUID conversationId, Integer version) {
+    public List<NonPoiItem> getNonPoiItems(UUID userId, UUID conversationId, Integer version) {
         return List.of();
     }
 
     @Override
-    public boolean addPoisToItems(UUID userId, UUID conversationId, List<UUID> poiIds) {
+    public boolean addPois(UUID userId, UUID conversationId, List<UUID> poiIds, boolean manual) {
         return false;
     }
 
     @Override
-    public boolean addActivitiesToItems(UUID userId, UUID conversationId, List<UUID> activityIds) {
+    public boolean addNonPoiItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds, boolean manual) {
         return false;
     }
 
@@ -44,7 +45,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
-    public boolean removeActivitiesFromItems(UUID userId, UUID conversationId, List<UUID> activityIds) {
+    public boolean removeNonPoiFromItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds) {
         return false;
     }
 }

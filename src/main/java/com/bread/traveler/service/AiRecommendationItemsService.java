@@ -2,6 +2,7 @@ package com.bread.traveler.service;
 
 import com.bread.traveler.entity.AiRecommendationItems;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.Pois;
 
 import java.util.List;
@@ -24,31 +25,35 @@ public interface AiRecommendationItemsService extends IService<AiRecommendationI
     List<Pois> getPoisItems(UUID userId, UUID conversationId, Integer version);
 
     /**
-     * 获取会话推荐的activities
+     * 获取会话推荐的nonPoi
+     *
      * @param userId
      * @param conversationId
      * @param version
      * @return
      */
-    List<Activity> getActivitiesItems(UUID userId, UUID conversationId, Integer version);
+    List<NonPoiItem> getNonPoiItems(UUID userId, UUID conversationId, Integer version);
 
     /**
-     * 手动添加pois到会话推荐中，version为0
+     * 添加pois到会话推荐Item中
      * @param userId
      * @param conversationId
      * @param poiIds
+     * @param manual 是否手动添加。除了AI提取网页内容后添加为自动添加（即extractItemsFromWebPageAndSave方法），其他均为手动添加
      * @return
      */
-    boolean addPoisToItems(UUID userId, UUID conversationId, List<UUID> poiIds);
+    boolean addPois(UUID userId, UUID conversationId, List<UUID> poiIds, boolean manual);
 
     /**
-     * 手动添加activities到会话推荐中，version为0
+     * 添加NonPoiItem到会话推荐Item中
+     *
      * @param userId
      * @param conversationId
-     * @param activityIds
+     * @param nonPoiItemIds
+     * @param manual 是否手动添加
      * @return
      */
-    boolean addActivitiesToItems(UUID userId, UUID conversationId, List<UUID> activityIds);
+    boolean addNonPoiItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds, boolean manual);
 
     /**
      * 删除会话推荐中的pois，不级联删除pois
@@ -60,12 +65,11 @@ public interface AiRecommendationItemsService extends IService<AiRecommendationI
     boolean removePoisFromItems(UUID userId, UUID conversationId, List<UUID> poiIds);
 
     /**
-     * 删除会话推荐中的activities，级联删除activities
-     *
+     * 删除会话推荐中的NonPoiItem，级联删除NonPoiItem
      * @param userId
      * @param conversationId
-     * @param activityIds
+     * @param nonPoiItemIds
      * @return
      */
-    boolean removeActivitiesFromItems(UUID userId, UUID conversationId, List<UUID> activityIds);
+    boolean removeNonPoiFromItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds);
 }
