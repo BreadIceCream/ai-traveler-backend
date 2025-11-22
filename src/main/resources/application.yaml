@@ -24,6 +24,7 @@ spring:
     zhipuai:
       api-key: ${ZHIPUAI_API_KEY}
       chat:
+        api-key: ${ZHIPUAI_CHAT_API_KEY}
         options:
           model: ${ZHIPUAI_CHAT_MODEL}
       embedding:

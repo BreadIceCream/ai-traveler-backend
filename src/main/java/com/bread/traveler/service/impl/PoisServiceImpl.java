@@ -81,7 +81,11 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         if (city != null && !city.trim().isEmpty()) {
             wrapper.like(Pois::getCity, city);
         }
-        return wrapper.list();
+        List<Pois> results = wrapper.list();
+        if (results == null || results.isEmpty()){
+            log.warn("No results found in DB for the search query: city={}, keywords={}", city, keywords);
+        }
+        return results;
     }
 
     @Override
@@ -157,7 +161,6 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/DefaultGenerateDescriptionTemplate.md"));
         Prompt prompt = promptTemplate.create(Map.of("poisName", poisName));
         List<String> descriptions = miniTaskClientProvider.getObject().prompt(prompt)
-                .options(ChatOptions.builder().temperature(0.5).build())
                 .call().entity(new ParameterizedTypeReference<>() {
                 });
         log.info("Descriptions generated success!");

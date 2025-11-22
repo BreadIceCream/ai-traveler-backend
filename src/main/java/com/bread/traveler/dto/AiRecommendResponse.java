@@ -1,25 +1,19 @@
 package com.bread.traveler.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
+@AllArgsConstructor
 public class AiRecommendResponse {
 
     // AI的回答
-    private String aiMessage;
+    private List<String> aiMessages;
     // 本次使用的工具名称
-    private List<String> toolUse;
+    private Set<String> toolUse;
     // 本次工具调用结果
-    private Map<String, List<Object>> toolCallResults;
-
-    public AiRecommendResponse() {
-        this.toolUse = new ArrayList<>();
-        this.toolCallResults = new HashMap<>();
-    }
+    private Map<String, List<String>> toolCallResults;
 
 }

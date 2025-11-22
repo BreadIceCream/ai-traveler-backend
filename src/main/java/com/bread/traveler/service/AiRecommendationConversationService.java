@@ -42,11 +42,34 @@ public interface AiRecommendationConversationService extends IService<AiRecommen
     AiRecommendResponse handleQuery(UUID userId, UUID conversationId, String queryText);
 
     /**
-     * 获取会话历史内容
+     * 根据id搜索会话
+     * @param userId
+     * @param conversationId
+     * @return
+     */
+    AiRecommendationConversation searchConversationById(UUID userId, UUID conversationId);
+
+    /**
+     * 获取指定会话的历史内容
      * @param userId
      * @param conversationId
      * @return
      */
     List<Message> getConversationHistory(UUID userId, UUID conversationId);
+
+    /**
+     * 获取所有会话
+     * @param userId
+     * @return
+     */
+    List<AiRecommendationConversation> getAllConversations(UUID userId);
+
+    /**
+     * 删除会话, 会话内所有内容也会被删除，包括记忆、工具调用结果（关联的webPage和aiRecommendationItem）
+     * @param userId
+     * @param conversationId
+     * @return
+     */
+    boolean deleteConversation(UUID userId, UUID conversationId);
 
 }

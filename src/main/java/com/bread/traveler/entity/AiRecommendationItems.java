@@ -7,7 +7,9 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -15,6 +17,8 @@ import lombok.Data;
  */
 @TableName(value ="ai_recommendation_items")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AiRecommendationItems implements Serializable {
     /**
      * 推荐的entity_id
@@ -34,8 +38,8 @@ public class AiRecommendationItems implements Serializable {
     @TableField(value = "conversation_id")
     private UUID conversationId;
 
-    @TableField(value = "version")
-    private Integer version;
+    @TableField(value = "is_manual")
+    private Boolean isManual;
 
     /**
      * 

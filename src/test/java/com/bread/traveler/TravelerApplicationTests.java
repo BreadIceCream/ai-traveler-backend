@@ -7,17 +7,23 @@ import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.Users;
 import com.bread.traveler.entity.WebPage;
 import com.bread.traveler.enums.NonPoiType;
+import com.bread.traveler.service.AiRecommendationConversationService;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.service.UsersService;
 import com.bread.traveler.service.WebSearchService;
+import com.bread.traveler.tools.ToolNames;
 import com.bread.traveler.utils.GaoDeUtils;
 import com.bread.traveler.tools.RecommendationTools;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -46,6 +52,13 @@ class TravelerApplicationTests {
     private NonPoiItemService nonPoiItemService;
     @Autowired
     private List<McpSyncClient> mcpSyncClients;
+    @Autowired
+    private AiRecommendationConversationService aiRecommendationConversationService;
+    @Autowired
+    private SyncMcpToolCallbackProvider syncMcpToolCallbackProvider;
+    @Autowired
+    @Qualifier("recommendChatClient")
+    private ObjectProvider<ChatClient> chatClientProvider;
 
     @Test
     void testEmbedding() {
@@ -80,10 +93,8 @@ class TravelerApplicationTests {
 
     @Test
     void testWebSearchTool(){
-        AiRecommendResponse response = new AiRecommendResponse();
         ToolContext toolContext = new ToolContext(
-                Map.of(RecommendationTools.TOOL_CONTEXT_CONVERSATION_ID, UUID.randomUUID(),
-                        RecommendationTools.TOOL_CONTEXT_AI_RECOMMEND_RESPONSE, response));
+                Map.of(RecommendationTools.TOOL_CONTEXT_CONVERSATION_ID, UUID.randomUUID()));
         try {
             WebSearchService.WebSearchResults results = recommendationTools.webSearchAndSave("北京旅游攻略", null, 1, toolContext);
             System.out.println(results.getOriginalQuery());
@@ -119,6 +130,27 @@ class TravelerApplicationTests {
         McpSyncClient mcpClient = mcpSyncClients.getFirst();
         McpSchema.ListToolsResult listToolsResult = mcpClient.listTools();
         System.out.println(listToolsResult);
+        List<McpSchema.Tool> tools = listToolsResult.tools();
+        String[] gaodeMcpTools = ToolNames.GAODE_MCP_TOOLS;
+        for (McpSchema.Tool tool : tools){
+        }
+    }
+
+
+    @Test
+    void testHandleQuery(){
+        // 9616a087-54d4-4ee0-8bea-a87a63abcae4
+        UUID userId = UUID.fromString("91b051a6-08ae-4125-a943-370e1deb5ce4");
+        UUID conversationId = UUID.fromString("bb916265-964c-48a6-a3b5-df8f0d74c843");
+        AiRecommendResponse response = aiRecommendationConversationService
+                .handleQuery(userId, conversationId, "从中南怎么去岳麓书院？");
+        System.out.println(response);
+    }
+
+    @Test
+    void testChatClient(){
+        ChatClient client = chatClientProvider.getObject();
+        System.out.println();
     }
 
 }

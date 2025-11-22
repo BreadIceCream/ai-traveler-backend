@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.entity.NonPoiItem;
@@ -59,6 +60,12 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     private TransactionTemplate transactionTemplate;
 
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
+
+    @Override
+    public boolean deleteByConversationId(UUID conversationId) {
+        LambdaQueryChainWrapper<WebPage> wrapper = lambdaQuery().eq(WebPage::getConversationId, conversationId);
+        return remove(wrapper);
+    }
 
     @Override
     public WebSearchResults webSearch(UUID conversationId, WebSearchParam param) throws IOException {

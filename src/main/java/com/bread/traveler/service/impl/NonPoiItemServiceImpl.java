@@ -1,5 +1,6 @@
 package com.bread.traveler.service.impl;
 
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.WebPage;
@@ -27,6 +28,18 @@ import java.util.UUID;
 @Slf4j
 public class NonPoiItemServiceImpl extends ServiceImpl<NonPoiItemMapper, NonPoiItem> implements NonPoiItemService{
 
+    @Override
+    public boolean deleteByIds(UUID userId, List<UUID> nonPoiItemIds) {
+        LambdaQueryChainWrapper<NonPoiItem> wrapper = lambdaQuery()
+                .eq(NonPoiItem::getPrivateUserId, userId)
+                .in(NonPoiItem::getId, nonPoiItemIds);
+        if (!remove(wrapper)) {
+            log.error("Delete non-poi items failed: user {}, items {}", userId, nonPoiItemIds);
+            return false;
+        }
+        log.info("Delete non-poi items success: user {}, items {}", userId, nonPoiItemIds);
+        return true;
+    }
 }
 
 

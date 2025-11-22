@@ -1,11 +1,12 @@
 package com.bread.traveler.config;
 
 import com.bread.traveler.tools.RecommendationTools;
+import com.bread.traveler.tools.ToolNames;
 import com.bread.traveler.tools.WebFetchTools;
+import io.modelcontextprotocol.client.McpSyncClient;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -13,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
+
+import java.util.List;
 
 
 @Configuration
@@ -22,7 +25,9 @@ public class ChatClientConfig {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient miniTaskClient(ZhiPuAiChatModel zhiPuAiChatModel){
         return ChatClient.builder(zhiPuAiChatModel)
-                .defaultOptions(ChatOptions.builder().model("GLM-4-FlashX-250414").build())
+                .defaultOptions(ChatOptions.builder()
+                        .model("GLM-4-FlashX-250414")
+                        .temperature(0.5).build())
                 .build();
     }
 
@@ -43,16 +48,20 @@ public class ChatClientConfig {
 
     @Bean(name = "recommendChatClient")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient recommendChatClient(ZhiPuAiChatModel zhiPuAiChatModel, RecommendationTools recommendationTools){
+    public ChatClient recommendChatClient(ZhiPuAiChatModel zhiPuAiChatModel,
+                                          RecommendationTools recommendationTools,
+                                          List<McpSyncClient> mcpSyncClients){
         // 只负责aiRecommendation的对话处理，复杂的extract任务由extractItemsClient处理
-        // 提供webSearch、poiSearch工具，可以搜索网页和POI，但不负责具体的解析
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder().maxMessages(100).build();
+        // 提供webSearch、poiSearch和部分高德Mcp工具
+        SyncMcpToolCallbackProvider syncMcpToolCallbackProvider = new SyncMcpToolCallbackProvider(
+                (mcpSyncClient, tool) -> ToolNames.GAODE_MCP_TOOLS_ALLOWED.contains(tool.name()),
+                mcpSyncClients);
         return ChatClient.builder(zhiPuAiChatModel)
-                // 添加MemoryAdvisor
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .defaultSystem(new ClassPathResource("prompts/RecommendationSystemPrompt.md"))
+                // 添加系统提示词，默认工具，模型选择
+                .defaultToolCallbacks(syncMcpToolCallbackProvider)
                 .defaultTools(recommendationTools)
-                .defaultOptions(ChatOptions.builder().model("GLM-4-FlashX-250414").build())
+                .defaultSystem(new ClassPathResource("prompts/RecommendationSystemPrompt.md"))
+                .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").build())
                 .build();
     }
 

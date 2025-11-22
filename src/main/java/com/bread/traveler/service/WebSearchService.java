@@ -25,6 +25,33 @@ public interface WebSearchService extends IService<WebPage> {
 
     String SEARCH_URL = "https://api.bocha.cn/v1/web-search";
 
+    /**
+     * 删除会话下的所有网页
+     * @param conversationId
+     * @return
+     */
+    boolean deleteByConversationId(UUID conversationId);
+
+    /**
+     * 搜索网页
+     *
+     * @param conversationId
+     * @param param
+     * @return 搜索结果，包含原始查询、结果数量和网页列表
+     * @throws IOException
+     */
+    WebSearchResults webSearch(UUID conversationId, WebSearchParam param) throws IOException;
+
+    /**
+     * 从网页中提取信息,生成POI或NonPoiItem
+     *
+     * @param userId
+     * @param city      城市。但会优先使用提取后得到的城市
+     * @param webPageId
+     * @return 提取的结果，包含POI和NonPoiItem的集合
+     */
+    ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId);
+
     @Builder
     @Data
     class WebSearchParam {
@@ -93,25 +120,5 @@ public interface WebSearchService extends IService<WebPage> {
         List<Pois> pois;
         List<NonPoiItem> nonPois;
     }
-
-    /**
-     * 搜索网页
-     *
-     * @param conversationId
-     * @param param
-     * @return 搜索结果，包含原始查询、结果数量和网页列表
-     * @throws IOException
-     */
-    WebSearchResults webSearch(UUID conversationId, WebSearchParam param) throws IOException;
-
-    /**
-     * 从网页中提取信息,生成POI或NonPoiItem
-     *
-     * @param userId
-     * @param city      城市。但会优先使用提取后得到的城市
-     * @param webPageId
-     * @return 提取的结果，包含POI和NonPoiItem的集合
-     */
-    ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId);
 
 }

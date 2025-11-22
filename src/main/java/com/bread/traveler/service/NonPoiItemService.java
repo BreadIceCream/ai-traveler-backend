@@ -13,5 +13,11 @@ import java.util.UUID;
 */
 public interface NonPoiItemService extends IService<NonPoiItem> {
 
-
+    /**
+     * 批量删除
+     * @param userId
+     * @param nonPoiItemIds
+     * @return
+     */
+    boolean deleteByIds(UUID userId, List<UUID> nonPoiItemIds);
 }

@@ -1,5 +1,7 @@
 package com.bread.traveler.constants;
 
+import java.util.Set;
+
 public class Constant {
 
     public static final String USERS_NOT_EXIST = "用户不存在";
@@ -18,6 +20,9 @@ public class Constant {
     public static final String USERS_FIND_SIMILAR_NO_RESULT = "未找到相似用户";
     public static final String WEB_SEARCH_FAILED = "网页搜索失败";
     public static final Integer WEB_SEARCH_COUNT = 10;
+    public static final int CHAT_MEMORY_MAX_MESSAGES = 50;
+    public static final String CONVERSATION_NOT_EXIST = "对话不存在";
+    public static final String CONVERSATION_PERMISSION_DENIED = "没有权限查看该对话";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等
