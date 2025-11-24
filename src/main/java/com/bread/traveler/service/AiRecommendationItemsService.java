@@ -67,7 +67,7 @@ public interface AiRecommendationItemsService extends IService<AiRecommendationI
     boolean removePoisFromItems(UUID userId, UUID conversationId, @Nullable List<UUID> poiIds);
 
     /**
-     * 删除会话推荐中的NonPoiItem，级联删除NonPoiItem
+     * 删除会话推荐中的NonPoiItem，不级联删除NonPoiItem
      * @param userId
      * @param conversationId
      * @param nonPoiItemIds 要删除的NonPoiItemId，如果为空，则删除该会话推荐中的所有

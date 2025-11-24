@@ -1,5 +1,6 @@
 package com.bread.traveler.service;
 
+import com.bread.traveler.dto.NonPoiItemDto;
 import com.bread.traveler.entity.NonPoiItem;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -20,4 +21,20 @@ public interface NonPoiItemService extends IService<NonPoiItem> {
      * @return
      */
     boolean deleteByIds(UUID userId, List<UUID> nonPoiItemIds);
+
+    /**
+     * 创建
+     * @param userId
+     * @param dto
+     * @return
+     */
+    NonPoiItem createNonPoiItem(UUID userId, NonPoiItemDto dto);
+
+    /**
+     * 修改
+     * @param userId
+     * @param nonPoiItem
+     * @return
+     */
+    boolean updateNonPoiItem(UUID userId, NonPoiItem nonPoiItem);
 }

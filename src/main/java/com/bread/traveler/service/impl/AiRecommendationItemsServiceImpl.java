@@ -2,6 +2,7 @@ package com.bread.traveler.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.entity.AiRecommendationConversation;
 import com.bread.traveler.entity.AiRecommendationItems;
@@ -47,10 +48,10 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
 
     @Override
     public List<Pois> getPoisItems(UUID userId, UUID conversationId, @Nullable Boolean isManual) {
+        log.info("Get pois items from ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 获取会话推荐的pois
         // 先从item表中获取pois记录
-        log.info("Get pois items from ITEM table: conversation {}, isManual {}", conversationId, isManual);
         LambdaQueryChainWrapper<AiRecommendationItems> wrapper = lambdaQuery()
                 .eq(AiRecommendationItems::getConversationId, conversationId)
                 .eq(AiRecommendationItems::getIsPoi, true);
@@ -68,8 +69,9 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
             return Collections.emptyList();
         }
         // 从pois表中获取pois实体，按照poiIds中id的顺序返回
+        List<String> poiIdsStr = poiIds.stream().map(poiId -> "'" + poiId + "'").toList();
         List<Pois> result = poisService.lambdaQuery().in(Pois::getPoiId, poiIds)
-                .last("order by FIELD(poi_id, " + StrUtil.join(",", poiIds) + ")").list();
+                .last("order by (poi_id," + StrUtil.join(",", poiIdsStr) + ")").list();
         if (result == null || result.isEmpty()){
             log.warn("Get pois items NO RESULTS in POI table: conversation {}", conversationId);
             return Collections.emptyList();
@@ -79,6 +81,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
 
     @Override
     public List<NonPoiItem> getNonPoiItems(UUID userId, UUID conversationId, @Nullable Boolean isManual) {
+        log.info("Get non poi items from ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 获取会话推荐的nonPoiItem
         LambdaQueryChainWrapper<AiRecommendationItems> wrapper = lambdaQuery()
@@ -98,8 +101,9 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
             return Collections.emptyList();
         }
         // 从nonPoiItem表中获取nonPoiItem实体，按照nonPoiItemIds中id的顺序返回
+        List<String> nonPoiItemIdsStr = nonPoiItemIds.stream().map(nonPoiItemId -> "'" + nonPoiItemId + "'").toList();
         List<NonPoiItem> result = nonPoiItemService.lambdaQuery().in(NonPoiItem::getId, nonPoiItemIds)
-                .last("order by FIELD(id, " + StrUtil.join(",", nonPoiItemIds) + ")").list();
+                .last("order by (id," + StrUtil.join(",", nonPoiItemIdsStr) + ")").list();
         if (result == null || result.isEmpty()){
             log.warn("Get non poi items NO RESULTS in NON_POI_ITEM table: conversation {}", conversationId);
             return Collections.emptyList();
@@ -109,6 +113,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
 
     @Override
     public boolean addPois(UUID userId, UUID conversationId, List<UUID> poiIds, boolean isManual) {
+        log.info("Add pois to ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 添加pois到item表中
         // 先从pois表中获取pois记录
@@ -132,6 +137,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
 
     @Override
     public boolean addNonPoiItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds, boolean isManual) {
+        log.info("Add non poi items to ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 添加nonPoiItem到item表中
         List<NonPoiItem> nonPoiItems = nonPoiItemService.listByIds(nonPoiItemIds);
@@ -154,29 +160,29 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
 
     @Override
     public boolean removePoisFromItems(UUID userId, UUID conversationId, @Nullable List<UUID> poiIds) {
+        log.info("Remove pois from ITEM table: conversation {}, pois {}", conversationId, poiIds);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 删除item表中的pois关联记录，不级联删除pois表
-        log.info("Remove pois from ITEM table: conversation {}, pois {}", conversationId, poiIds);
-        LambdaQueryChainWrapper<AiRecommendationItems> wrapper = lambdaQuery()
+        LambdaUpdateChainWrapper<AiRecommendationItems> wrapper = lambdaUpdate()
                 .eq(AiRecommendationItems::getConversationId, conversationId)
                 .eq(AiRecommendationItems::getIsPoi, true);
         if (poiIds != null && !poiIds.isEmpty()) {
             wrapper.in(AiRecommendationItems::getEntityId, poiIds);
         }
-        if (!remove(wrapper)) {
+        if (!wrapper.remove()) {
             log.error("Remove pois from ITEM table FAILED: conversation {}, pois {}", conversationId, poiIds);
             return false;
         }
         return true;
     }
 
-    @Override
+    @Override //todo 修改为不级联删除，将nonPoiItem和conversation解耦
     @Transactional(rollbackFor = Exception.class)
     public boolean removeNonPoiFromItems(UUID userId, UUID conversationId, @Nullable List<UUID> nonPoiItemIds) {
+        log.info("Remove non poi items from ITEM table: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 删除item表中的nonPoiItem关联记录，级联删除nonPoiItem表
-        log.info("Remove non poi items from ITEM table: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
-        LambdaQueryChainWrapper<AiRecommendationItems> wrapper = lambdaQuery()
+        LambdaUpdateChainWrapper<AiRecommendationItems> wrapper = lambdaUpdate()
                 .eq(AiRecommendationItems::getConversationId, conversationId)
                 .eq(AiRecommendationItems::getIsPoi, false);
         boolean itemResult;
@@ -189,7 +195,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
             List<AiRecommendationItems> list = list(wrapper);
             nonPoiItemIds = list.stream().map(AiRecommendationItems::getEntityId).toList();
         }
-        itemResult = remove(wrapper);
+        itemResult = wrapper.remove();
         nonPoiItemResult = nonPoiItemService.deleteByIds(userId, nonPoiItemIds);
         if (!itemResult || !nonPoiItemResult) {
             log.error("Remove non poi items from ITEM table FAILED: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
@@ -201,13 +207,17 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean removeAllItems(UUID userId, UUID conversationId) {
-        AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         log.info("Remove all items from ITEM table: conversation {}", conversationId);
+        AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 删除该会话推荐的所有pois，ids填null
         boolean a = removePoisFromItems(userId, conversationId, null);
         // 删除该会话推荐的所有nonPoiItem，ids填null
         boolean b = removeNonPoiFromItems(userId, conversationId, null);
-        return a && b;
+        if (!a || !b){
+            log.error("Remove all items from ITEM table FAILED: conversation {}", conversationId);
+            return false;
+        }
+        return true;
     }
 }
 

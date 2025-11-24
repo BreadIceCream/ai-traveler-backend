@@ -1,4 +1,4 @@
-package com.bread.traveler.typehandler;
+package com.bread.traveler.enums;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -13,6 +13,8 @@ import java.sql.Types;
 
 /**
  * 专门处理 PostgreSQL 枚举类型的 Handler
+ * 这个类不要放在typehandler包下，否则mybatis-plus会自动扫描注册，导致type属性为Enum.class
+ * 现在mybatis-plus会在运行时根据@TableField动态创建
  */
 @MappedTypes(Enum.class)
 @MappedJdbcTypes(JdbcType.OTHER)
@@ -36,18 +38,18 @@ public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
     @Override
     public E getNullableResult(ResultSet rs, String columnName) throws SQLException {
         String s = rs.getString(columnName);
-        return s == null ? null : Enum.valueOf(type, s);
+        return s == null ? null : Enum.valueOf(type, s.toUpperCase());
     }
 
     @Override
     public E getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
         String s = rs.getString(columnIndex);
-        return s == null ? null : Enum.valueOf(type, s);
+        return s == null ? null : Enum.valueOf(type, s.toUpperCase());
     }
 
     @Override
     public E getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
         String s = cs.getString(columnIndex);
-        return s == null ? null : Enum.valueOf(type, s);
+        return s == null ? null : Enum.valueOf(type, s.toUpperCase());
     }
 }

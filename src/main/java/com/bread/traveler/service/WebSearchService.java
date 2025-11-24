@@ -33,6 +33,13 @@ public interface WebSearchService extends IService<WebPage> {
     boolean deleteByConversationId(UUID conversationId);
 
     /**
+     * 列出会话下的所有网页
+     * @param conversationId
+     * @return
+     */
+    List<WebPage> listByConversationId(UUID conversationId);
+
+    /**
      * 搜索网页
      *
      * @param conversationId

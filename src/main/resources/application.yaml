@@ -65,7 +65,7 @@ mybatis-plus:
     db-config:
       id-type: auto
   configuration:
-    default-enum-type-handler: com.bread.traveler.typehandler.EnumTypeHandler
+    default-enum-type-handler: com.bread.traveler.enums.EnumTypeHandler
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-handlers-package: com.bread.traveler.typehandler

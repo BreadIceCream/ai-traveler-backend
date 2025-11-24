@@ -63,12 +63,23 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
 
     @Override
     public boolean deleteByConversationId(UUID conversationId) {
-        LambdaQueryChainWrapper<WebPage> wrapper = lambdaQuery().eq(WebPage::getConversationId, conversationId);
-        return remove(wrapper);
+        log.info("Delete all web pages from WEB_PAGE table: conversation {}", conversationId);
+        if (lambdaUpdate().eq(WebPage::getConversationId, conversationId).remove()) {
+            log.info("Delete success");
+            return true;
+        }
+        log.info("Delete failed");
+        return false;
+    }
+
+    @Override
+    public List<WebPage> listByConversationId(UUID conversationId) {
+        return lambdaQuery().eq(WebPage::getConversationId, conversationId).list();
     }
 
     @Override
     public WebSearchResults webSearch(UUID conversationId, WebSearchParam param) throws IOException {
+        log.info("Web search: conversation {}", conversationId);
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(SEARCH_URL);
             httpPost.setHeader("Content-Type", "application/json");
@@ -103,7 +114,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
         }
     }
 
-    @Override
+    @Override //todo 将提取到的poi和nonPoi都保存到item表中
     public ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId) {
         log.info("Extract items from web page: {}", webPageId);
         WebPage webPage = getById(webPageId);
