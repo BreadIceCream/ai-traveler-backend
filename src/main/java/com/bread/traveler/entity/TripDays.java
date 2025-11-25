@@ -41,7 +41,7 @@ public class TripDays implements Serializable {
      * 
      */
     @TableField(value = "day_order")
-    private Integer dayOrder;
+    private Double dayOrder;
 
     /**
      * 

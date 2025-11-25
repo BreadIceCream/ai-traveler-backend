@@ -19,13 +19,24 @@ public class WishlistItems implements Serializable {
     /**
      * 
      */
-    @TableId(value = "user_id")
-    private UUID userId;
+    @TableId(value = "id")
+    private UUID id;
 
     /**
-     * 
+     * 当前心愿单item所属的trip_id
      */
-    @TableField(value = "poi_id")
-    private UUID poiId;
+    @TableField(value = "trip_id")
+    private UUID tripId;
 
+    /**
+     * poiId或者nonPoiId
+     */
+    @TableField(value = "entity_id")
+    private UUID entityId;
+
+    /**
+     * 是否为poi类型
+     */
+    @TableField(value = "is_poi")
+    private Boolean isPoi;
 }

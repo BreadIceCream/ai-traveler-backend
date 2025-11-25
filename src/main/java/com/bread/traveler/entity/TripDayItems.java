@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.UUID;
@@ -15,11 +14,11 @@ import lombok.Data;
 
 /**
  * 
- * @TableName itinerary_items
+ * @TableName trip_day_items
  */
-@TableName(value ="itinerary_items")
+@TableName(value ="trip_day_items")
 @Data
-public class ItineraryItems implements Serializable {
+public class TripDayItems implements Serializable {
     /**
      * 
      */
@@ -35,8 +34,8 @@ public class ItineraryItems implements Serializable {
     /**
      * 
      */
-    @TableField(value = "poi_id")
-    private UUID poiId;
+    @TableField(value = "entity_id")
+    private UUID entityId;
 
     /**
      * 
@@ -54,10 +53,10 @@ public class ItineraryItems implements Serializable {
      * 
      */
     @TableField(value = "item_order")
-    private Integer itemOrder;
+    private Double itemOrder;
 
     /**
-     * 
+     * 交通建议，从上一个地点到当前地点
      */
     @TableField(value = "transport_notes")
     private String transportNotes;
@@ -68,4 +67,9 @@ public class ItineraryItems implements Serializable {
     @TableField(value = "estimated_cost")
     private BigDecimal estimatedCost;
 
+    /**
+     * 是否为poi类型
+     */
+    @TableField(value = "is_poi")
+    private Boolean isPoi;
 }

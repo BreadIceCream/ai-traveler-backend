@@ -1,6 +1,5 @@
 package com.bread.traveler.mapper;
 
-import com.bread.traveler.entity.ItineraryItems;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

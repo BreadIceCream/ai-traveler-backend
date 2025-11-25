@@ -117,7 +117,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
         }
     }
 
-    @Override //todo 将提取到的poi和nonPoi都保存到item表中
+    @Override
     public ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId) {
         log.info("Extract items from web page: {}", webPageId);
         WebPage webPage = getById(webPageId);

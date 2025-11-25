@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import com.bread.traveler.enums.EnumTypeHandler;
 import com.bread.traveler.enums.TripStatus;
 import com.bread.traveler.typehandler.JsonbTypeHandler;
 import lombok.Data;
@@ -21,7 +22,7 @@ import lombok.Data;
  * 
  * @TableName trips
  */
-@TableName(value ="trips")
+@TableName(value ="trips", autoResultMap = true)
 @Data
 public class Trips implements Serializable {
     /**
@@ -39,8 +40,8 @@ public class Trips implements Serializable {
     /**
      * 
      */
-    @TableField(value = "name")
-    private String name;
+    @TableField(value = "title")
+    private String title;
 
     /**
      * 
@@ -69,20 +70,14 @@ public class Trips implements Serializable {
     /**
      * 
      */
-    @TableField(value = "status")
+    @TableField(value = "status", typeHandler = EnumTypeHandler.class)
     private TripStatus status;
 
     /**
      * 
      */
-    @TableField(value = "trip_preferences", typeHandler = JsonbTypeHandler.class)
-    private Map<String, Object> tripPreferences;
-
-    /**
-     * 
-     */
-    @TableField(value = "is_template")
-    private Boolean isTemplate;
+    @TableField(value = "description")
+    private String description;
 
     /**
      * 
