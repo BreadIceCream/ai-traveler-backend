@@ -27,6 +27,14 @@ public class NonPoiItemController {
         return nonPoiItem != null ? Result.success("创建成功", nonPoiItem) : Result.serverError("创建失败");
     }
 
+    @GetMapping("/list")
+    @Operation(summary = "获取用户的非POI项列表")
+    public Result getNonPoiItemList(@RequestParam UUID userId){
+        List<NonPoiItem> nonPoiItemList = nonPoiItemService.getByUserId(userId);
+        return Result.success(nonPoiItemList);
+    }
+
+
     @PutMapping("/update")
     @Operation(summary = "更新非POI项")
     public Result updateNonPoiItem(@RequestParam UUID userId, @RequestBody NonPoiItem nonPoiItem){

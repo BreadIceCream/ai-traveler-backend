@@ -11,6 +11,7 @@ import com.bread.traveler.constants.Constant;
 import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.Pois;
 import com.bread.traveler.entity.WebPage;
+import com.bread.traveler.service.AiRecommendationItemsService;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.service.PoisService;
 import com.bread.traveler.service.WebSearchService;
@@ -58,6 +59,8 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     private NonPoiItemService nonPoiItemService;
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private AiRecommendationItemsService aiRecommendationItemsService;
 
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
@@ -157,6 +160,10 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
                         }
                         return pois.getFirst();
                     }).filter(Objects::nonNull).toList();
+                    // 将pois关联到conversationItem中。因为poi的嵌入和保存是异步的，使用addPois会先查一遍数据库认为数据不存在
+                    // 这里采用直接添加
+                    aiRecommendationItemsService.addPoisDirect(userId, webPage.getConversationId(),
+                            results.stream().map(Pois::getPoiId).toList());
                     return results;
                 } catch (Exception e) {
                     log.error("Async POI processing failed, rolling back transaction.", e);
@@ -177,8 +184,21 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
             nonPoiItem.setPrivateUserId(userId);
             return nonPoiItem;
         }).toList();
+        Boolean nonPoiItemSaved = false;
         if (!nonPoiItems.isEmpty()){
-            nonPoiItemService.saveBatch(nonPoiItems);
+            // 保存非POI项。将非POI项关联到conversationItem中。采用事务
+             nonPoiItemSaved = transactionTemplate.execute(status -> {
+                try {
+                    boolean a = nonPoiItemService.saveBatch(nonPoiItems);
+                    boolean b = aiRecommendationItemsService.addNonPoiItems(userId, webPage.getConversationId(),
+                            nonPoiItems.stream().map(NonPoiItem::getId).toList(), false);
+                    return a & b;
+                } catch (Exception e) {
+                    log.error("NON POI save failed, rolling back transaction.", e);
+                    status.setRollbackOnly();
+                    throw new RuntimeException("Non poi save transaction rolled back", e);
+                }
+            });
         }
         // 等待 pois 解析完成，返回结果
         String message = "success";
@@ -188,7 +208,11 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
         } catch (Exception e) {
             // poi事务已经回滚
             log.error("Extract: Pois parse failed", e);
-            message = "部分POI提取失败";
+            message = "failed";
+        }
+        if (nonPoiItemSaved == null || !nonPoiItemSaved) {
+            log.error("Extract: Non poi save failed");
+            message = "failed";
         }
         return new ExtractResult(message, pois, nonPoiItems);
     }

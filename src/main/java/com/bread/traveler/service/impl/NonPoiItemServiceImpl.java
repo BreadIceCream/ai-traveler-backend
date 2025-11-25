@@ -75,6 +75,13 @@ public class NonPoiItemServiceImpl extends ServiceImpl<NonPoiItemMapper, NonPoiI
         log.info("Update non-poi item success: {}", nonPoiItem);
         return true;
     }
+
+    @Override
+    public List<NonPoiItem> getByUserId(UUID userId) {
+        log.info("Get non-poi items by userId: {}", userId);
+        List<NonPoiItem> list = lambdaQuery().eq(NonPoiItem::getPrivateUserId, userId).list();
+        return list != null ? list : Collections.emptyList();
+    }
 }
 
 

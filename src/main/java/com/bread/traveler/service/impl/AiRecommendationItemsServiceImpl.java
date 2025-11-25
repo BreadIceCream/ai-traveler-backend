@@ -118,6 +118,9 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
         // 添加pois到item表中
         // 先从pois表中获取pois记录
         List<Pois> pois = poisService.listByIds(poiIds);
+        if (pois.size() != poiIds.size()){
+            log.warn("Some poi don't exist: {}", poiIds);
+        }
         List<AiRecommendationItems> items = pois.stream().map(poi -> {
             // 创建item实体
             return new AiRecommendationItems(
@@ -136,11 +139,36 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
+    public boolean addPoisDirect(UUID userId, UUID conversationId, List<UUID> poiIds) {
+        log.info("Add pois to ITEM table: conversation {}, isManual false", conversationId);
+        AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
+        // 添加pois到item表中
+        List<AiRecommendationItems> items = poiIds.stream().map(poiId -> {
+            // 创建item实体
+            return new AiRecommendationItems(
+                    poiId,
+                    OffsetDateTime.now(ZoneId.systemDefault()),
+                    conversationId,
+                    false,
+                    true
+            );
+        }).toList();
+        if (!selfProxy.saveBatch(items)) {
+            log.error("Add pois to ITEM table FAILED: conversation {}, pois {}", conversationId, poiIds);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean addNonPoiItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds, boolean isManual) {
         log.info("Add non poi items to ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 添加nonPoiItem到item表中
         List<NonPoiItem> nonPoiItems = nonPoiItemService.listByIds(nonPoiItemIds);
+        if (nonPoiItems.size() != nonPoiItemIds.size()){
+            log.warn("Some non poi item don't exist: {}", nonPoiItemIds);
+        }
         List<AiRecommendationItems> items = nonPoiItems.stream().map(nonPoiItem -> {
             // 创建item实体
             return new AiRecommendationItems(
@@ -176,28 +204,20 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
         return true;
     }
 
-    @Override //todo 修改为不级联删除，将nonPoiItem和conversation解耦
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean removeNonPoiFromItems(UUID userId, UUID conversationId, @Nullable List<UUID> nonPoiItemIds) {
         log.info("Remove non poi items from ITEM table: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
-        // 删除item表中的nonPoiItem关联记录，级联删除nonPoiItem表
+        // 删除item表中的nonPoiItem关联记录
         LambdaUpdateChainWrapper<AiRecommendationItems> wrapper = lambdaUpdate()
                 .eq(AiRecommendationItems::getConversationId, conversationId)
                 .eq(AiRecommendationItems::getIsPoi, false);
-        boolean itemResult;
-        boolean nonPoiItemResult;
         if (nonPoiItemIds != null && !nonPoiItemIds.isEmpty()) {
             // 删除该会话推荐的指定nonPoiItem
             wrapper.in(AiRecommendationItems::getEntityId, nonPoiItemIds);
-        }else {
-            // 删除该会话推荐的所有nonPoiItem，先获取该会话推荐的所有nonPoiItem
-            List<AiRecommendationItems> list = list(wrapper);
-            nonPoiItemIds = list.stream().map(AiRecommendationItems::getEntityId).toList();
         }
-        itemResult = wrapper.remove();
-        nonPoiItemResult = nonPoiItemService.deleteByIds(userId, nonPoiItemIds);
-        if (!itemResult || !nonPoiItemResult) {
+        if (!wrapper.remove()) {
             log.error("Remove non poi items from ITEM table FAILED: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
             return false;
         }

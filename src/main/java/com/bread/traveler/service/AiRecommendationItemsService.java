@@ -6,7 +6,6 @@ import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.entity.Pois;
 import jakarta.annotation.Nullable;
 
-import javax.validation.constraints.Null;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +44,16 @@ public interface AiRecommendationItemsService extends IService<AiRecommendationI
      * @return
      */
     boolean addPois(UUID userId, UUID conversationId, List<UUID> poiIds, boolean isManual);
+
+    /**
+     * 添加pois到会话推荐Item中，直接添加，不检查poiId是否存在
+     * 供extractItemsFromWebPageAndSave使用
+     * @param userId
+     * @param conversationId
+     * @param poiIds
+     * @return
+     */
+    boolean addPoisDirect(UUID userId, UUID conversationId, List<UUID> poiIds);
 
     /**
      * 添加NonPoiItem到会话推荐Item中

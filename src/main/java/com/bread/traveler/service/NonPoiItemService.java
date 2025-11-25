@@ -37,4 +37,11 @@ public interface NonPoiItemService extends IService<NonPoiItem> {
      * @return
      */
     boolean updateNonPoiItem(UUID userId, NonPoiItem nonPoiItem);
+
+    /**
+     * 根据用户ID获取
+     * @param userId
+     * @return
+     */
+    List<NonPoiItem> getByUserId(UUID userId);
 }
