@@ -9,6 +9,7 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
+import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,6 +63,20 @@ public class ChatClientConfig {
                 .defaultTools(recommendationTools)
                 .defaultSystem(new ClassPathResource("prompts/RecommendationSystemPrompt.md"))
                 .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").build())
+                .build();
+    }
+
+    @Bean(name = "routePlanClient")
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public ChatClient routePlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients){
+        SyncMcpToolCallbackProvider syncMcpToolCallbackProvider = new SyncMcpToolCallbackProvider(
+                (mcpSyncClient, tool) -> ToolNames.ROUTE_PLAN_CLIENT_GAODE_MCP_TOOLS.contains(tool.name()),
+                mcpSyncClients);
+        return ChatClient.builder(zhiPuAiChatModel)
+                // 添加系统提示词，默认工具，模型选择
+                .defaultToolCallbacks(syncMcpToolCallbackProvider)
+                .defaultSystem(new ClassPathResource("prompts/RoutePlanClientSystemPrompt.md"))
+                .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").temperature(0.4).build())
                 .build();
     }
 

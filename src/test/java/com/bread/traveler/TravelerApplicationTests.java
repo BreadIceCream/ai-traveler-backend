@@ -1,16 +1,15 @@
 package com.bread.traveler;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.AiRecommendResponse;
 import com.bread.traveler.entity.NonPoiItem;
+import com.bread.traveler.entity.Pois;
 import com.bread.traveler.entity.Users;
 import com.bread.traveler.entity.WebPage;
 import com.bread.traveler.enums.NonPoiType;
-import com.bread.traveler.service.AiRecommendationConversationService;
-import com.bread.traveler.service.NonPoiItemService;
-import com.bread.traveler.service.UsersService;
-import com.bread.traveler.service.WebSearchService;
+import com.bread.traveler.service.*;
 import com.bread.traveler.tools.ToolNames;
 import com.bread.traveler.utils.GaoDeUtils;
 import com.bread.traveler.tools.RecommendationTools;
@@ -19,6 +18,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ToolContext;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.beans.factory.ObjectProvider;
@@ -33,11 +33,12 @@ import java.util.UUID;
 
 @SpringBootTest
 class TravelerApplicationTests {
-
     @Test
     void contextLoads() {
     }
 
+    @Autowired
+    private PoisService poisService;
     @Autowired
     private UsersService usersService;
     @Autowired
@@ -59,6 +60,9 @@ class TravelerApplicationTests {
     @Autowired
     @Qualifier("recommendChatClient")
     private ObjectProvider<ChatClient> chatClientProvider;
+    @Autowired
+    @Qualifier("routePlanClient")
+    private ObjectProvider<ChatClient> routePlanClientProvider;
 
     @Test
     void testEmbedding() {
@@ -151,6 +155,21 @@ class TravelerApplicationTests {
     void testChatClient(){
         ChatClient client = chatClientProvider.getObject();
         System.out.println();
+    }
+
+    @Test
+    void testRoutePlanClient(){
+        ChatClient client = routePlanClientProvider.getObject();
+        Pois taiPingJie = poisService.getPoiById(UUID.fromString("1f8de154-56a7-45d2-912a-f1a3586c470d"));
+        NonPoiItem chenQingChun = nonPoiItemService.getById(UUID.fromString("8bc2792c-8fef-49fa-9841-dbea35b1c369"));
+        String origin = JSONUtil.toJsonStr(taiPingJie);
+        String destination = JSONUtil.toJsonStr(chenQingChun);
+        String prompt = "origin:" + origin + System.lineSeparator() + "destination:" + destination;
+        long start = System.currentTimeMillis();
+        String content = client.prompt(prompt).call().content();
+        long end = System.currentTimeMillis();
+        System.out.println("耗时：" + (end - start) * 1.0 / 1000 + "s");
+        System.out.println(content);
     }
 
 }

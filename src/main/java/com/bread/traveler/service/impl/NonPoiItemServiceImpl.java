@@ -1,21 +1,14 @@
 package com.bread.traveler.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.dto.NonPoiItemDto;
 import com.bread.traveler.entity.NonPoiItem;
-import com.bread.traveler.entity.WebPage;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.mapper.NonPoiItemMapper;
-import com.bread.traveler.service.WebSearchService;
-import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -48,7 +41,7 @@ public class NonPoiItemServiceImpl extends ServiceImpl<NonPoiItemMapper, NonPoiI
 
     @Override
     public NonPoiItem createNonPoiItem(UUID userId, NonPoiItemDto dto) {
-        NonPoiItem nonPoiItem = BeanUtil.copyProperties(dto, NonPoiItem.class);
+        NonPoiItem nonPoiItem = BeanUtil.copyProperties(dto, NonPoiItem.class, "id");
         nonPoiItem.setId(UUID.randomUUID());
         nonPoiItem.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
         nonPoiItem.setPrivateUserId(userId);
@@ -61,19 +54,20 @@ public class NonPoiItemServiceImpl extends ServiceImpl<NonPoiItemMapper, NonPoiI
     }
 
     @Override
-    public boolean updateNonPoiItem(UUID userId, NonPoiItem nonPoiItem) {
-        // 忽略id，createdAt，privateUserId这三个属性
-        NonPoiItem updateEntity = BeanUtil.copyProperties(nonPoiItem, NonPoiItem.class, "id", "createdAt", "privateUserId");
-        boolean update = lambdaUpdate()
-                .eq(NonPoiItem::getId, nonPoiItem.getId())
-                .eq(NonPoiItem::getPrivateUserId, userId)
-                .update(updateEntity);
-        if (!update) {
-            log.info("Update non-poi item failed: {}", nonPoiItem);
-            return false;
+    public NonPoiItem updateNonPoiItem(UUID userId, NonPoiItemDto dto) {
+        log.info("Update non-poi item: {}", dto);
+        Assert.notNull(userId, "userId cannot be null");
+        Assert.notNull(dto.getId(), "id cannot be null");
+        NonPoiItem item = lambdaQuery().eq(NonPoiItem::getId, dto.getId()).eq(NonPoiItem::getPrivateUserId, userId).one();
+        Assert.notNull(item, "Non-poi item not found: {}", dto.getId());
+        // 更新item，忽略id，createdAt，privateUserId这三个属性
+        BeanUtil.copyProperties(dto, item, "id", "createdAt", "privateUserId");
+        if (updateById(item)) {
+            log.info("Update non-poi item success: {}", dto);
+            return item;
         }
-        log.info("Update non-poi item success: {}", nonPoiItem);
-        return true;
+        log.error("Update non-poi item failed: {}", dto);
+        return null;
     }
 
     @Override

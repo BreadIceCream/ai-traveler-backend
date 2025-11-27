@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,12 +35,6 @@ public class TripDays implements Serializable {
      */
     @TableField(value = "day_date")
     private LocalDate dayDate;
-
-    /**
-     * 
-     */
-    @TableField(value = "day_order")
-    private Double dayOrder;
 
     /**
      * 

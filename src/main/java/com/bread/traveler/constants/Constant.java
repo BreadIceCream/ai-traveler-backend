@@ -1,7 +1,5 @@
 package com.bread.traveler.constants;
 
-import java.util.Set;
-
 public class Constant {
 
     public static final String USERS_NOT_EXIST = "用户不存在";
@@ -23,6 +21,19 @@ public class Constant {
     public static final int CHAT_MEMORY_MAX_MESSAGES = 50;
     public static final String CONVERSATION_NOT_EXIST = "对话不存在";
     public static final String CONVERSATION_PERMISSION_DENIED = "没有权限查看该对话";
+    public static final String PREV_ITEM_NOT_FOUND = "无法获取起点，无法规划路径";
+    public static final String NON_POI_ITEM_NOT_FOUND = "未找到该对象";
+    public static final String TRIP_DAY_EXISTS = "该日程已经存在";
+    public static final String TRIP_DAY_CREATE_FAILED = "日程创建失败";
+    public static final String TRIP_DAY_NOT_EXIST = "该日程不存在";
+    public static final String TRIP_CREATE_FAILED = "行程创建失败";
+    public static final String TRIP_NOT_EXIST = "该行程不存在";
+    public static final String TRIP_UPDATE_FAILED = "行程信息更新失败";
+    public static final String TRIP_DELETE_FAILED = "行程删除失败";
+    public static final String TRIP_DAY_DELETE_FAILED = "日程删除失败";
+    public static final String WISHLIST_ITEM_EXISTS = "心愿单中该事项已存在，不要重复添加";
+    public static final String WISHLIST_ITEM_NOT_EXISTS = "该事项不存在";
+    public static String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等

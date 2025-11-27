@@ -7,17 +7,20 @@ import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.bread.traveler.dto.ItineraryItem;
 import com.bread.traveler.enums.NonPoiType;
 import com.bread.traveler.enums.EnumTypeHandler;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 
  * @TableName non_poi_item
  */
+@EqualsAndHashCode(callSuper = false)
 @TableName(value ="non_poi_item", autoResultMap = true)
 @Data
-public class NonPoiItem implements Serializable {
+public class NonPoiItem extends ItineraryItem implements Serializable {
     /**
      * 
      */

@@ -1,36 +1,29 @@
 package com.bread.traveler.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import com.bread.traveler.enums.PoiType;
-import com.bread.traveler.typehandler.JsonbTypeHandler;
+import com.bread.traveler.dto.ItineraryItem;
 import com.bread.traveler.typehandler.ListStringTypeHandler;
-import com.bread.traveler.typehandler.VectorTypeHandler;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.relational.core.mapping.Table;
+import lombok.EqualsAndHashCode;
 
 /**
  * 
  * @TableName pois
  */
+@EqualsAndHashCode(callSuper = false)
 @TableName(value ="pois")
 @Data
 @Builder
-public class Pois implements Serializable {
+public class Pois extends ItineraryItem implements Serializable {
     /**
      * 
      */

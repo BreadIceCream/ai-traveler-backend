@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import lombok.Data;
@@ -39,4 +40,7 @@ public class WishlistItems implements Serializable {
      */
     @TableField(value = "is_poi")
     private Boolean isPoi;
+
+    @TableField(value = "created_at")
+    private OffsetDateTime createdAt;
 }

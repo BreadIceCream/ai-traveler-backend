@@ -37,9 +37,9 @@ public class NonPoiItemController {
 
     @PutMapping("/update")
     @Operation(summary = "更新非POI项")
-    public Result updateNonPoiItem(@RequestParam UUID userId, @RequestBody NonPoiItem nonPoiItem){
-        boolean success = nonPoiItemService.updateNonPoiItem(userId, nonPoiItem);
-        return success ? Result.success("更新成功") : Result.serverError("更新失败");
+    public Result updateNonPoiItem(@RequestParam UUID userId, @RequestBody NonPoiItemDto dto){
+        NonPoiItem nonPoiItem = nonPoiItemService.updateNonPoiItem(userId, dto);
+        return nonPoiItem != null ? Result.success("更新成功", nonPoiItem) : Result.serverError("更新失败");
     }
 
     @DeleteMapping("/delete")

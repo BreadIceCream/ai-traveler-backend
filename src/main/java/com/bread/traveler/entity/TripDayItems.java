@@ -10,7 +10,10 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -18,6 +21,9 @@ import lombok.Data;
  */
 @TableName(value ="trip_day_items")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TripDayItems implements Serializable {
     /**
      * 

@@ -1,8 +1,12 @@
 package com.bread.traveler.service;
 
+import com.bread.traveler.dto.EntireTripDayItem;
 import com.bread.traveler.dto.TripDayItemDto;
 import com.bread.traveler.entity.TripDayItems;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bread.traveler.enums.NonPoiType;
+import jakarta.annotation.Nullable;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -15,6 +19,28 @@ import java.util.UUID;
 * @createDate 2025-11-25 11:45:06
 */
 public interface TripDayItemsService extends IService<TripDayItems> {
+
+
+
+    @Data
+    class PoisTransportInfo{
+        private String name;
+        private String type;
+        private String city;
+        private String address;
+        private BigDecimal latitude;
+        private BigDecimal longitude;
+    }
+
+    @Data
+    class NonPoiTransportInfo{
+        private String title;
+        private String description;
+        private String city;
+        private String estimatedAddress;
+        private String extraInfo;
+        private NonPoiType type;
+    }
 
     /**
      * 添加POI、NonPoi到日程当中，默认为最后一个item
@@ -53,10 +79,25 @@ public interface TripDayItemsService extends IService<TripDayItems> {
     boolean moveItemOrder(UUID currentId, UUID prevId, UUID nextId, UUID tripDayId);
 
     /**
-     * 更新日程item的交通建议，调用高德api接口更新
+     * AI更新日程item的交通建议
+     * 使用高德MCP或高德API。从上一个地点到当前地点
      * @param itemId
      * @return
      */
-    TripDayItems updateTransportNote(UUID itemId);
+    TripDayItems updateTransportNote(UUID itemId, @Nullable String originAddress);
+
+    /**
+     * 获取某个日程中的所有item
+     * @param tripDayId
+     * @return items有序集合，若没有item则为空
+     */
+    List<TripDayItems> getItemsByTripDayId(UUID tripDayId);
+
+    /**
+     * 获取某个日程中的所有item，包括item的POI/NonPoi信息
+     * @param tripDayId
+     * @return EntireTripDayItem有序集合，若没有item则为空
+     */
+    List<EntireTripDayItem> getEntireItemsByTripDayId(UUID tripDayId);
 
 }

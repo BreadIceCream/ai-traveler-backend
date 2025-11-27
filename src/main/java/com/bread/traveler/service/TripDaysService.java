@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface TripDaysService extends IService<TripDays> {
 
     /**
-     * 创建行程中的日程，默认为最后一天
+     * 创建行程中的日程，必须指定date
      * @param tripId
      * @param date
      * @param note
@@ -25,13 +25,12 @@ public interface TripDaysService extends IService<TripDays> {
     TripDays createTripDay(UUID tripId, LocalDate date, String note);
 
     /**
-     * 更新行程中的日程，更新时间、note
+     * 更新日程的note
      * @param tripDayId
-     * @param date
      * @param note
      * @return
      */
-    boolean updateTripDay(UUID tripDayId, LocalDate date, String note);
+    boolean updateTripDayNote(UUID tripDayId, String note);
 
     /**
      * 获取行程中某天的详情，包括每个item
@@ -39,6 +38,13 @@ public interface TripDaysService extends IService<TripDays> {
      * @return
      */
     EntireTripDay getEntireTripDay(UUID tripDayId);
+
+    /**
+     * 获取行程中所有的日程详情，包括每个日程的item
+     * @param tripId
+     * @return 日程有序集合，按照日期进行排序。如果行程中没有日程，则返回空集合
+     */
+    List<EntireTripDay> getEntireTripDaysByTripId(UUID tripId);
 
     /**
      * AI智能规划，重新规划某天的行程
@@ -49,13 +55,12 @@ public interface TripDaysService extends IService<TripDays> {
     EntireTripDay aiRePlanTripDay(UUID tripDayId);
 
     /**
-     * 移动行程中某天的位置
-     * @param currentId 当前tripDay的ID
-     * @param prevId    前一个tripDay的ID，为null则代表最前面
-     * @param nextId    后一个tripDay的ID，为null则代表最后面
+     * 交换两个日程的顺序
+     * @param aTripDayId
+     * @param bTripDayId
      * @return
      */
-    boolean moveDayOrder(UUID currentId, UUID prevId, UUID nextId);
+    boolean exchangeDayOrder(UUID aTripDayId, UUID bTripDayId);
 
     /**
      * 删除行程中的日程，级联删除该日程下的所有item

@@ -22,8 +22,9 @@ public class ControllerAdvice {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result handleException(Exception e) {
-        log.error("服务器系统异常: {}", e.getMessage(), e);
-        return Result.serverError("系统异常");
+        String message = e.getMessage();
+        log.error("服务器系统异常: {}", message, e);
+        return Result.serverError(message == null || message.isEmpty() ? "服务器系统异常" : message);
     }
 
 }

@@ -33,10 +33,10 @@ public interface NonPoiItemService extends IService<NonPoiItem> {
     /**
      * 修改
      * @param userId
-     * @param nonPoiItem
+     * @param dto
      * @return
      */
-    boolean updateNonPoiItem(UUID userId, NonPoiItem nonPoiItem);
+    NonPoiItem updateNonPoiItem(UUID userId, NonPoiItemDto dto);
 
     /**
      * 根据用户ID获取

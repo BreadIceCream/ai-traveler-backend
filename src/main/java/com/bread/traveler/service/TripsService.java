@@ -31,9 +31,9 @@ public interface TripsService extends IService<Trips> {
     Trips updateTripInfo(UUID userId, TripDto dto);
 
     /**
-     * 获取用户所有行程
+     * 获取用户所有行程，按照创建时间倒序排序
      * @param userId
-     * @return
+     * @return 行程列表。如果用户没有行程，则返回空集合
      */
     List<Trips> getAllTripsOfUser(UUID userId);
 

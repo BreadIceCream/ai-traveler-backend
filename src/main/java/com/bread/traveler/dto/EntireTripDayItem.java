@@ -1,17 +1,16 @@
 package com.bread.traveler.dto;
 
 import com.bread.traveler.entity.TripDayItems;
-import com.bread.traveler.entity.TripDays;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EntireTripDay{
-    private TripDays tripDay;
-    private List<EntireTripDayItem> tripDayItems;
+public class EntireTripDayItem {
+
+    private TripDayItems tripDayItem;
+    private ItineraryItem entity;
+
 }
