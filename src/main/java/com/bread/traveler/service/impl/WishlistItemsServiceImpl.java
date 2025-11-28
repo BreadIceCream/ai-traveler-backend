@@ -48,16 +48,16 @@ public class WishlistItemsServiceImpl extends ServiceImpl<WishlistItemsMapper, W
         boolean itemExists = lambdaQuery().eq(WishlistItems::getTripId, tripId).eq(WishlistItems::getEntityId, entityId).exists();
         Assert.isTrue(!itemExists, Constant.WISHLIST_ITEM_EXISTS);
         WishlistItems item = new WishlistItems();
-        item.setId(UUID.randomUUID());
+        item.setItemId(UUID.randomUUID());
         item.setEntityId(entityId);
         item.setTripId(tripId);
         item.setIsPoi(isPoi);
         item.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
         if (save(item)) {
-            log.info("Add item to wishlist success: {}", item.getId());
+            log.info("Add item to wishlist success: {}", item.getItemId());
             return true;
         }
-        log.info("Add item to wishlist failed: {}", item.getId());
+        log.info("Add item to wishlist failed: {}", item.getItemId());
         return false;
     }
 
@@ -84,7 +84,7 @@ public class WishlistItemsServiceImpl extends ServiceImpl<WishlistItemsMapper, W
         log.info("Remove items from wishlist: {}", itemIds);
         Assert.notNull(itemIds, "itemIds cannot be null");
         Assert.notEmpty(itemIds, "itemIds cannot be empty");
-        boolean remove = lambdaUpdate().in(WishlistItems::getId, itemIds).remove();
+        boolean remove = lambdaUpdate().in(WishlistItems::getItemId, itemIds).remove();
         Assert.isTrue(remove, Constant.WISHLIST_ITEM_NOT_EXISTS);
         log.info("Remove items from wishlist success: {}", itemIds);
         return true;

@@ -20,8 +20,8 @@ public class WishlistItems implements Serializable {
     /**
      * 
      */
-    @TableId(value = "id")
-    private UUID id;
+    @TableId(value = "item_id")
+    private UUID itemId;
 
     /**
      * 当前心愿单item所属的trip_id

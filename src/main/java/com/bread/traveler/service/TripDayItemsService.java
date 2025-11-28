@@ -9,7 +9,6 @@ import jakarta.annotation.Nullable;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,15 +43,14 @@ public interface TripDayItemsService extends IService<TripDayItems> {
 
     /**
      * 添加POI、NonPoi到日程当中，默认为最后一个item
-     * @param tripDayId     日程ID
-     * @param entityId      POI/NonPoi的ID
-     * @param isPoi         true:POI, false:NonPoi
-     * @param startTime     开始时间
-     * @param endTime       结束时间
-     * @param estimatedCost 预计花费
+     *
+     * @param tripDayId 日程ID
+     * @param entityId  POI/NonPoi的ID
+     * @param isPoi     true:POI, false:NonPoi
+     * @param dto       时间、花费、交通建议、备注
      * @return
      */
-    TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, LocalTime startTime, LocalTime endTime, BigDecimal estimatedCost);
+    TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto);
 
     /**
      * 删除日程中的POI、NonPoi
@@ -62,7 +60,7 @@ public interface TripDayItemsService extends IService<TripDayItems> {
     boolean deleteItems(List<UUID> itemIds);
 
     /**
-     * 更新日程item的信息，包括时间、花费、交通建议
+     * 更新日程item的信息，包括时间、花费、交通建议、备注
      * @param dto
      * @return
      */

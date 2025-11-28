@@ -53,7 +53,7 @@ public class TripsController {
     @Operation(summary = "AI智能生成完整行程")
     public Result aiGenerateEntireTrip(@RequestParam UUID userId, @RequestParam UUID tripId) {
         EntireTrip result = tripsService.aiGenerateEntireTrip(userId, tripId);
-        return result == null ? Result.serverError("AI生成失败") : Result.success("AI生成成功", result);
+        return result == null ? Result.serverError("AI规划失败") : Result.success("AI规划成功", result);
     }
 
     @DeleteMapping("/delete")

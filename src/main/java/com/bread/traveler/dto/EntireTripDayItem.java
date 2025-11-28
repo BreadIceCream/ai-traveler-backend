@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EntireTripDayItem {
 
-    private TripDayItems tripDayItem;
+    private TripDayItems item;
     private ItineraryItem entity;
 
 }

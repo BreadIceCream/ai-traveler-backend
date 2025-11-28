@@ -25,9 +25,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
-import java.time.LocalTime;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -49,10 +46,10 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     @Autowired
     private NonPoiItemService nonPoiItemService;
 
-
     @Override
-    public TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, LocalTime startTime, LocalTime endTime, BigDecimal estimatedCost) {
-        log.info("Add item to trip day: tripDayId {}, entityId {}, isPoi {}, startTime {}, endTime {}, estimatedCost {}", tripDayId, entityId, isPoi, startTime, endTime, estimatedCost);
+    public TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto) {
+        log.info("Add item to trip day: tripDayId {}, entityId {}, isPoi {}, dto {}",
+                tripDayId, entityId, isPoi, dto);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
         Assert.notNull(entityId, "entityId cannot be null");
         // 检查entity是否存在
@@ -60,14 +57,15 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
                 poisService.lambdaQuery().eq(Pois::getPoiId, entityId).exists() :
                 nonPoiItemService.lambdaQuery().eq(NonPoiItem::getId, entityId).exists();
         Assert.isTrue(exists, "entity not exists");
-        TripDayItems item = TripDayItems.builder()
-                .itemId(UUID.randomUUID())
-                .tripDayId(tripDayId)
-                .entityId(entityId)
-                .isPoi(isPoi)
-                .startTime(startTime)
-                .endTime(endTime)
-                .estimatedCost(estimatedCost).build();
+        // 检查item是否已经添加到当前日程，避免重复添加（不同日程允许重复添加）
+        boolean itemExists = lambdaQuery().eq(TripDayItems::getTripDayId, tripDayId).eq(TripDayItems::getEntityId, entityId).eq(TripDayItems::getIsPoi, isPoi).exists();
+        Assert.isTrue(!itemExists, Constant.TRIP_DAY_ITEM_EXISTS);
+        // 创建item
+        TripDayItems item = BeanUtil.copyProperties(dto, TripDayItems.class, "itemId");
+        item.setItemId(UUID.randomUUID());
+        item.setTripDayId(tripDayId);
+        item.setEntityId(entityId);
+        item.setIsPoi(isPoi);
         // 设置order，默认添加到最后一个
         // 获取最大的order
         Double maxOrder = baseMapper.getMaxOrder(tripDayId);
@@ -101,9 +99,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
             log.error("Item not found: {}", dto.getItemId());
             throw new BusinessException("Item not found");
         }
-        BeanUtil.copyProperties(dto, item, CopyOptions.create()
-                .setIgnoreProperties("itemId")
-                .ignoreNullValue());
+        BeanUtil.copyProperties(dto, item, CopyOptions.create().setIgnoreProperties("itemId"));
         if (updateById(item)) {
             log.info("Update item info success: {}", dto);
             return item;

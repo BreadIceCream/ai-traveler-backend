@@ -32,7 +32,7 @@ public interface WishlistItemsService extends IService<WishlistItems> {
     /**
      * 获取某个行程下所有心愿单Item的详细信息，包含entity信息
      * @param tripId
-     * @return List<EntireWishlistItem> 按照添加的顺序倒序排序
+     * @return List<EntireWishlistItem> 按照添加的顺序倒序排序。如果没有item返回空列表
      */
     List<EntireWishlistItem> listEntireByTripId(UUID tripId);
 }

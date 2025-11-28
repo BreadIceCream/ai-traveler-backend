@@ -25,7 +25,7 @@ url: 网页url地址
 6. 按照 Output Schema 组装 JSON。
 
 # Output Schema
-请直接输出 JSON 格式，不要包含 markdown 标记。根对象必须包含 `Pois` 和 `NonPois` 两个键。
+直接输出 JSON 格式，严禁包含任何说明信息和 markdown 标记。根对象必须包含 `Pois` 和 `NonPois` 两个键。
 ```json
 {
   "pois": [

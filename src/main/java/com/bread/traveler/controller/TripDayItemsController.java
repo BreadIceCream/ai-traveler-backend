@@ -33,9 +33,8 @@ public class TripDayItemsController {
     @PostMapping("/add")
     @Operation(summary = "添加日程item")
     public Result addItems(@RequestParam UUID tripDayId, @RequestParam UUID entityId,
-                           @RequestParam boolean isPoi, @RequestParam Double estimatedCost,
-                           @RequestParam LocalTime startTime, @RequestParam LocalTime endTime) {
-        TripDayItems tripDayItems = tripDayItemsService.addItems(tripDayId, entityId, isPoi, startTime, endTime, BigDecimal.valueOf(estimatedCost));
+                           @RequestParam boolean isPoi, @RequestBody TripDayItemDto dto) {
+        TripDayItems tripDayItems = tripDayItemsService.addItems(tripDayId, entityId, isPoi, dto);
         return tripDayItems == null ? Result.serverError("添加失败") : Result.success("添加成功", tripDayItems);
     }
 

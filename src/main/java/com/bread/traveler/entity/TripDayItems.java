@@ -78,4 +78,7 @@ public class TripDayItems implements Serializable {
      */
     @TableField(value = "is_poi")
     private Boolean isPoi;
+
+    @TableField(value = "notes")
+    private String notes;
 }

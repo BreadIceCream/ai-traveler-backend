@@ -33,6 +33,12 @@ public class Constant {
     public static final String TRIP_DAY_DELETE_FAILED = "日程删除失败";
     public static final String WISHLIST_ITEM_EXISTS = "心愿单中该事项已存在，不要重复添加";
     public static final String WISHLIST_ITEM_NOT_EXISTS = "该事项不存在";
+    public static final String TRIP_DAY_NO_ITEMS = "当前日程为空";
+    public static final String TRIP_DAY_RE_PLAN_FAILED = "AI规划日程失败";
+    public static final String TRIP_DAY_DATE_NOT_IN_TRIP_RANGE = "日期超出行程时间";
+    public static final String WISHLIST_EMPTY = "心愿单为空";
+    public static final String TRIP_DAY_ITEM_EXISTS = "日程中已存在，不要重复添加";
+    public static final String TRIP_AI_GENERATE_FAILED = "AI规划旅程失败";
     public static String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
 
     public static class SHOW_FIELD {

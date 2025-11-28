@@ -4,6 +4,7 @@ import com.bread.traveler.dto.EntireTrip;
 import com.bread.traveler.dto.TripDto;
 import com.bread.traveler.entity.Trips;
 import com.baomidou.mybatisplus.extension.service.IService;
+import lombok.Data;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +15,11 @@ import java.util.UUID;
 * @createDate 2025-11-14 12:09:43
 */
 public interface TripsService extends IService<Trips> {
+
+    @Data
+    class AiPlanTrip {
+        private List<TripDaysService.AiPlanTripDay> tripDays;
+    }
 
     /**
      * 创建行程
@@ -46,7 +52,8 @@ public interface TripsService extends IService<Trips> {
     EntireTrip getEntireTrip(UUID userId, UUID tripId);
 
     /**
-     * AI智能规划，生成整个行程
+     * AI智能规划，根据wishlist心愿单生成整个行程。新生成的行程会覆盖原行程
+     * 只考虑有地址的item，没有地址的item会被忽略不会被添加到行程中，用户需要自行添加（保留在心愿单中）
      * @param userId
      * @param tripId
      * @return

@@ -4,8 +4,8 @@ import java.util.Set;
 
 public class ToolNames {
 
-    public static final String WEB_SEARCH_TOOL_NAME = "webSearch";
-    public static final String POI_SEARCH_TOOL_NAME = "poiSearch";
+    public static final String WEB_SEARCH_TOOL_NAME = "web_search";
+    public static final String POI_SEARCH_TOOL_NAME = "poi_search";
     public static final String FETCH_TOOL_NAME = "fetch";
 
     public static final String[] GAODE_MCP_TOOLS = {
@@ -50,4 +50,10 @@ public class ToolNames {
             "maps_schema_take_taxi"
     );
 
+    public static final Set<String> TRIP_PLAN_CLIENT_GAODE_MCP_TOOLS = Set.of(
+            "maps_text_search",
+            "maps_geo",
+            "maps_distance",
+            "maps_weather"
+    );
 }
