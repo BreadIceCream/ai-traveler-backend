@@ -1,6 +1,6 @@
 package com.bread.traveler.mapper;
 
-import com.bread.traveler.entity.Expenses;
+import com.bread.traveler.entity.TripExpenses;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
 * @Entity com.bread.traveler.entity.Expenses
 */
 @Mapper
-public interface ExpensesMapper extends BaseMapper<Expenses> {
+public interface TripExpensesMapper extends BaseMapper<TripExpenses> {
 
 }
 

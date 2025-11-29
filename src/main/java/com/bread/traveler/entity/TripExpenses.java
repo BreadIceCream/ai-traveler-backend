@@ -1,30 +1,32 @@
 package com.bread.traveler.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
+import com.bread.traveler.enums.EnumTypeHandler;
+import com.bread.traveler.enums.ExpenseType;
 import lombok.Data;
 
 /**
  * 
  * @TableName expenses
  */
-@TableName(value ="expenses")
+@TableName(value ="trip_expenses", autoResultMap = true)
 @Data
-public class Expenses implements Serializable {
+public class TripExpenses implements Serializable {
     /**
      * 
      */
     @TableId(value = "expense_id")
     private UUID expenseId;
+
+    @TableField(value = "user_id")
+    private UUID userId;
 
     /**
      * 
@@ -39,10 +41,10 @@ public class Expenses implements Serializable {
     private BigDecimal amount;
 
     /**
-     * 
+     * 支出分类
      */
-    @TableField(value = "category")
-    private String category;
+    @TableField(value = "category", typeHandler = EnumTypeHandler.class)
+    private ExpenseType category;
 
     /**
      * 
@@ -53,7 +55,6 @@ public class Expenses implements Serializable {
     /**
      * 
      */
-    @TableField(value = "expense_date")
-    private OffsetDateTime expenseDate;
-
+    @TableField(value = "expense_time")
+    private OffsetDateTime expenseTime;
 }

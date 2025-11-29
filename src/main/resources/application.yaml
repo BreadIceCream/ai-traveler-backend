@@ -54,11 +54,22 @@ spring:
       database: 2
   profiles:
     active: dev
+  servlet:
+    multipart:
+      max-file-size: 3MB
+      resolve-lazily: true  # 延迟解析，保证MaxUploadSizeExceededException能被ExceptionHandler捕获处理
 
 gaode:
   api-key: ${GAODE_API_KEY}
 web-search:
   api-key: ${WEB_SEARCH_API_KEY}
+
+aliyun:
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT}
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME}
+    region: ${ALIYUN_OSS_REGION}
+
 
 mybatis-plus:
   global-config:
@@ -89,7 +100,8 @@ knife4j:
     # 语言选择: zh_cn | en_us
     language: zh_cn
 
-
 server:
   servlet:
     context-path: /api
+  tomcat:
+    max-swallow-size: 30MB  # 调整吞吐大小，使得MaxUploadSizeExceededException能被正确处理并返回Result

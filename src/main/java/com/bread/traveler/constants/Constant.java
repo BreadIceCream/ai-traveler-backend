@@ -46,7 +46,18 @@ public class Constant {
     public static final String TRIP_MEMBER_NOT_EXIST = "该成员不存在";
     public static final String TRIP_MEMBER_EXIST = "已是成员，不要重复添加";
     public static final String NOT_TRIP_MEMBER = "不是旅程成员，无法操作";
-    public static String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
+    public static final String EXPENSE_AMOUNT_NOT_NULL = "金额不能为空";
+    public static final String EXPENSE_CATEGORY_NOT_NULL = "分类不能为空";
+    public static final String EXPENSE_ADD_FAILED = "支出信息添加失败";
+    public static final String EXPENSE_NOT_EXIST = "支出信息不存在";
+    public static final String EXPENSE_DELETE_FAILED = "支出信息删除失败";
+    public static final String EXPENSE_UPDATE_FAILED = "支出信息更新失败";
+    public static final String TRIP_LOG_TYPE_NOT_NULL = "日志类型不能为空";
+    public static final String TRIP_LOG_CONTENT_NOT_EMPTY = "日志内容不能为空";
+    public static final String TRIP_LOG_CREATE_FAILED = "创建日志失败";
+    public static final String TRIP_LOG_NOT_EXISTS = "日志不存在";
+    public static final String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
+    public static final String TRIP_LOG_UPLOAD_FILE_FAILED = "上传失败";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等
