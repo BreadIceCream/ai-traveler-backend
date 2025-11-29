@@ -5,6 +5,8 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.EntireTripDayItem;
 import com.bread.traveler.dto.TripDayItemDto;
@@ -47,7 +49,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     private NonPoiItemService nonPoiItemService;
 
     @Override
-    public TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto) {
+    @TripRoleValidate
+    public TripDayItems addItems(UUID userId, UUID tripId, UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto) {
         log.info("Add item to trip day: tripDayId {}, entityId {}, isPoi {}, dto {}",
                 tripDayId, entityId, isPoi, dto);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
@@ -80,7 +83,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    public boolean deleteItems(List<UUID> itemIds) {
+    @TripRoleValidate
+    public boolean deleteItems(UUID userId, UUID tripId, List<UUID> itemIds) {
         log.info("Delete items of TRIP_DAY table: {}", itemIds);
         Assert.notNull(itemIds, "itemIds cannot be null");
         Assert.notEmpty(itemIds, "itemIds cannot be empty");
@@ -90,7 +94,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    public TripDayItems updateItemInfo(TripDayItemDto dto) {
+    @TripRoleValidate
+    public TripDayItems updateItemInfo(UUID userId, UUID tripId, TripDayItemDto dto) {
         log.info("Update item info: {}", dto);
         Assert.notNull(dto, "dto cannot be null");
         Assert.notNull(dto.getItemId(), "itemId cannot be null");
@@ -109,7 +114,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    public boolean moveItemOrder(UUID currentId, UUID prevId, UUID nextId, UUID tripDayId) {
+    @TripRoleValidate
+    public boolean moveItemOrder(UUID userId, UUID tripId, UUID currentId, UUID prevId, UUID nextId, UUID tripDayId) {
         log.info("Move item order: current {}, prev {}, next {}, NewTripDay {}", currentId, prevId, nextId, tripDayId);
         // 获取前一个item
         Double prevOrder = null;
@@ -140,7 +146,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override //todo 优化性能，提高查询效率
-    public TripDayItems updateTransportNote(UUID itemId, @Nullable String originAddress) {
+    @TripRoleValidate
+    public TripDayItems updateTransportNote(UUID userId, UUID tripId, UUID itemId, @Nullable String originAddress) {
         log.info("Update transport note: {}", itemId);
         TripDayItems current = getById(itemId);
         Assert.notNull(current, Constant.DESTINATION_ITEM_NOT_FOUND);
@@ -151,7 +158,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
             // 从数据库中获取上一个地点
             // 这里不更改为getEntireItemsByTripDayId方法，因为getEntireItemsByTripDayId方法会查询所有entity信息
             // 而这里只筛选出1个然后查poi或nonPoi表
-            List<TripDayItems> otherItems = getItemsByTripDayId(current.getTripDayId());
+            List<TripDayItems> otherItems = getItemsByTripDayId(userId, tripId, current.getTripDayId());
             TripDayItems prev = otherItems.stream()
                     // 筛选出顺序小于当前item的
                     .filter(item -> item.getItemOrder() < current.getItemOrder())
@@ -185,7 +192,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    public List<TripDayItems> getItemsByTripDayId(UUID tripDayId) {
+    @TripVisibilityValidate
+    public List<TripDayItems> getItemsByTripDayId(UUID userId, UUID tripId, UUID tripDayId) {
         log.info("Get items by trip day id: {}", tripDayId);
         List<TripDayItems> result = lambdaQuery().eq(TripDayItems::getTripDayId, tripDayId).list();
         // 按照itemOrder升序排序
@@ -194,7 +202,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    public List<EntireTripDayItem> getEntireItemsByTripDayId(UUID tripDayId) {
+    @TripVisibilityValidate
+    public List<EntireTripDayItem> getEntireItemsByTripDayId(UUID userId, UUID tripId, UUID tripDayId) {
         log.info("Get entire items by trip day id: {}", tripDayId);
         List<TripDayItems> items = lambdaQuery().eq(TripDayItems::getTripDayId, tripDayId).list();
         // 按照itemOrder升序排序，到pois或nonPois中获取详细信息

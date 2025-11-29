@@ -32,7 +32,7 @@ public class Trips implements Serializable {
     private UUID tripId;
 
     /**
-     * 
+     * 创建的用户id，OWNER
      */
     @TableField(value = "user_id")
     private UUID userId;
@@ -84,5 +84,8 @@ public class Trips implements Serializable {
      */
     @TableField(value = "created_at")
     private OffsetDateTime createdAt;
+
+    @TableField(value = "is_private")
+    private Boolean isPrivate;
 
 }

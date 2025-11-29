@@ -1,8 +1,6 @@
 package com.bread.traveler.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.bread.traveler.enums.NonPoiType;
-import com.bread.traveler.enums.EnumTypeHandler;
 import lombok.Data;
 
 import java.util.UUID;

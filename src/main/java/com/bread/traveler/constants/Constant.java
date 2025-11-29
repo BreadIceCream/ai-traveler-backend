@@ -1,5 +1,7 @@
 package com.bread.traveler.constants;
 
+import java.util.function.Supplier;
+
 public class Constant {
 
     public static final String USERS_NOT_EXIST = "用户不存在";
@@ -39,6 +41,11 @@ public class Constant {
     public static final String WISHLIST_EMPTY = "心愿单为空";
     public static final String TRIP_DAY_ITEM_EXISTS = "日程中已存在，不要重复添加";
     public static final String TRIP_AI_GENERATE_FAILED = "AI规划旅程失败";
+    public static final String TRIP_MEMBER_NO_PERMISSION = "没有权限";
+    public static final String TRIP_MEMBER_REQUEST_NOT_EXIST = "不存在该请求，无法处理";
+    public static final String TRIP_MEMBER_NOT_EXIST = "该成员不存在";
+    public static final String TRIP_MEMBER_EXIST = "已是成员，不要重复添加";
+    public static final String NOT_TRIP_MEMBER = "不是旅程成员，无法操作";
     public static String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
 
     public static class SHOW_FIELD {

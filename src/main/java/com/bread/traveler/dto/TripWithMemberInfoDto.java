@@ -1,7 +1,7 @@
 package com.bread.traveler.dto;
 
+import com.bread.traveler.enums.MemberRole;
 import com.bread.traveler.enums.TripStatus;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -10,25 +10,24 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
-@Schema(description = "行程dto")
-public class TripDto {
+public class TripWithMemberInfoDto {
 
-    @Schema(description = "标题")
+    // trip info
+    private UUID tripId;
+    private UUID ownerId;
     private String title;
-
-    @Schema(description = "目的地城市")
     private String destinationCity;
-
-    @Schema(description = "开始日期")
     private LocalDate startDate;
-
-    @Schema(description = "结束日期")
     private LocalDate endDate;
-
-    @Schema(description = "预算")
     private BigDecimal totalBudget;
-
-    @Schema(description = "描述")
+    private TripStatus status;
     private String description;
+    private OffsetDateTime createdAt;
+    private Boolean isPrivate;
+    // member info
+    private MemberRole memberRole;
+    private Boolean isPass;
+    private OffsetDateTime joinedAt;
+
 
 }

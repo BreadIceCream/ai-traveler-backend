@@ -5,6 +5,8 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.EntireTripDay;
 import com.bread.traveler.dto.EntireTripDayItem;
@@ -64,17 +66,19 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
     @Override
-    public TripDays createTripDay(UUID tripId, LocalDate date, String note) {
-        log.info("Create trip day: {}, date: {}, note: {}", tripId, date, note);
+    @TripRoleValidate
+    public TripDays createTripDay(UUID userId, UUID tripId, LocalDate date, String note) {
+        log.info("Create trip day by user {}: {}, date: {}, note: {}",userId, tripId, date, note);
+        Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
         Assert.notNull(date, "date cannot be null");
-        // 判断行程是否存在且date是否在行程的日期范围内
+        // 判断旅程是否存在且date是否在旅程的日期范围内
         Trips trip = tripsService.getById(tripId);
         Assert.notNull(trip, Constant.TRIP_NOT_EXIST);
         Assert.isTrue(
                 !date.isBefore(trip.getStartDate()) && !date.isAfter(trip.getEndDate()),
                 Constant.TRIP_DAY_DATE_NOT_IN_TRIP_RANGE);
-        // 查看数据库中是否有该日期的行程
+        // 查看数据库中是否有该日期的旅程
         boolean exists = lambdaQuery().eq(TripDays::getTripId, tripId).eq(TripDays::getDayDate, date).exists();
         if (exists) {
             log.warn("Trip day already exists: {}, date: {}", tripId, date);
@@ -94,7 +98,8 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     }
 
     @Override
-    public boolean updateTripDayNote(UUID tripDayId, String note) {
+    @TripRoleValidate
+    public boolean updateTripDayNote(UUID userId, UUID tripId, UUID tripDayId, String note) {
         log.info("Update trip day note: {}, note: {}", tripDayId, note);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
         boolean update = lambdaUpdate().eq(TripDays::getTripDayId, tripDayId)
@@ -108,7 +113,8 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     }
 
     @Override
-    public EntireTripDay getEntireTripDay(UUID tripDayId) {
+    @TripVisibilityValidate
+    public EntireTripDay getEntireTripDay(UUID userId, UUID tripId, UUID tripDayId) {
         log.info("Get entire trip day: {}", tripDayId);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
         TripDays tripDay = getById(tripDayId);
@@ -116,15 +122,16 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
             log.error("Trip day not exist: {}", tripDayId);
             throw new BusinessException(Constant.TRIP_DAY_NOT_EXIST);
         }
-        List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(tripDayId);
+        List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(userId, tripId, tripDayId);
         return new EntireTripDay(tripDay, entireItems);
     }
 
     @Override
-    public List<EntireTripDay> getEntireTripDaysByTripId(UUID tripId) {
+    @TripVisibilityValidate
+    public List<EntireTripDay> getEntireTripDaysByTripId(UUID userId, UUID tripId) {
         log.info("Get entire trip days by trip id: {}", tripId);
         Assert.notNull(tripId, "tripId cannot be null");
-        // 获取该行程的所有日程
+        // 获取该旅程的所有日程
         List<TripDays> tripDays = lambdaQuery().eq(TripDays::getTripId, tripId).list();
         if (tripDays == null || tripDays.isEmpty()) {
             log.info("No trip days in trip: {}", tripId);
@@ -134,7 +141,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
         List<EntireTripDay> result = tripDays.stream()
                 .sorted(Comparator.comparing(TripDays::getDayDate))
                 .map(tripDay -> {
-                    List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(tripDay.getTripDayId());
+                    List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(userId, tripId, tripDay.getTripDayId());
                     return new EntireTripDay(tripDay, entireItems);
                 }).toList();
         log.info("Get entire trip days success: {}", tripDays);
@@ -142,14 +149,15 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     }
 
     @Override
-    public EntireTripDay aiRePlanTripDay(UUID tripDayId) {
+    @TripRoleValidate
+    public EntireTripDay aiRePlanTripDay(UUID userId, UUID tripId, UUID tripDayId) {
         log.info("AI re-plan trip day: {}", tripDayId);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
         // 获取该日程
         TripDays tripDay = getById(tripDayId);
         Assert.notNull(tripDay, Constant.TRIP_DAY_NOT_EXIST);
         // 获取该日程的items
-        List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(tripDayId);
+        List<EntireTripDayItem> entireItems = tripDayItemsService.getEntireItemsByTripDayId(userId, tripId, tripDayId);
         Assert.notEmpty(entireItems, Constant.TRIP_DAY_NO_ITEMS + "，AI无法规划");
         // 获取所有itineraryItems (poi或nonPoiItem)。对于nonPoi只保留有estimatedAddress的
         List<String> itineraryItemsJson = entireItems.stream()
@@ -280,7 +288,8 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean exchangeDayOrder(UUID aTripDayId, UUID bTripDayId) {
+    @TripRoleValidate
+    public boolean exchangeDayOrder(UUID userId, UUID tripId, UUID aTripDayId, UUID bTripDayId) {
         log.info("Exchange day order: {}, {}", aTripDayId, bTripDayId);
         Assert.notNull(aTripDayId, "aTripDayId cannot be null");
         Assert.notNull(bTripDayId, "bTripDayId cannot be null");
@@ -301,7 +310,8 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteTripDays(List<UUID> tripDayIds) {
+    @TripRoleValidate
+    public boolean deleteTripDays(UUID userId, UUID tripId, List<UUID> tripDayIds) {
         log.info("Delete trip days: {}", tripDayIds);
         Assert.notNull(tripDayIds, "tripDayIds cannot be null");
         Assert.notEmpty(tripDayIds, "tripDayIds cannot be empty");

@@ -4,17 +4,19 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.*;
 import com.bread.traveler.entity.*;
+import com.bread.traveler.enums.MemberRole;
 import com.bread.traveler.enums.TripStatus;
 import com.bread.traveler.exception.BusinessException;
-import com.bread.traveler.service.TripDayItemsService;
-import com.bread.traveler.service.TripDaysService;
-import com.bread.traveler.service.TripsService;
+import com.bread.traveler.service.*;
 import com.bread.traveler.mapper.TripsMapper;
-import com.bread.traveler.service.WishlistItemsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -42,13 +44,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
-* @author huang
-* @description 针对表【trips】的数据库操作Service实现
-* @createDate 2025-11-14 12:09:43
-*/
+ * @author huang
+ * @description 针对表【trips】的数据库操作Service实现
+ * @createDate 2025-11-14 12:09:43
+ */
 @Service
 @Slf4j
-public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements TripsService{
+public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements TripsService {
 
     @Autowired
     private TripDaysService tripDaysService;
@@ -59,12 +61,16 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     private ObjectProvider<ChatClient> tripPlanClientProvider;
     @Autowired
     private TripDayItemsService tripDayItemsService;
-
-    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
     @Autowired
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private TripMembersService tripMembersService;
+
+    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
+
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Trips createTrip(UUID userId, TripDto dto) {
         log.info("Create trip: user {}, dto {}", userId, dto);
         Assert.notNull(userId, "userId cannot be null");
@@ -73,7 +79,10 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
         trip.setUserId(userId);
         trip.setStatus(TripStatus.PLANNING);
         trip.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
-        if (save(trip)) {
+        trip.setIsPrivate(true);
+        // 添加到trip_member表
+        boolean a = tripMembersService.createOwner(trip.getTripId(), userId);
+        if (a && save(trip)) {
             log.info("Create trip success: {}", trip.getTripId());
             return trip;
         }
@@ -82,14 +91,15 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    public Trips updateTripInfo(UUID userId, TripDto dto) {
+    @TripRoleValidate
+    public Trips updateTripInfo(UUID userId, UUID tripId, TripDto dto) {
         log.info("Update trip info: user {}, dto {}", userId, dto);
         Assert.notNull(userId, "userId cannot be null");
+        Assert.notNull(tripId, "tripId cannot be null");
         Assert.notNull(dto, "dto cannot be null");
-        Assert.notNull(dto.getTripId(), "tripId cannot be null");
-        Trips trip = lambdaQuery().eq(Trips::getTripId, dto.getTripId()).eq(Trips::getUserId, userId).one();
+        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).one();
         if (trip == null) {
-            log.error("Trip not found: {}", dto.getTripId());
+            log.error("Trip not found: {}", tripId);
             throw new BusinessException(Constant.TRIP_NOT_EXIST);
         }
         // 更新信息
@@ -103,45 +113,90 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    public List<Trips> getAllTripsOfUser(UUID userId) {
-        log.info("Get all trips of user: {}", userId);
+    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER修改
+    public boolean changeVisibility(UUID userId, UUID tripId, Boolean isPrivate) {
+        log.info("Change visibility of trip {}: is private {}", tripId, isPrivate);
+        Assert.notNull(tripId, "tripId cannot be null");
         Assert.notNull(userId, "userId cannot be null");
-        List<Trips> result = lambdaQuery().eq(Trips::getUserId, userId).list();
-        if (result == null || result.isEmpty()){
-            log.info("No trips found for user: {}", userId);
-            return Collections.emptyList();
-        }
-        // 按照创建时间倒序排序
-        result.sort((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt()));
-        return result;
+        Assert.notNull(isPrivate, "isPrivate cannot be null");
+        // 更新visibility
+        lambdaUpdate().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).set(Trips::getIsPrivate, isPrivate).update();
+        return true;
     }
 
     @Override
+    public List<TripWithMemberInfoDto> getAllTripsOfUser(UUID userId) {
+        log.info("Get all trips of user: {}", userId);
+        Assert.notNull(userId, "userId cannot be null");
+        // 获取用户加入的旅程,包括申请但未通过的isPass=false
+        // 已经按照加入的顺序倒叙排序
+        List<TripMembers> tripMemberInfos = tripMembersService.getJoinedTrips(userId);
+        if (tripMemberInfos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<UUID, TripMembers> tripIdToTripMember = tripMemberInfos.stream().collect(Collectors.toMap(TripMembers::getTripId, tripMember -> tripMember));
+        // 获取所有旅程信息
+        List<UUID> tripIds = tripMemberInfos.stream().map(TripMembers::getTripId).toList();
+        List<Trips> trips = listByIds(tripIds);
+        // 创建TripWithMemberInfoDto列表
+        // 按照用户加入旅程的时间倒序排序
+        return trips.stream().map(trip -> {
+                    TripMembers memberInfo = tripIdToTripMember.get(trip.getTripId());
+                    TripWithMemberInfoDto dto = BeanUtil.copyProperties(trip, TripWithMemberInfoDto.class, "userId");
+                    dto.setOwnerId(trip.getUserId());
+                    dto.setMemberRole(memberInfo.getRole());
+                    dto.setIsPass(memberInfo.getIsPass());
+                    dto.setJoinedAt(memberInfo.getCreatedAt());
+                    return dto;
+                })
+                // 按照用户加入旅程的时间倒序排序
+                .sorted((o1, o2) -> o2.getJoinedAt().compareTo(o1.getJoinedAt()))
+                .toList();
+    }
+
+    @Override
+    @TripVisibilityValidate
     public EntireTrip getEntireTrip(UUID userId, UUID tripId) {
         log.info("Get entire trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
-        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).one();
+        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).one();
         if (trip == null) {
             log.error("Trip not found: {}", tripId);
             throw new BusinessException(Constant.TRIP_NOT_EXIST);
         }
-        List<EntireTripDay> tripDays = tripDaysService.getEntireTripDaysByTripId(tripId);
+        List<EntireTripDay> tripDays = tripDaysService.getEntireTripDaysByTripId(userId, tripId);
         return new EntireTrip(trip, tripDays);
     }
 
     @Override
-    public EntireTrip aiGenerateEntireTrip(UUID userId, UUID tripId) {
+    public Page<Trips> getPublicTrips(String destinationCity, LocalDate startDate, LocalDate endDate, Integer pageNum, Integer pageSize) {
+        log.info("Get public trips: destinationCity {}, startDate {}, endDate {}, pageNum {}, pageSize {}", destinationCity, startDate, endDate, pageNum, pageSize);
+        Assert.notNull(pageNum, "pageNum cannot be null");
+        Assert.notNull(pageSize, "pageSize cannot be null");
+        LambdaQueryChainWrapper<Trips> wrapper = lambdaQuery()
+                .eq(Trips::getIsPrivate, false)
+                // 如果直接使用eq会报类型转换错误
+                .eqSql(Trips::getStatus, "'%s'".formatted(TripStatus.PLANNING.name()))
+                .like(destinationCity != null && !destinationCity.trim().isEmpty(), Trips::getDestinationCity, destinationCity)
+                .ge(startDate != null, Trips::getStartDate, startDate)
+                .le(endDate != null, Trips::getEndDate, endDate);
+        return wrapper.page(Page.of(pageNum, pageSize));
+    }
+
+    @Override
+    @TripRoleValidate
+    public EntireTrip aiGenerateEntireTripPlan(UUID userId, UUID tripId) {
         log.info("Ai generate entire trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
-        // 判断行程是否存在
-        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).one();
+        // 判断旅程是否存在
+        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).one();
         if (trip == null) {
             log.error("Trip not found: {}", tripId);
             throw new BusinessException(Constant.TRIP_NOT_EXIST);
         }
-        // 根据wishList智能生成行程，获取该行程的所有wishlistItem
+        // 根据wishList智能生成旅程，获取该旅程的所有wishlistItem
         List<EntireWishlistItem> entireWishlistItems = wishlistItemsService.listEntireByTripId(tripId);
         Assert.notEmpty(entireWishlistItems, Constant.WISHLIST_EMPTY + "，AI无法规划");
         // 获取entity，过滤不必要的字段。nonPoiItem只保留有estimatedAddress的
@@ -184,7 +239,8 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
             String date = trip.getStartDate() + "至" + trip.getEndDate();
             Prompt prompt = promptTemplate.create(Map.of("items", itineraryItemsJson, "date", date));
             ChatClient client = tripPlanClientProvider.getObject();
-            return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {});
+            return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
+            });
         });
         // 将原先的entireWishlistItems转为map，key为itemId，value为entireWishlistItem
         Map<UUID, EntireWishlistItem> itemIdToEntireWishlistItem = entireWishlistItems.stream().collect(Collectors.toMap(
@@ -199,7 +255,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
             log.error("AI generate entire trip CLIENT TASK failed", e);
             throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
         }
-        if (output == null){
+        if (output == null) {
             log.error("AI generate entire trip failed, output null: {}", trip);
             throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
         }
@@ -259,19 +315,19 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
                     }
                     // 删除该trip原先的规划
                     List<TripDays> oriTripDays = tripDaysService.lambdaQuery().eq(TripDays::getTripId, tripId).list();
-                    if (oriTripDays != null && !oriTripDays.isEmpty()){
+                    if (oriTripDays != null && !oriTripDays.isEmpty()) {
                         List<UUID> oriTripDayIds = oriTripDays.stream().map(TripDays::getTripDayId).toList();
                         log.info("AI generate trip: Delete original trip plans: {}", oriTripDayIds);
-                        // 这个方法会删除行程中的日程，级联删除该日程下的所有item
-                        tripDaysService.deleteTripDays(oriTripDayIds);
+                        // 这个方法会删除旅程中的日程，级联删除该日程下的所有item
+                        tripDaysService.deleteTripDays(userId, tripId, oriTripDayIds);
                     }
                     // 保存新的规划
                     boolean a = tripDaysService.saveBatch(allTripDays);
                     boolean b = tripDayItemsService.saveBatch(allTripDayItems);
-                    if (!a || !b){
+                    if (!a || !b) {
                         log.error("AI generate entire trip failed: Save to db failed: {}, {}", allTripDays, allTripDayItems);
                         status.setRollbackOnly();
-                    }else{
+                    } else {
                         log.info("AI generate entire trip success. Save to db success: {}, {}", allTripDays, allTripDayItems);
                     }
                 } catch (Exception e) {
@@ -287,24 +343,27 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER删除
     public boolean deleteTrip(UUID userId, UUID tripId) {
         log.info("Delete trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
         boolean exists = lambdaQuery().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).exists();
-        Assert.isTrue(exists, "Trip not found");
-        // 级联删除该行程tripId下的所有日程和日程下的所有item
+        Assert.isTrue(exists, Constant.TRIP_NOT_EXIST);
+        // 级联删除该旅程tripId下的所有日程和日程下的所有item
         List<UUID> tripDayIds = tripDaysService.lambdaQuery()
                 .eq(TripDays::getTripId, tripId)
                 .list().stream().map(TripDays::getTripDayId).toList();
         // 这个删除方法会自动删除所有日程下的所有item
-        if (!tripDayIds.isEmpty()){
+        if (!tripDayIds.isEmpty()) {
             // 日程不为空，删除所有日程
-            tripDaysService.deleteTripDays(tripDayIds);
-        }else{
+            tripDaysService.deleteTripDays(userId, tripId, tripDayIds);
+        } else {
             log.info("Trip days is empty: tripId {}", tripId);
         }
+        // 删除旅程和成员
         lambdaUpdate().eq(Trips::getTripId, tripId).remove();
+        tripMembersService.deleteMembersByTripId(tripId, userId);
         log.info("Delete trip success: {}", tripId);
         return true;
     }

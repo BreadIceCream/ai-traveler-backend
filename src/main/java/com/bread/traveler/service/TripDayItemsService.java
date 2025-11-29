@@ -44,58 +44,78 @@ public interface TripDayItemsService extends IService<TripDayItems> {
     /**
      * 添加POI、NonPoi到日程当中，默认为最后一个item
      *
+     * @param userId    用户ID
+     * @param tripId    旅程ID
      * @param tripDayId 日程ID
      * @param entityId  POI/NonPoi的ID
      * @param isPoi     true:POI, false:NonPoi
      * @param dto       时间、花费、交通建议、备注
      * @return
      */
-    TripDayItems addItems(UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto);
+    TripDayItems addItems(UUID userId, UUID tripId, UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto);
 
     /**
      * 删除日程中的POI、NonPoi
+     *
+     * @param userId 用户ID
+     * @param tripId 旅程ID
      * @param itemIds
      * @return
      */
-    boolean deleteItems(List<UUID> itemIds);
+    boolean deleteItems(UUID userId, UUID tripId, List<UUID> itemIds);
 
     /**
      * 更新日程item的信息，包括时间、花费、交通建议、备注
+     *
+     * @param userId 用户ID
+     * @param tripId 旅程ID
      * @param dto
      * @return
      */
-    TripDayItems updateItemInfo(TripDayItemDto dto);
+    TripDayItems updateItemInfo(UUID userId, UUID tripId, TripDayItemDto dto);
 
     /**
      * 移动日程item的位置
+     *
+     * @param userId    用户ID
+     * @param tripId    旅程ID
      * @param currentId 当前item的ID
-     * @param prevId 前一个item的ID(如果移动到第一位，则为 null)
-     * @param nextId 后一个item的ID(如果移动到最后一位，则为 null)
+     * @param prevId    前一个item的ID(如果移动到第一位，则为 null)
+     * @param nextId    后一个item的ID(如果移动到最后一位，则为 null)
      * @param tripDayId 移动后所属的天 (用于处理跨天移动的情况)
      * @return
      */
-    boolean moveItemOrder(UUID currentId, UUID prevId, UUID nextId, UUID tripDayId);
+    boolean moveItemOrder(UUID userId, UUID tripId, UUID currentId, UUID prevId, UUID nextId, UUID tripDayId);
 
     /**
      * AI更新日程item的交通建议
      * 使用高德MCP或高德API。从上一个地点到当前地点
+     *
+     * @param userId 用户id
+     * @param tripId 旅程id
      * @param itemId
      * @return
      */
-    TripDayItems updateTransportNote(UUID itemId, @Nullable String originAddress);
+    TripDayItems updateTransportNote(UUID userId, UUID tripId, UUID itemId, @Nullable String originAddress);
 
     /**
      * 获取某个日程中的所有item
+     *
+     * @param userId 当前用户id
+     * @param tripId 旅程id
      * @param tripDayId
      * @return items有序集合，若没有item则为空
      */
-    List<TripDayItems> getItemsByTripDayId(UUID tripDayId);
+    List<TripDayItems> getItemsByTripDayId(UUID userId, UUID tripId, UUID tripDayId);
 
     /**
      * 获取某个日程中的所有item，包括item的POI/NonPoi信息
+     *
+     * @param userId 当前用户id
+     * @param tripId 旅程id
      * @param tripDayId
      * @return EntireTripDayItem有序集合，若没有item则为空
      */
-    List<EntireTripDayItem> getEntireItemsByTripDayId(UUID tripDayId);
+    List<EntireTripDayItem> getEntireItemsByTripDayId(UUID userId, UUID tripId, UUID tripDayId);
 
 }
