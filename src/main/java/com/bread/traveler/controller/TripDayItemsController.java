@@ -23,94 +23,70 @@ public class TripDayItemsController {
     private TripDayItemsService tripDayItemsService;
 
     @GetMapping("/list")
-    @Operation(summary = "获取某个日程的详细item列表", description = "获取某个日程的详细item列表，包括entity信息")
+    @Operation(summary = "获取某个日程的详细item列表", description = "获取某个日程的详细item列表，包括entity信息\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": [\n    {\n      \"item\": {\n        \"itemId\": \"123e4567-e89b-12d3-a456-426614174000\",\n        \"tripDayId\": \"123e4567-e89b-12d3-a456-426614174001\",\n        \"entityId\": \"123e4567-e89b-12d3-a456-426614174002\",\n        \"startTime\": \"09:00:00\",\n        \"endTime\": \"10:30:00\",\n        \"itemOrder\": 1.0,\n        \"transportNotes\": \"步行10分钟\",\n        \"estimatedCost\": 50.00,\n        \"isPoi\": true,\n        \"notes\": \"需要提前预约\"\n      },\n      \"entity\": {\n        \"poiId\": \"123e4567-e89b-12d3-a456-426614174002\",\n        \"name\": \"故宫博物院\",\n        \"type\": \"museum\",\n        \"city\": \"北京\",\n        \"address\": \"北京市东城区景山前街4号\",\n        \"latitude\": 39.9163,\n        \"longitude\": 116.3972,\n        \"description\": \"明清两朝的皇宫...\",\n        \"openingHours\": \"08:30-17:00\",\n        \"avgVisitDuration\": 180,\n        \"avgCost\": \"60元\",\n        \"photos\": [\"url1\"],\n        \"phone\": \"010-85007421\",\n        \"rating\": \"4.8\",\n        \"createdAt\": \"2023-10-01T12:00:00+08:00\"\n      }\n    }\n  ]\n}\n```")
     public Result getEntireItemsByTripDayId(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId, 
-            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") 
-            @RequestParam UUID tripDayId) {
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID tripDayId) {
         List<EntireTripDayItem> items = tripDayItemsService.getEntireItemsByTripDayId(userId, tripId, tripDayId);
         return items.isEmpty() ? Result.success("获取成功，日程为空", items) : Result.success("获取成功", items);
     }
 
     @PostMapping("/add")
-    @Operation(summary = "添加日程item")
+    @Operation(summary = "添加日程item", description = "添加日程item\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"itemId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripDayId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"entityId\": \"123e4567-e89b-12d3-a456-426614174002\",\n    \"startTime\": \"09:00:00\",\n    \"endTime\": \"10:30:00\",\n    \"itemOrder\": 1.0,\n    \"transportNotes\": \"步行10分钟\",\n    \"estimatedCost\": 50.00,\n    \"isPoi\": true,\n    \"notes\": \"需要提前预约\"\n  }\n}\n```")
     public Result addItems(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId,
-            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") 
-            @RequestParam UUID tripDayId, 
-            @Schema(description = "实体ID", example = "123e4567-e89b-12d3-a456-426614174003") 
-            @RequestParam UUID entityId,
-            @Schema(description = "是否为POI", example = "true") 
-            @RequestParam boolean isPoi, 
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID tripDayId,
+            @Schema(description = "实体ID", example = "123e4567-e89b-12d3-a456-426614174003") @RequestParam UUID entityId,
+            @Schema(description = "是否为POI", example = "true") @RequestParam boolean isPoi,
             @RequestBody TripDayItemDto dto) {
         TripDayItems tripDayItems = tripDayItemsService.addItems(userId, tripId, tripDayId, entityId, isPoi, dto);
         return tripDayItems == null ? Result.serverError("添加失败") : Result.success("添加成功", tripDayItems);
     }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除日程item")
+    @Operation(summary = "删除日程item", description = "删除日程item\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"删除成功\"\n}\n```")
     public Result deleteItems(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId, 
-            @Schema(description = "日程item ID列表", example = "[\"123e4567-e89b-12d3-a456-426614174004\"]") 
-            @RequestParam List<UUID> itemIds) {
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "日程item ID列表", example = "[\"123e4567-e89b-12d3-a456-426614174004\"]") @RequestParam List<UUID> itemIds) {
         boolean result = tripDayItemsService.deleteItems(userId, tripId, itemIds);
         return result ? Result.success("删除成功") : Result.serverError("删除失败");
     }
 
     @PutMapping("/update")
-    @Operation(summary = "更新日程item信息")
+    @Operation(summary = "更新日程item信息", description = "更新日程item信息\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"itemId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripDayId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"entityId\": \"123e4567-e89b-12d3-a456-426614174002\",\n    \"startTime\": \"09:00:00\",\n    \"endTime\": \"10:30:00\",\n    \"itemOrder\": 1.0,\n    \"transportNotes\": \"步行10分钟\",\n    \"estimatedCost\": 50.00,\n    \"isPoi\": true,\n    \"notes\": \"需要提前预约\"\n  }\n}\n```")
     public Result updateItemInfo(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId, 
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @RequestBody TripDayItemDto dto) {
         TripDayItems updatedItem = tripDayItemsService.updateItemInfo(userId, tripId, dto);
         return updatedItem == null ? Result.serverError("更新失败") : Result.success("更新成功", updatedItem);
     }
 
     @PutMapping("/transport")
-    @Operation(summary = "AI更新日程item的交通建议")
+    @Operation(summary = "AI更新日程item的交通建议", description = "AI更新日程item的交通建议\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"itemId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripDayId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"entityId\": \"123e4567-e89b-12d3-a456-426614174002\",\n    \"startTime\": \"09:00:00\",\n    \"endTime\": \"10:30:00\",\n    \"itemOrder\": 1.0,\n    \"transportNotes\": \"步行10分钟\",\n    \"estimatedCost\": 50.00,\n    \"isPoi\": true,\n    \"notes\": \"需要提前预约\"\n  }\n}\n```")
     public Result updateTransportNote(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId, 
-            @Schema(description = "日程item ID", example = "123e4567-e89b-12d3-a456-426614174004") 
-            @RequestParam UUID itemId, 
-            @Schema(description = "起始地址", example = "北京市朝阳区") 
-            @RequestParam(required = false) String originAddress) {
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "日程item ID", example = "123e4567-e89b-12d3-a456-426614174004") @RequestParam UUID itemId,
+            @Schema(description = "起始地址", example = "北京市朝阳区") @RequestParam(required = false) String originAddress) {
         TripDayItems updatedItem = tripDayItemsService.updateTransportNote(userId, tripId, itemId, originAddress);
         return updatedItem == null ? Result.serverError("更新失败") : Result.success("更新成功", updatedItem);
     }
 
     @PutMapping("/move")
-    @Operation(summary = "移动日程item的位置，改变顺序")
+    @Operation(summary = "移动日程item的位置，改变顺序", description = "移动日程item的位置，改变顺序\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"移动成功\"\n}\n```")
     public Result moveItemOrder(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
-            @RequestParam UUID userId, 
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") 
-            @RequestParam UUID tripId,
-            @Schema(description = "当前item ID", example = "123e4567-e89b-12d3-a456-426614174004") 
-            @RequestParam UUID currentId,
-            @Schema(description = "前一个item ID", example = "123e4567-e89b-12d3-a456-426614174003") 
-            @RequestParam(required = false) UUID prevId,
-            @Schema(description = "后一个item ID", example = "123e4567-e89b-12d3-a456-426614174005") 
-            @RequestParam(required = false) UUID nextId,
-            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") 
-            @RequestParam UUID tripDayId) {
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "当前item ID", example = "123e4567-e89b-12d3-a456-426614174004") @RequestParam UUID currentId,
+            @Schema(description = "前一个item ID", example = "123e4567-e89b-12d3-a456-426614174003") @RequestParam(required = false) UUID prevId,
+            @Schema(description = "后一个item ID", example = "123e4567-e89b-12d3-a456-426614174005") @RequestParam(required = false) UUID nextId,
+            @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID tripDayId) {
         boolean result = tripDayItemsService.moveItemOrder(userId, tripId, currentId, prevId, nextId, tripDayId);
         return result ? Result.success("移动成功") : Result.serverError("移动失败");
     }
-
 
 }
