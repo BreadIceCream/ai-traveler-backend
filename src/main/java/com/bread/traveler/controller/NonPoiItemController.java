@@ -5,6 +5,7 @@ import com.bread.traveler.entity.NonPoiItem;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +23,20 @@ public class NonPoiItemController {
 
     @PostMapping("/create")
     @Operation(summary = "创建非POI项")
-    public Result createNonPoiItem(@RequestParam UUID userId, @RequestBody NonPoiItemDto dto){
+    public Result createNonPoiItem(
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
+            @RequestParam UUID userId, 
+            @Schema(description = "非POI项dto", example = "{\"name\": \"测试非POI项\", \"type\": \"RESTAURANT\"}") 
+            @RequestBody NonPoiItemDto dto){
         NonPoiItem nonPoiItem = nonPoiItemService.createNonPoiItem(userId, dto);
         return nonPoiItem != null ? Result.success("创建成功", nonPoiItem) : Result.serverError("创建失败");
     }
 
     @GetMapping("/list")
     @Operation(summary = "获取用户的非POI项列表")
-    public Result getNonPoiItemList(@RequestParam UUID userId){
+    public Result getNonPoiItemList(
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
+            @RequestParam UUID userId){
         List<NonPoiItem> nonPoiItemList = nonPoiItemService.getByUserId(userId);
         return Result.success(nonPoiItemList);
     }
@@ -37,14 +44,22 @@ public class NonPoiItemController {
 
     @PutMapping("/update")
     @Operation(summary = "更新非POI项")
-    public Result updateNonPoiItem(@RequestParam UUID userId, @RequestBody NonPoiItemDto dto){
+    public Result updateNonPoiItem(
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
+            @RequestParam UUID userId, 
+            @Schema(description = "非POI项dto", example = "{\"id\": \"123e4567-e89b-12d3-a456-426614174002\", \"name\": \"更新后的名称\", \"type\": \"RESTAURANT\"}") 
+            @RequestBody NonPoiItemDto dto){
         NonPoiItem nonPoiItem = nonPoiItemService.updateNonPoiItem(userId, dto);
         return nonPoiItem != null ? Result.success("更新成功", nonPoiItem) : Result.serverError("更新失败");
     }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除非POI项")
-    public Result deleteNonPoiItem(@RequestParam UUID userId, @RequestParam UUID nonPoiItemId){
+    public Result deleteNonPoiItem(
+            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") 
+            @RequestParam UUID userId, 
+            @Schema(description = "非POI项ID", example = "123e4567-e89b-12d3-a456-426614174002") 
+            @RequestParam UUID nonPoiItemId){
         boolean success = nonPoiItemService.deleteByIds(userId, List.of(nonPoiItemId));
         return success ? Result.success("删除成功") : Result.serverError("删除失败");
     }
