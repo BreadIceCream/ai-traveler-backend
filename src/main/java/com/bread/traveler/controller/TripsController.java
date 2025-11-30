@@ -5,6 +5,7 @@ import com.bread.traveler.dto.EntireTrip;
 import com.bread.traveler.dto.TripDto;
 import com.bread.traveler.dto.TripWithMemberInfoDto;
 import com.bread.traveler.entity.Trips;
+import com.bread.traveler.enums.TripStatus;
 import com.bread.traveler.service.TripsService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +43,13 @@ public class TripsController {
     @Operation(summary = "更新旅程可见性")
     public Result updateTripVisibility(@RequestParam UUID userId, @RequestParam UUID tripId, @RequestParam Boolean isPrivate) {
         boolean result = tripsService.changeVisibility(userId, tripId, isPrivate);
+        return result ? Result.success("更新成功") : Result.serverError("更新失败");
+    }
+
+    @PutMapping("/status")
+    @Operation(summary = "更新旅程状态")
+    public Result updateTripStatus(@RequestParam UUID userId, @RequestParam UUID tripId, @RequestParam TripStatus newStatus) {
+        boolean result = tripsService.changeStatus(userId, tripId, newStatus);
         return result ? Result.success("更新成功") : Result.serverError("更新失败");
     }
 

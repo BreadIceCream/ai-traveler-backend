@@ -1,7 +1,6 @@
 package com.bread.traveler.controller;
 
 import com.bread.traveler.dto.TripMemberDto;
-import com.bread.traveler.enums.MemberRole;
 import com.bread.traveler.service.TripMembersService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,10 +20,10 @@ public class TripMembersController {
     private TripMembersService tripMembersService;
 
     @PostMapping("/addRequest")
-    @Operation(summary = "添加成员请求", description = "向旅程添加成员请求")
+    @Operation(summary = "申请加入旅程", description = "向旅程添加成员请求")
     public Result addMemberRequest(@RequestParam UUID tripId, @RequestParam UUID userId) {
         boolean result = tripMembersService.addMemberRequest(tripId, userId);
-        return result ? Result.success("添加成员请求成功") : Result.serverError("添加成员请求失败");
+        return result ? Result.success("申请成功") : Result.serverError("申请失败");
     }
 
     @PutMapping("/handleRequest")
@@ -35,6 +34,13 @@ public class TripMembersController {
                                      @RequestParam Boolean accept) {
         boolean result = tripMembersService.handleMemberRequest(tripId, currentUserId, handleUserId, accept);
         return result ? Result.success("处理成员请求成功") : Result.serverError("处理成员请求失败");
+    }
+
+    @PostMapping("/invite")
+    @Operation(summary = "邀请用户", description = "邀请用户加入旅程")
+    public Result inviteMember(@RequestParam UUID tripId, @RequestParam UUID userId, @RequestParam List<UUID> inviteUserIds){
+        boolean result = tripMembersService.inviteMembers(tripId, userId, inviteUserIds);
+        return result ? Result.success("邀请成功") : Result.serverError("邀请失败");
     }
 
     @DeleteMapping("/delete")
@@ -60,7 +66,7 @@ public class TripMembersController {
     @Operation(summary = "获取旅程成员列表", description = "获取指定旅程的所有成员列表，支持按审批状态筛选")
     public Result getMembers(@RequestParam UUID userId, @RequestParam UUID tripId,
                             @RequestParam(required = false) Boolean isPass) {
-        List<TripMemberDto> members = tripMembersService.getMembers(userId, tripId, isPass);
+        List<TripMemberDto> members = tripMembersService.getTripMembers(userId, tripId, isPass);
         return members.isEmpty() ? Result.success("获取成功，暂无成员", members) : Result.success("获取成功", members);
     }
 

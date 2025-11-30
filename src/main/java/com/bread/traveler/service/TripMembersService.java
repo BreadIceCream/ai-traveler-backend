@@ -17,12 +17,24 @@ import java.util.UUID;
 public interface TripMembersService extends IService<TripMembers> {
 
     /**
-     * 添加成员请求
-     * @param tripId
-     * @param requestUserId
+     * 用户申请加入旅程
+     * 只能申请加入PUBLIC且PLANNING状态的旅程
+     * @param tripId 旅程id
+     * @param userId 当前用户id（请求用户id）
      * @return
      */
-    boolean addMemberRequest(UUID tripId, UUID requestUserId);
+    boolean addMemberRequest(UUID tripId, UUID userId);
+
+    /**
+     * 邀请成员加入旅程，创建者可以邀请其他用户加入旅程
+     * 只有OWNER可以邀请成员加入
+     *
+     * @param tripId 旅程id
+     * @param userId 当前用户id
+     * @param inviteUserIds 邀请的用户id列表
+     * @return
+     */
+    boolean inviteMembers(UUID tripId, UUID userId, List<UUID> inviteUserIds);
 
     /**
      * 创建旅程拥有者
@@ -76,14 +88,14 @@ public interface TripMembersService extends IService<TripMembers> {
     boolean updateMemberRole(UUID tripId, UUID userId, UUID handleUserId, MemberRole newRole);
 
     /**
-     * 获取旅程的所有成员
+     * 获取旅程的所有用户
      *
      * @param userId 当前用户id
      * @param tripId 旅程id
-     * @param isPass 是否通过批准。若为null返回所有成员
+     * @param isPass 是否通过批准。若为null返回所有用户
      * @return 成员列表，含用户信息。如果没有匹配的成员，则返回空列表
      */
-    List<TripMemberDto> getMembers(UUID userId, UUID tripId, @Nullable Boolean isPass);
+    List<TripMemberDto> getTripMembers(UUID userId, UUID tripId, @Nullable Boolean isPass);
 
     /**
      * 获取用户加入的旅程（包括申请但未通过的isPass=false)

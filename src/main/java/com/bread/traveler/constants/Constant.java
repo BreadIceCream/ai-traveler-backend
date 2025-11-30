@@ -58,6 +58,12 @@ public class Constant {
     public static final String TRIP_LOG_NOT_EXISTS = "日志不存在";
     public static final String DESTINATION_ITEM_NOT_FOUND = "未找到目的地";
     public static final String TRIP_LOG_UPLOAD_FILE_FAILED = "上传失败";
+    public static final String TRIP_STATUS_UPDATE_FAILED = "旅程状态修改失败";
+    public static final String TRIP_VISIBILITY_UPDATE_FAILED = "旅程可见性修改失败";
+    public static final String TRIP_MEMBER_REQUEST_DENIED = "无法申请加入旅程";
+    public static final String TRIP_MEMBER_REQUEST_EXIST = "已申请，不要重复申请";
+    public static final String TRIP_MEMBER_INVITE_USER_NOT_EMPTY = "邀请的用户不能为空";
+    public static final String TRIP_MEMBER_INVITE_USER_FAILED = "邀请用户失败";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等

@@ -22,7 +22,7 @@ public interface TripExpensesService extends IService<TripExpenses> {
     
     /**
      * 添加一笔新的支出, 默认支出时间是当前时间
-     * 需要校验trip是否对用户可见
+     * 只有旅程成员才能添加支出
      * @param userId  当前用户ID
      * @param tripId  旅程ID
      * @param dto 创建支出参数
@@ -33,7 +33,7 @@ public interface TripExpensesService extends IService<TripExpenses> {
 
     /**
      * 批量添加支出记录，默认支出时间是当前时间
-     * 需要校验该用户是否为旅程成员
+     * 只有旅程成员才能添加支出
      * 场景：用户一次性录入多笔消费，或者从第三方账单导入
      * @param userId 当前用户ID
      * @param tripId 旅程ID

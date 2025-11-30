@@ -3,6 +3,7 @@ package com.bread.traveler.service;
 import com.bread.traveler.entity.TripLogs;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.bread.traveler.enums.LogType;
+import jakarta.annotation.Nullable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -19,25 +20,27 @@ public interface TripLogsService extends IService<TripLogs> {
 
     /**
      * 创建一条新的Note类型旅程日志
-     * 需要校验当前用户是否对旅程有访问权限
+     * 只有旅程成员才能添加日志
      *
-     * @param userId  当前用户ID
-     * @param tripId  关联的旅程ID
-     * @param content 内容 (如果是NOTE则是文本，如果是IMAGE/VIDEO则是URL)
+     * @param userId   当前用户ID
+     * @param tripId   关联的旅程ID
+     * @param content  内容 (如果是NOTE则是文本，如果是IMAGE/VIDEO则是URL)
+     * @param isPublic 是否公开，默认为false
      * @return 创建成功的日志实体
      */
-    TripLogs createNoteLog(UUID userId, UUID tripId, String content);
+    TripLogs createNoteLog(UUID userId, UUID tripId, String content, @Nullable Boolean isPublic);
 
     /**
-     * 创建一条新的IMAGE类型旅程日志
-     * 需要校验当前用户是否对旅程有访问权限
-     * 会将img保存至Aliyun oss
-     * @param userId 当前用户ID
-     * @param tripId 关联的旅程ID
-     * @param imgFile 图片文件
+     * 创建一条新的IMAGE类型旅程日志,会将img保存至Aliyun oss
+     * 只有旅程成员才能添加日志
+     *
+     * @param userId   当前用户ID
+     * @param tripId   关联的旅程ID
+     * @param imgFile  图片文件
+     * @param isPublic 是否公开，默认为false
      * @return
      */
-    TripLogs createImgLog(UUID userId, UUID tripId, MultipartFile imgFile);
+    TripLogs createImgLog(UUID userId, UUID tripId, MultipartFile imgFile, @Nullable Boolean isPublic);
 
     /**
      * 删除指定的日志
@@ -49,24 +52,42 @@ public interface TripLogsService extends IService<TripLogs> {
     boolean deleteLog(UUID userId, UUID logId);
 
     /**
-     * 获取当前用户某个旅程下的所有日志（时间轴模式）
-     * 通常用于“全部动态”页面
+     * 修改日志的公开可见性
+     * @param userId 当前用户ID
+     * @param logId  日志ID
+     * @param isPublic 是否公开
+     * @return 是否修改成功
+     */
+    boolean changeLogVisibility(UUID userId, UUID logId, Boolean isPublic);
+
+    /**
+     * 获取当前用户的某个旅程下的所有日志（时间轴模式）
      *
      * @param userId 当前用户ID
      * @param tripId 旅程ID
-     * @return 日志列表 （按创建时间正序排列）. 如果没有日志则返回空列表
+     * @return 日志列表 （按创建时间倒序排列）. 如果没有日志则返回空列表
      */
-    List<TripLogs> getLogsByTripId(UUID userId, UUID tripId);
+    List<TripLogs> getLogsOfUserByTripId(UUID userId, UUID tripId);
 
     /**
-     * 获取当前用户某个旅程下指定类型的日志（相册模式/笔记模式）
+     * 获取当前用户的某个旅程下指定类型的日志（相册模式/笔记模式）
      * 场景：用户只想看“相册”（LogType.IMAGE）或者只想看“日记”（LogType.NOTE）
      *
      * @param userId 当前用户ID
      * @param tripId 旅程ID
      * @param type   日志类型
-     * @return 筛选后的日志列表, 按创建时间正序排列。如果没有日志则返回空列表
+     * @return 筛选后的日志列表, 按创建时间倒序排列。如果没有日志则返回空列表
      */
-    List<TripLogs> getLogsByTripIdAndType(UUID userId, UUID tripId, LogType type);
+    List<TripLogs> getLogsOfUserByTripIdAndType(UUID userId, UUID tripId, LogType type);
+
+    /**
+     * 获取指定旅程的公开日志，需要校验旅程trip对当前用户是否可见
+     * 场景：旅程成员公开日志，其他成员可以查看
+     *
+     * @param userId 当前用户ID
+     * @param tripId 旅程ID
+     * @return 公开日志列表，按创建时间倒序排序，如果没有公开日志则返回空列表
+     */
+    List<TripLogs> getPublicLogsByTripId(UUID userId, UUID tripId);
     
 }

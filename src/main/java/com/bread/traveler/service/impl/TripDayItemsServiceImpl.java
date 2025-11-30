@@ -5,7 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.EntireTripDayItem;
@@ -49,7 +49,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     private NonPoiItemService nonPoiItemService;
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public TripDayItems addItems(UUID userId, UUID tripId, UUID tripDayId, UUID entityId, boolean isPoi, TripDayItemDto dto) {
         log.info("Add item to trip day: tripDayId {}, entityId {}, isPoi {}, dto {}",
                 tripDayId, entityId, isPoi, dto);
@@ -83,7 +83,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public boolean deleteItems(UUID userId, UUID tripId, List<UUID> itemIds) {
         log.info("Delete items of TRIP_DAY table: {}", itemIds);
         Assert.notNull(itemIds, "itemIds cannot be null");
@@ -94,7 +94,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public TripDayItems updateItemInfo(UUID userId, UUID tripId, TripDayItemDto dto) {
         log.info("Update item info: {}", dto);
         Assert.notNull(dto, "dto cannot be null");
@@ -114,7 +114,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public boolean moveItemOrder(UUID userId, UUID tripId, UUID currentId, UUID prevId, UUID nextId, UUID tripDayId) {
         log.info("Move item order: current {}, prev {}, next {}, NewTripDay {}", currentId, prevId, nextId, tripDayId);
         // 获取前一个item
@@ -146,7 +146,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     }
 
     @Override //todo 优化性能，提高查询效率
-    @TripRoleValidate
+    @TripAccessValidate
     public TripDayItems updateTransportNote(UUID userId, UUID tripId, UUID itemId, @Nullable String originAddress) {
         log.info("Update transport note: {}", itemId);
         TripDayItems current = getById(itemId);

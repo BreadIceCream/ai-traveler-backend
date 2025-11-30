@@ -3,11 +3,12 @@ package com.bread.traveler.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bread.traveler.annotation.TripVisibilityValidate;
+import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.TripExpenseCreateUpdateDto;
 import com.bread.traveler.entity.TripExpenses;
 import com.bread.traveler.enums.ExpenseType;
+import com.bread.traveler.enums.MemberRole;
 import com.bread.traveler.exception.BusinessException;
 import com.bread.traveler.service.TripExpensesService;
 import com.bread.traveler.mapper.TripExpensesMapper;
@@ -35,7 +36,7 @@ public class TripExpensesServiceImpl extends ServiceImpl<TripExpensesMapper, Tri
     private TripExpensesService selfProxy;
 
     @Override
-    @TripVisibilityValidate // 只要可见，用户就可以创建自己的expense花费信息，因为这是属于用户自己的
+    @TripAccessValidate(lowestRole = MemberRole.VIEWER) // 只有成员才能添加属于自己的花费信息
     public TripExpenses addExpense(UUID userId, UUID tripId, TripExpenseCreateUpdateDto dto) {
         log.info("Add expense: user {}, trip {}, dto {}", userId, tripId, dto);
         Assert.notNull(dto, "dto cannot be null");
@@ -55,7 +56,7 @@ public class TripExpensesServiceImpl extends ServiceImpl<TripExpensesMapper, Tri
     }
 
     @Override
-    @TripVisibilityValidate
+    @TripAccessValidate(lowestRole = MemberRole.VIEWER) // 只有成员才能添加属于自己的花费信息
     public boolean batchAddExpenses(UUID userId, UUID tripId, List<TripExpenseCreateUpdateDto> dtos) {
         log.info("Batch add expenses: user {}, trip {}, dtos {}", userId, tripId, dtos);
         Assert.notNull(dtos, "dtos cannot be null");

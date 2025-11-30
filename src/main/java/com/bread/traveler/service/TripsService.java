@@ -6,6 +6,7 @@ import com.bread.traveler.dto.TripDto;
 import com.bread.traveler.dto.TripWithMemberInfoDto;
 import com.bread.traveler.entity.Trips;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bread.traveler.enums.TripStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,7 +26,8 @@ public interface TripsService extends IService<Trips> {
     }
 
     /**
-     * 创建旅程。可见性默认设置为private
+     * 创建旅程
+     * 可见性默认设置为private，状态默认设置为PLANNING
      * @param dto
      * @return
      */
@@ -50,7 +52,16 @@ public interface TripsService extends IService<Trips> {
     boolean changeVisibility(UUID userId, UUID tripId, Boolean isPrivate);
 
     /**
-     * 获取用户加入的所有旅程，包括申请但未通过的
+     * 更新旅程状态。仅允许OWNER修改
+     * @param userId 用户id
+     * @param tripId 旅程id
+     * @param newStatus 新状态
+     * @return
+     */
+    boolean changeStatus(UUID userId, UUID tripId, TripStatus newStatus);
+
+    /**
+     * 获取用户的所有旅程，包括申请但未通过的isPass=false
      * @param userId
      * @return 旅程列表，包含该用户的成员信息。如果没有，则返回空集合
      */
@@ -65,12 +76,13 @@ public interface TripsService extends IService<Trips> {
     EntireTrip getEntireTrip(UUID userId, UUID tripId);
 
     /**
+     * todo 添加语义搜索功能
      * 分页获取公开的旅程。支持通过目的地、时间范围筛选
      * 只能获取公开的、PLANNING的旅程
      * @param destinationCity
      * @param startDate
      * @param endDate
-     * @return
+     * @return 分页结果，按照旅程创建时间倒序排序
      */
     Page<Trips> getPublicTrips(String destinationCity, LocalDate startDate, LocalDate endDate, Integer pageNum, Integer pageSize);
 

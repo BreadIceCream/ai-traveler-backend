@@ -7,7 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.*;
@@ -91,7 +91,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public Trips updateTripInfo(UUID userId, UUID tripId, TripDto dto) {
         log.info("Update trip info: user {}, dto {}", userId, dto);
         Assert.notNull(userId, "userId cannot be null");
@@ -113,14 +113,36 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER修改
+    @TripAccessValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER修改
     public boolean changeVisibility(UUID userId, UUID tripId, Boolean isPrivate) {
         log.info("Change visibility of trip {}: is private {}", tripId, isPrivate);
         Assert.notNull(tripId, "tripId cannot be null");
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(isPrivate, "isPrivate cannot be null");
         // 更新visibility
-        lambdaUpdate().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).set(Trips::getIsPrivate, isPrivate).update();
+        boolean update = lambdaUpdate().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).set(Trips::getIsPrivate, isPrivate).update();
+        if (!update) {
+            log.error("Change visibility failed: {}", tripId);
+            throw new RuntimeException(Constant.TRIP_VISIBILITY_UPDATE_FAILED);
+        }
+        log.info("Change visibility success: {}", tripId);
+        return true;
+    }
+
+    @Override
+    @TripAccessValidate(lowestRole = MemberRole.OWNER)
+    public boolean changeStatus(UUID userId, UUID tripId, TripStatus newStatus) {
+        log.info("Change status of trip {}: {}", tripId, newStatus);
+        Assert.notNull(userId, "userId cannot be null");
+        Assert.notNull(tripId, "tripId cannot be null");
+        Assert.notNull(newStatus, "newStatus cannot be null");
+        // 更新status，自定义预编译sql，采用::进行类型推断，避免了mp中setSql方法的注入问题
+        int row = baseMapper.changeStatus(userId, tripId, newStatus.name());
+        if (row != 1) {
+            log.error("Change status failed: {}", tripId);
+            throw new RuntimeException(Constant.TRIP_STATUS_UPDATE_FAILED);
+        }
+        log.info("Change status success: {}", tripId);
         return true;
     }
 
@@ -174,18 +196,33 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
         log.info("Get public trips: destinationCity {}, startDate {}, endDate {}, pageNum {}, pageSize {}", destinationCity, startDate, endDate, pageNum, pageSize);
         Assert.notNull(pageNum, "pageNum cannot be null");
         Assert.notNull(pageSize, "pageSize cannot be null");
-        LambdaQueryChainWrapper<Trips> wrapper = lambdaQuery()
-                .eq(Trips::getIsPrivate, false)
-                // 如果直接使用eq会报类型转换错误
-                .eqSql(Trips::getStatus, "'%s'".formatted(TripStatus.PLANNING.name()))
-                .like(destinationCity != null && !destinationCity.trim().isEmpty(), Trips::getDestinationCity, destinationCity)
-                .ge(startDate != null, Trips::getStartDate, startDate)
-                .le(endDate != null, Trips::getEndDate, endDate);
-        return wrapper.page(Page.of(pageNum, pageSize));
+//        LambdaQueryChainWrapper<Trips> wrapper = lambdaQuery()
+//                .eq(Trips::getIsPrivate, false)
+//                // 如果直接使用eq会报类型转换错误
+//                .eqSql(Trips::getStatus, "'%s'".formatted(TripStatus.PLANNING.name()))
+//                .like(destinationCity != null && !destinationCity.trim().isEmpty(), Trips::getDestinationCity, destinationCity)
+//                .ge(startDate != null, Trips::getStartDate, startDate)
+//                .le(endDate != null, Trips::getEndDate, endDate);
+//        return wrapper.page(Page.of(pageNum, pageSize));
+        // 自定义动态sql语句，使用::进行TripStatus类型推断，避免了mp中eqSql方法的注入问题
+        long offset = (long) (pageNum - 1) * pageSize;
+        long total = baseMapper.countTrips(false, TripStatus.PLANNING.name(), destinationCity, startDate, endDate);
+        if (total == 0){
+            // 总数为0，返回空页
+           log.info("Total is 0, return empty page");
+           return Page.of(pageNum, pageSize, total);
+        }
+        // 获取分页数据列表，组建Page对象并返回
+        List<Trips> records = baseMapper.selectTripsPage(
+                false, TripStatus.PLANNING.name(), destinationCity, startDate, endDate, offset, pageSize);
+        Page<Trips> page = Page.of(pageNum, pageSize, total);
+        page.setRecords(records);
+        page.setPages((long) Math.ceil(total * 1.0 / pageSize));
+        return page;
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public EntireTrip aiGenerateEntireTripPlan(UUID userId, UUID tripId) {
         log.info("Ai generate entire trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
@@ -343,7 +380,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER删除
+    @TripAccessValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER删除
     public boolean deleteTrip(UUID userId, UUID tripId) {
         log.info("Delete trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");

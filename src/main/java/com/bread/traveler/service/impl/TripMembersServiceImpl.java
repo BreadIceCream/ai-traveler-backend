@@ -3,7 +3,7 @@ package com.bread.traveler.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.TripMemberDto;
@@ -11,6 +11,7 @@ import com.bread.traveler.entity.TripMembers;
 import com.bread.traveler.entity.Trips;
 import com.bread.traveler.entity.Users;
 import com.bread.traveler.enums.MemberRole;
+import com.bread.traveler.enums.TripStatus;
 import com.bread.traveler.exception.BusinessException;
 import com.bread.traveler.service.TripMembersService;
 import com.bread.traveler.mapper.TripMembersMapper;
@@ -26,7 +27,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author huang
@@ -42,29 +45,78 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     private TripsService tripsService;
     @Autowired
     private UsersService usersService;
+    @Autowired
+    @Lazy
+    private TripMembersService selfProxy;
 
-    @Override // 添加成员请求，无需权限校验
-    public boolean addMemberRequest(UUID tripId, UUID requestUserId) {
-        log.info("Adding member request for trip: {}, user: {}", tripId, requestUserId);
+    @Override
+    public boolean addMemberRequest(UUID tripId, UUID userId) {
+        log.info("Adding member request for trip: {}, user: {}", tripId, userId);
         Assert.notNull(tripId, "tripId cannot be null");
-        Assert.notNull(requestUserId, "requestUserId cannot be null");
+        Assert.notNull(userId, "userId cannot be null");
         // 查看trip是否存在
         Trips trip = tripsService.getById(tripId);
         Assert.notNull(trip, Constant.TRIP_NOT_EXIST);
+        // 查看trip是否public且状态为PLANNING
+        Assert.isTrue(!trip.getIsPrivate() && TripStatus.PLANNING.equals(trip.getStatus()),
+                Constant.TRIP_MEMBER_REQUEST_DENIED);
         // 查看用户是否存在
-        Users user = usersService.getById(requestUserId);
+        Users user = usersService.getById(userId);
         Assert.notNull(user, Constant.USERS_NOT_EXIST);
         // 查看该成员是否已经发送过请求
-        boolean exists = lambdaQuery().eq(TripMembers::getTripId, tripId).eq(TripMembers::getUserId, requestUserId).exists();
-        Assert.isTrue(!exists, Constant.TRIP_MEMBER_EXIST);
+        TripMembers member = lambdaQuery().eq(TripMembers::getTripId, tripId).eq(TripMembers::getUserId, userId).one();
+        if (member != null){
+            throw member.getIsPass() ? new BusinessException(Constant.TRIP_MEMBER_EXIST) : new BusinessException(Constant.TRIP_MEMBER_REQUEST_EXIST);
+        }
         // 添加成员请求。默认为VIEWER，未通过待处理
-        TripMembers tripMember = new TripMembers(UUID.randomUUID(), tripId, requestUserId, MemberRole.VIEWER, false, OffsetDateTime.now(ZoneId.systemDefault()));
+        TripMembers tripMember = new TripMembers(UUID.randomUUID(), tripId, userId, MemberRole.VIEWER, false, OffsetDateTime.now(ZoneId.systemDefault()));
         if (save(tripMember)) {
             log.info("Add member request success: {}", tripMember);
             return true;
         }
         log.error("Add member request failed: {}", tripMember);
         return false;
+    }
+
+    @Override
+    @TripAccessValidate(lowestRole = MemberRole.OWNER)
+    public boolean inviteMembers(UUID tripId, UUID userId, List<UUID> inviteUserIds) {
+        log.info("Inviting member: trip {}, user {}, inviteUserId {}", tripId, userId, inviteUserIds);
+        Assert.notNull(tripId, "tripId cannot be null");
+        Assert.notNull(userId, "userId cannot be null");
+        Assert.isTrue(inviteUserIds != null && !inviteUserIds.isEmpty(),
+                Constant.TRIP_MEMBER_INVITE_USER_NOT_EMPTY);
+        // 获取邀请的users（表中不存在的user会被忽略，以表为准）
+        List<Users> inviteUsers = usersService.lambdaQuery().in(Users::getUserId, inviteUserIds).list();
+        if (inviteUsers == null || inviteUsers.isEmpty()) {
+            log.error("Invite user not exist: {}", inviteUserIds);
+            throw new BusinessException(Constant.USERS_NOT_EXIST);
+        }
+        // 获取当前旅程已添加的用户
+        List<TripMembers> joinedMembers = lambdaQuery().eq(TripMembers::getTripId, tripId).list();
+        Set<UUID> joinedMemberIds = joinedMembers.stream().map(TripMembers::getUserId).collect(Collectors.toSet());
+        // 过滤已经添加的用户。创建TripMember
+        List<TripMembers> inviteMembers = inviteUsers.stream()
+                // 筛选未添加的用户
+                .filter(inviteUser -> !joinedMemberIds.contains(inviteUser.getUserId()))
+                .map(inviteUser -> new TripMembers(
+                        UUID.randomUUID(),
+                        tripId,
+                        inviteUser.getUserId(),
+                        MemberRole.VIEWER,
+                        true, // 邀请的成员直接通过
+                        OffsetDateTime.now(ZoneId.systemDefault())
+                )).toList();
+        if (inviteMembers.isEmpty()) {
+            log.info("All invite user already joined: {}", inviteUserIds);
+            return true;
+        }
+        if (selfProxy.saveBatch(inviteMembers)) {
+            log.info("Invite member success: {}", inviteMembers);
+            return true;
+        }
+        log.error("Invite member failed: {}", inviteMembers);
+        throw new RuntimeException(Constant.TRIP_MEMBER_INVITE_USER_FAILED);
     }
 
     @Override
@@ -75,7 +127,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     }
 
     @Override
-    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 只有OWNER才能处理成员请求
+    @TripAccessValidate(lowestRole = MemberRole.OWNER) // 只有OWNER才能处理成员请求
     public boolean handleMemberRequest(UUID tripId, UUID userId, UUID handleUserId, Boolean accept) {
         log.info("Handling member request: {}, handleUserId {}, currentUserId {}, accept {}", tripId, handleUserId, userId, accept);
         Assert.notNull(tripId, "tripId cannot be null");
@@ -106,7 +158,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     }
 
     @Override
-    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 只有OWNER可以删除成员
+    @TripAccessValidate(lowestRole = MemberRole.OWNER) // 只有OWNER可以删除成员
     public boolean deleteMember(UUID tripId, UUID userId, UUID handleUserId) {
         log.info("Deleting member: {}, handleUserId {}, userId {}", tripId, handleUserId, userId);
         Assert.notNull(tripId, "tripId cannot be null");
@@ -119,7 +171,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     }
 
     @Override
-    @TripRoleValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER删除
+    @TripAccessValidate(lowestRole = MemberRole.OWNER) // 仅允许OWNER删除
     public boolean deleteMembersByTripId(UUID tripId, UUID userId) {
         log.info("Delete all members of trip {} by user {}", tripId, userId);
         lambdaUpdate().eq(TripMembers::getTripId, tripId).remove();
@@ -127,7 +179,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     }
 
     @Override
-    @TripRoleValidate(lowestRole = MemberRole.OWNER)
+    @TripAccessValidate(lowestRole = MemberRole.OWNER)
     public boolean updateMemberRole(UUID tripId, UUID userId, UUID handleUserId, MemberRole newRole) {
         log.info("Updating member role: {}, handleUserId {}, currentUserId {}, newRole {}", tripId, handleUserId, userId, newRole);
         Assert.notNull(tripId, "tripId cannot be null");
@@ -144,7 +196,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
 
     @Override
     @TripVisibilityValidate
-    public List<TripMemberDto> getMembers(UUID userId, UUID tripId, @Nullable Boolean isPass) {
+    public List<TripMemberDto> getTripMembers(UUID userId, UUID tripId, @Nullable Boolean isPass) {
         log.info("Get members: {}, isPass {}", tripId, isPass);
         Assert.notNull(tripId, "tripId cannot be null");
         // 获取成员列表
@@ -183,19 +235,6 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
                 .toList();
     }
 
-    /**
-     * 验证当前用户是否为OWNER。不为OWNER则抛出异常
-     *
-     * @param tripId
-     * @param currentUserId
-     */
-    private void validateCurrentUserIsOwner(UUID tripId, UUID currentUserId) {
-        TripMembers currentUser = lambdaQuery().eq(TripMembers::getTripId, tripId).eq(TripMembers::getUserId, currentUserId).one();
-        if (currentUser == null || !MemberRole.OWNER.equals(currentUser.getRole())) {
-            log.error("Current user is not owner: {}", currentUserId);
-            throw new BusinessException(Constant.TRIP_MEMBER_NO_PERMISSION);
-        }
-    }
 }
 
 

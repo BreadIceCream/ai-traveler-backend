@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TripRoleValidate {
+public @interface TripAccessValidate {
 
-    // 这里设置默认设置为EDITOR。默认设置表示修改的最低权限
+    // 对Trip修改的默认访问权限为OWNER
     MemberRole lowestRole() default MemberRole.OWNER;
 
 }

@@ -5,7 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.bread.traveler.annotation.TripRoleValidate;
+import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.EntireTripDay;
@@ -66,7 +66,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public TripDays createTripDay(UUID userId, UUID tripId, LocalDate date, String note) {
         log.info("Create trip day by user {}: {}, date: {}, note: {}",userId, tripId, date, note);
         Assert.notNull(userId, "userId cannot be null");
@@ -98,7 +98,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public boolean updateTripDayNote(UUID userId, UUID tripId, UUID tripDayId, String note) {
         log.info("Update trip day note: {}, note: {}", tripDayId, note);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
@@ -149,7 +149,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     }
 
     @Override
-    @TripRoleValidate
+    @TripAccessValidate
     public EntireTripDay aiRePlanTripDay(UUID userId, UUID tripId, UUID tripDayId) {
         log.info("AI re-plan trip day: {}", tripDayId);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
@@ -288,7 +288,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @TripRoleValidate
+    @TripAccessValidate
     public boolean exchangeDayOrder(UUID userId, UUID tripId, UUID aTripDayId, UUID bTripDayId) {
         log.info("Exchange day order: {}, {}", aTripDayId, bTripDayId);
         Assert.notNull(aTripDayId, "aTripDayId cannot be null");
@@ -310,7 +310,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @TripRoleValidate
+    @TripAccessValidate
     public boolean deleteTripDays(UUID userId, UUID tripId, List<UUID> tripDayIds) {
         log.info("Delete trip days: {}", tripDayIds);
         Assert.notNull(tripDayIds, "tripDayIds cannot be null");

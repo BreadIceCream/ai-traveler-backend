@@ -48,4 +48,7 @@ public class TripLogs implements Serializable {
      */
     @TableField(value = "user_id")
     private UUID userId;
+
+    @TableField(value = "is_public")
+    private Boolean isPublic;
 }

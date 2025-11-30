@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bread.traveler.mapper.TripsMapper" >
+
+    <!-- 1. 定义 ResultMap -->
+    <!-- autoMapping="true" 让 MP 自动映射其他没有特殊处理的字段 (如 id, name 等) -->
+    <resultMap id="TripResultMap" type="com.bread.traveler.entity.Trips" autoMapping="true">
+        <!-- 2. 显式指定 ID (推荐，虽然 autoMapping 也能处理，但显式写出是好习惯) -->
+        <id column="trip_id" property="tripId"/>
+
+        <!-- 3. 【核心修复】显式指定 status 字段的 typeHandler -->
+        <result column="status" property="status"
+                typeHandler="com.bread.traveler.enums.EnumTypeHandler"/>
+    </resultMap>
+
+    <!-- 通用查询条件片段 -->
+    <sql id="TripQueryConditions">
+        <where>
+            <!-- 1. 固定条件: 是否私有 -->
+            <if test="isPrivate != null">
+                AND is_private = #{isPrivate}
+            </if>
+
+            <!-- 2. 固定条件: 状态 -->
+            <!-- 注意: 如果 status 是枚举, 这里传入的是 name() 字符串 -->
+            <!-- 使用::trip_status进行类型推断 -->
+            <if test="status != null and status != ''">
+                AND status = #{status}::trip_status
+            </if>
+
+            <!-- 3. 动态条件: 目的城市 (模糊查询) -->
+            <if test="city != null and city != ''">
+                AND destination_city LIKE CONCAT('%', #{city}, '%')
+            </if>
+
+            <!-- 4. 动态条件: 开始时间 (>=) -->
+            <if test="startDate != null">
+                AND start_date &gt;= #{startDate}
+            </if>
+
+            <!-- 5. 动态条件: 结束时间 (<=) -->
+            <if test="endDate != null">
+                AND end_date &lt;= #{endDate}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countTrips" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM trips
+        <include refid="TripQueryConditions"/>
+    </select>
+
+    <select id="selectTripsPage" resultMap="TripResultMap">
+        SELECT *
+        FROM trips
+        <include refid="TripQueryConditions"/>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+</mapper>
