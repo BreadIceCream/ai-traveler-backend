@@ -42,30 +42,6 @@
 
 
 **接口描述**:<p>根据POI ID获取POI的详细信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;externalApiId&quot;: &quot;B0FFH4XYZ&quot;,
-    &quot;name&quot;: &quot;故宫博物院&quot;,
-    &quot;type&quot;: &quot;museum&quot;,
-    &quot;city&quot;: &quot;北京&quot;,
-    &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-    &quot;latitude&quot;: 39.9163,
-    &quot;longitude&quot;: 116.3972,
-    &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-    &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-    &quot;avgVisitDuration&quot;: 180,
-    &quot;avgCost&quot;: &quot;60元&quot;,
-    &quot;photos&quot;: [&quot;url1&quot;, &quot;url2&quot;],
-    &quot;phone&quot;: &quot;010-85007421&quot;,
-    &quot;rating&quot;: &quot;4.8&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -172,32 +148,6 @@
 
 
 **接口描述**:<p>使用语义搜索的POI</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;externalApiId&quot;: &quot;B0FFH4XYZ&quot;,
-      &quot;name&quot;: &quot;故宫博物院&quot;,
-      &quot;type&quot;: &quot;museum&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-      &quot;latitude&quot;: 39.9163,
-      &quot;longitude&quot;: 116.3972,
-      &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-      &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-      &quot;avgVisitDuration&quot;: 180,
-      &quot;avgCost&quot;: &quot;60元&quot;,
-      &quot;photos&quot;: [&quot;url1&quot;, &quot;url2&quot;],
-      &quot;phone&quot;: &quot;010-85007421&quot;,
-      &quot;rating&quot;: &quot;4.8&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -306,32 +256,6 @@
 
 
 **接口描述**:<p>数据库精确搜索的POI</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;externalApiId&quot;: &quot;B0FFH4XYZ&quot;,
-      &quot;name&quot;: &quot;故宫博物院&quot;,
-      &quot;type&quot;: &quot;museum&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-      &quot;latitude&quot;: 39.9163,
-      &quot;longitude&quot;: 116.3972,
-      &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-      &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-      &quot;avgVisitDuration&quot;: 180,
-      &quot;avgCost&quot;: &quot;60元&quot;,
-      &quot;photos&quot;: [&quot;url1&quot;, &quot;url2&quot;],
-      &quot;phone&quot;: &quot;010-85007421&quot;,
-      &quot;rating&quot;: &quot;4.8&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -439,32 +363,6 @@
 
 
 **接口描述**:<p>第三方API（高德/谷歌）搜索的POI</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;externalApiId&quot;: &quot;B0FFH4XYZ&quot;,
-      &quot;name&quot;: &quot;故宫博物院&quot;,
-      &quot;type&quot;: &quot;museum&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-      &quot;latitude&quot;: 39.9163,
-      &quot;longitude&quot;: 116.3972,
-      &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-      &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-      &quot;avgVisitDuration&quot;: 180,
-      &quot;avgCost&quot;: &quot;60元&quot;,
-      &quot;photos&quot;: [&quot;url1&quot;, &quot;url2&quot;],
-      &quot;phone&quot;: &quot;010-85007421&quot;,
-      &quot;rating&quot;: &quot;4.8&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -575,18 +473,6 @@
 
 
 **接口描述**:<p>更新用户偏好设置</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;username&quot;: &quot;testuser&quot;,
-    &quot;preferencesText&quot;: &quot;喜欢自然风光和户外活动&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -694,18 +580,6 @@
 
 
 **接口描述**:<p>创建用户</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;username&quot;: &quot;testuser&quot;,
-    &quot;preferencesText&quot;: &quot;喜欢历史文化和美食&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -813,18 +687,6 @@
 
 
 **接口描述**:<p>根据用户ID查询用户</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;username&quot;: &quot;testuser&quot;,
-    &quot;preferencesText&quot;: &quot;喜欢历史文化和美食&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -931,18 +793,6 @@
 
 
 **接口描述**:<p>根据用户名查询用户</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;username&quot;: &quot;testuser&quot;,
-    &quot;preferencesText&quot;: &quot;喜欢历史文化和美食&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -1049,20 +899,6 @@
 
 
 **接口描述**:<p>查找兴趣相似用户</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;username&quot;: &quot;testuser&quot;,
-      &quot;preferencesText&quot;: &quot;喜欢历史文化和美食&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -1173,13 +1009,6 @@
 
 
 **接口描述**:<p>更新旅程可见性</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;更新成功&quot;
-}
-</code></pre>
 
 
 
@@ -1288,25 +1117,6 @@
 
 
 **接口描述**:<p>更新旅程信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;title&quot;: &quot;北京三日游（更新）&quot;,
-    &quot;destinationCity&quot;: &quot;北京&quot;,
-    &quot;startDate&quot;: &quot;2024-12-01&quot;,
-    &quot;endDate&quot;: &quot;2024-12-03&quot;,
-    &quot;totalBudget&quot;: 3500.00,
-    &quot;status&quot;: &quot;PLANNED&quot;,
-    &quot;description&quot;: &quot;更新后的北京三日游计划&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;isPrivate&quot;: false
-  }
-}
-</code></pre>
 
 
 
@@ -1436,13 +1246,6 @@
 
 
 **接口描述**:<p>更新旅程状态</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;更新成功&quot;
-}
-</code></pre>
 
 
 
@@ -1551,25 +1354,6 @@
 
 
 **接口描述**:<p>创建旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;title&quot;: &quot;北京三日游&quot;,
-    &quot;destinationCity&quot;: &quot;北京&quot;,
-    &quot;startDate&quot;: &quot;2024-12-01&quot;,
-    &quot;endDate&quot;: &quot;2024-12-03&quot;,
-    &quot;totalBudget&quot;: 3000.00,
-    &quot;status&quot;: &quot;PLANNED&quot;,
-    &quot;description&quot;: &quot;北京三日游计划&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;isPrivate&quot;: false
-  }
-}
-</code></pre>
 
 
 
@@ -1698,21 +1482,6 @@
 
 
 **接口描述**:<p>AI智能生成完整旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;trip&quot;: { ... },
-    &quot;tripDays&quot;: [
-      {
-        &quot;tripDay&quot;: { ... },
-        &quot;tripDayItems&quot;: [ ... ]
-      }
-    ]
-  }
-}
-</code></pre>
 
 
 
@@ -1820,30 +1589,6 @@
 
 
 **接口描述**:<p>获取用户所有旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;ownerId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;title&quot;: &quot;北京三日游&quot;,
-      &quot;destinationCity&quot;: &quot;北京&quot;,
-      &quot;startDate&quot;: &quot;2024-12-01&quot;,
-      &quot;endDate&quot;: &quot;2024-12-03&quot;,
-      &quot;totalBudget&quot;: 3000.00,
-      &quot;status&quot;: &quot;IN_PROGRESS&quot;,
-      &quot;description&quot;: &quot;北京三日游计划&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;isPrivate&quot;: false,
-      &quot;memberRole&quot;: &quot;OWNER&quot;,
-      &quot;isPass&quot;: true,
-      &quot;joinedAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -1950,33 +1695,6 @@
 
 
 **接口描述**:<p>分页获取公开旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;records&quot;: [
-      {
-        &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-        &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-        &quot;title&quot;: &quot;北京三日游&quot;,
-        &quot;destinationCity&quot;: &quot;北京&quot;,
-        &quot;startDate&quot;: &quot;2024-12-01&quot;,
-        &quot;endDate&quot;: &quot;2024-12-03&quot;,
-        &quot;totalBudget&quot;: 3000.00,
-        &quot;status&quot;: &quot;PLANNED&quot;,
-        &quot;description&quot;: &quot;北京三日游计划&quot;,
-        &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-        &quot;isPrivate&quot;: false
-      }
-    ],
-    &quot;total&quot;: 100,
-    &quot;size&quot;: 10,
-    &quot;current&quot;: 1,
-    &quot;pages&quot;: 10
-  }
-}
-</code></pre>
 
 
 
@@ -2087,21 +1805,6 @@
 
 
 **接口描述**:<p>获取完整旅程信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;trip&quot;: { ... },
-    &quot;tripDays&quot;: [
-      {
-        &quot;tripDay&quot;: { ... },
-        &quot;tripDayItems&quot;: [ ... ]
-      }
-    ]
-  }
-}
-</code></pre>
 
 
 
@@ -2209,13 +1912,6 @@
 
 
 **接口描述**:<p>删除旅程，级联删除所有日程和item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -2326,13 +2022,6 @@
 
 
 **接口描述**:<p>接受或拒绝成员的加入请求</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;处理成员请求成功&quot;
-}
-</code></pre>
 
 
 
@@ -2442,13 +2131,6 @@
 
 
 **接口描述**:<p>邀请用户加入旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;邀请成功&quot;
-}
-</code></pre>
 
 
 
@@ -2557,13 +2239,6 @@
 
 
 **接口描述**:<p>向旅程添加成员请求</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;申请成功&quot;
-}
-</code></pre>
 
 
 
@@ -2671,24 +2346,6 @@
 
 
 **接口描述**:<p>获取指定旅程的所有成员列表，支持按审批状态筛选</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-      &quot;role&quot;: &quot;VIEWER&quot;,
-      &quot;isPass&quot;: true,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;userName&quot;: &quot;testuser&quot;,
-      &quot;preferencesText&quot;: &quot;喜欢历史文化和美食&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -2797,13 +2454,6 @@
 
 
 **接口描述**:<p>从旅程中删除指定成员</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成员成功&quot;
-}
-</code></pre>
 
 
 
@@ -2915,13 +2565,6 @@
 
 
 **接口描述**:<p>更新日程备注</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;更新成功&quot;
-}
-</code></pre>
 
 
 
@@ -3031,13 +2674,6 @@
 
 
 **接口描述**:<p>交换两个日程的顺序</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;交换成功&quot;
-}
-</code></pre>
 
 
 
@@ -3147,18 +2783,6 @@
 
 
 **接口描述**:<p>创建旅程日程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;dayDate&quot;: &quot;2024-12-01&quot;,
-    &quot;notes&quot;: &quot;第一天的行程安排&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -3268,26 +2892,6 @@
 
 
 **接口描述**:<p>AI智能重新规划某天旅程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;tripDay&quot;: {
-      &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;dayDate&quot;: &quot;2024-12-01&quot;,
-      &quot;notes&quot;: &quot;第一天的行程安排&quot;
-    },
-    &quot;tripDayItems&quot;: [
-      {
-        &quot;item&quot;: { ... },
-        &quot;entity&quot;: { ... }
-      }
-    ]
-  }
-}
-</code></pre>
 
 
 
@@ -3396,28 +3000,6 @@
 
 
 **接口描述**:<p>获取旅程所有日程</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;tripDay&quot;: {
-        &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-        &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-        &quot;dayDate&quot;: &quot;2024-12-01&quot;,
-        &quot;notes&quot;: &quot;第一天的行程安排&quot;
-      },
-      &quot;tripDayItems&quot;: [
-        {
-          &quot;item&quot;: { ... },
-          &quot;entity&quot;: { ... }
-        }
-      ]
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -3525,53 +3107,6 @@
 
 
 **接口描述**:<p>获取某天日程详情</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;tripDay&quot;: {
-      &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;dayDate&quot;: &quot;2024-12-01&quot;,
-      &quot;notes&quot;: &quot;第一天的行程安排&quot;
-    },
-    &quot;tripDayItems&quot;: [
-      {
-        &quot;item&quot;: {
-          &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-          &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-          &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-          &quot;startTime&quot;: &quot;09:00:00&quot;,
-          &quot;endTime&quot;: &quot;10:30:00&quot;,
-          &quot;itemOrder&quot;: 1.0,
-          &quot;transportNotes&quot;: &quot;步行10分钟&quot;,
-          &quot;estimatedCost&quot;: 50.00,
-          &quot;isPoi&quot;: true,
-          &quot;notes&quot;: &quot;需要提前预约&quot;
-        },
-        &quot;entity&quot;: {
-          &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-          &quot;name&quot;: &quot;故宫博物院&quot;,
-          &quot;type&quot;: &quot;museum&quot;,
-          &quot;city&quot;: &quot;北京&quot;,
-          &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-          &quot;latitude&quot;: 39.9163,
-          &quot;longitude&quot;: 116.3972,
-          &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-          &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-          &quot;avgVisitDuration&quot;: 180,
-          &quot;avgCost&quot;: &quot;60元&quot;,
-          &quot;photos&quot;: [&quot;url1&quot;],
-          &quot;phone&quot;: &quot;010-85007421&quot;,
-          &quot;rating&quot;: &quot;4.8&quot;,
-          &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-        }
-      }
-    ]
-  }
-}
-</code></pre>
 
 
 
@@ -3680,13 +3215,6 @@
 
 
 **接口描述**:<p>删除日程，级联删除所有item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -3798,24 +3326,6 @@
 
 
 **接口描述**:<p>更新日程item信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-    &quot;startTime&quot;: &quot;09:00:00&quot;,
-    &quot;endTime&quot;: &quot;10:30:00&quot;,
-    &quot;itemOrder&quot;: 1.0,
-    &quot;transportNotes&quot;: &quot;步行10分钟&quot;,
-    &quot;estimatedCost&quot;: 50.00,
-    &quot;isPoi&quot;: true,
-    &quot;notes&quot;: &quot;需要提前预约&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -3945,24 +3455,6 @@
 
 
 **接口描述**:<p>AI更新日程item的交通建议</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-    &quot;startTime&quot;: &quot;09:00:00&quot;,
-    &quot;endTime&quot;: &quot;10:30:00&quot;,
-    &quot;itemOrder&quot;: 1.0,
-    &quot;transportNotes&quot;: &quot;步行10分钟&quot;,
-    &quot;estimatedCost&quot;: 50.00,
-    &quot;isPoi&quot;: true,
-    &quot;notes&quot;: &quot;需要提前预约&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -4072,13 +3564,6 @@
 
 
 **接口描述**:<p>移动日程item的位置，改变顺序</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;移动成功&quot;
-}
-</code></pre>
 
 
 
@@ -4190,24 +3675,6 @@
 
 
 **接口描述**:<p>添加日程item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-    &quot;startTime&quot;: &quot;09:00:00&quot;,
-    &quot;endTime&quot;: &quot;10:30:00&quot;,
-    &quot;itemOrder&quot;: 1.0,
-    &quot;transportNotes&quot;: &quot;步行10分钟&quot;,
-    &quot;estimatedCost&quot;: 50.00,
-    &quot;isPoi&quot;: true,
-    &quot;notes&quot;: &quot;需要提前预约&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -4340,45 +3807,6 @@
 
 
 **接口描述**:<p>获取某个日程的详细item列表，包括entity信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;item&quot;: {
-        &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-        &quot;tripDayId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-        &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-        &quot;startTime&quot;: &quot;09:00:00&quot;,
-        &quot;endTime&quot;: &quot;10:30:00&quot;,
-        &quot;itemOrder&quot;: 1.0,
-        &quot;transportNotes&quot;: &quot;步行10分钟&quot;,
-        &quot;estimatedCost&quot;: 50.00,
-        &quot;isPoi&quot;: true,
-        &quot;notes&quot;: &quot;需要提前预约&quot;
-      },
-      &quot;entity&quot;: {
-        &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-        &quot;name&quot;: &quot;故宫博物院&quot;,
-        &quot;type&quot;: &quot;museum&quot;,
-        &quot;city&quot;: &quot;北京&quot;,
-        &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-        &quot;latitude&quot;: 39.9163,
-        &quot;longitude&quot;: 116.3972,
-        &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-        &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-        &quot;avgVisitDuration&quot;: 180,
-        &quot;avgCost&quot;: &quot;60元&quot;,
-        &quot;photos&quot;: [&quot;url1&quot;],
-        &quot;phone&quot;: &quot;010-85007421&quot;,
-        &quot;rating&quot;: &quot;4.8&quot;,
-        &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-      }
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -4487,13 +3915,6 @@
 
 
 **接口描述**:<p>删除日程item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -4605,13 +4026,6 @@
 
 
 **接口描述**:<p>修改日志可见性</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;修改成功&quot;
-}
-</code></pre>
 
 
 
@@ -4720,21 +4134,6 @@
 
 
 **接口描述**:<p>创建文本日志</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;logId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;logType&quot;: &quot;NOTE&quot;,
-    &quot;content&quot;: &quot;今天游览了故宫博物院&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;isPublic&quot;: true
-  }
-}
-</code></pre>
 
 
 
@@ -4856,21 +4255,6 @@
 
 
 **接口描述**:<p>上传图片文件，最大为3MB</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;logId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;logType&quot;: &quot;IMAGE&quot;,
-    &quot;content&quot;: &quot;http://example.com/image.jpg&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;isPublic&quot;: true
-  }
-}
-</code></pre>
 
 
 
@@ -4980,23 +4364,6 @@
 
 
 **接口描述**:<p>获取当前用户某个旅程所有日志</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;logId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;logType&quot;: &quot;NOTE&quot;,
-      &quot;content&quot;: &quot;今天游览了故宫博物院&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;isPublic&quot;: true
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -5104,23 +4471,6 @@
 
 
 **接口描述**:<p>获取当前用户某个旅程指定类型日志</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;logId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;logType&quot;: &quot;NOTE&quot;,
-      &quot;content&quot;: &quot;今天游览了故宫博物院&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;isPublic&quot;: true
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -5229,23 +4579,6 @@
 
 
 **接口描述**:<p>获取旅程公开日志</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;logId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;logType&quot;: &quot;NOTE&quot;,
-      &quot;content&quot;: &quot;今天游览了故宫博物院&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;isPublic&quot;: true
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -5353,13 +4686,6 @@
 
 
 **接口描述**:<p>删除日志</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -5470,21 +4796,6 @@
 
 
 **接口描述**:<p>更新支出记录</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;expenseId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;amount&quot;: 150.00,
-    &quot;category&quot;: &quot;ACCOMMODATION&quot;,
-    &quot;description&quot;: &quot;酒店住宿费用&quot;,
-    &quot;expenseTime&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -5610,13 +4921,6 @@
 
 
 **接口描述**:<p>批量添加支出记录</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;批量添加成功&quot;
-}
-</code></pre>
 
 
 
@@ -5744,21 +5048,6 @@
 
 
 **接口描述**:<p>添加单笔支出</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;expenseId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;amount&quot;: 150.00,
-    &quot;category&quot;: &quot;ACCOMMODATION&quot;,
-    &quot;description&quot;: &quot;酒店住宿费用&quot;,
-    &quot;expenseTime&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -5884,19 +5173,6 @@
 
 
 **接口描述**:<p>获取指定旅程的总支出统计信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;count&quot;: 10,
-    &quot;sum&quot;: 1500.00,
-    &quot;min&quot;: 50.00,
-    &quot;average&quot;: 150.00,
-    &quot;max&quot;: 300.00
-  }
-}
-</code></pre>
 
 
 
@@ -6004,28 +5280,6 @@
 
 
 **接口描述**:<p>获取指定旅程的各类支出统计信息</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;ACCOMMODATION&quot;: {
-      &quot;count&quot;: 2,
-      &quot;sum&quot;: 500.00,
-      &quot;min&quot;: 200.00,
-      &quot;average&quot;: 250.00,
-      &quot;max&quot;: 300.00
-    },
-    &quot;FOOD&quot;: {
-      &quot;count&quot;: 5,
-      &quot;sum&quot;: 200.00,
-      &quot;min&quot;: 20.00,
-      &quot;average&quot;: 40.00,
-      &quot;max&quot;: 60.00
-    }
-  }
-}
-</code></pre>
 
 
 
@@ -6133,23 +5387,6 @@
 
 
 **接口描述**:<p>获取指定旅程的所有支出记录</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;expenseId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;amount&quot;: 150.00,
-      &quot;category&quot;: &quot;ACCOMMODATION&quot;,
-      &quot;description&quot;: &quot;酒店住宿费用&quot;,
-      &quot;expenseTime&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -6257,21 +5494,6 @@
 
 
 **接口描述**:<p>获取单笔支出详情</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;expenseId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-    &quot;amount&quot;: 150.00,
-    &quot;category&quot;: &quot;ACCOMMODATION&quot;,
-    &quot;description&quot;: &quot;酒店住宿费用&quot;,
-    &quot;expenseTime&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -6379,13 +5601,6 @@
 
 
 **接口描述**:<p>删除支出记录</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -6496,19 +5711,6 @@
 
 
 **接口描述**:<p>重命名一个AI推荐会话</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;conversationId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;title&quot;: &quot;北京之旅&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;updatedAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -6617,20 +5819,6 @@
 
 
 **接口描述**:<p>处理用户的当前问题</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;aiMessages&quot;: [&quot;您好，推荐您去故宫博物院参观&quot;, &quot;故宫是中国古代宫殿建筑群...&quot;],
-    &quot;toolUse&quot;: [&quot;POI_SEARCH&quot;, &quot;WEB_SEARCH&quot;],
-    &quot;toolCallResults&quot;: {
-      &quot;POI_SEARCH&quot;: [&quot;故宫博物院&quot;, &quot;天安门广场&quot;],
-      &quot;WEB_SEARCH&quot;: [&quot;故宫开放时间&quot;]
-    }
-  }
-}
-</code></pre>
 
 
 
@@ -6739,19 +5927,6 @@
 
 
 **接口描述**:<p>创建一个AI推荐会话</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;conversationId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;title&quot;: &quot;北京旅游推荐&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;updatedAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -6859,19 +6034,6 @@
 
 
 **接口描述**:<p>获取一个AI推荐会话</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;conversationId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;title&quot;: &quot;北京旅游推荐&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;updatedAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -6979,22 +6141,6 @@
 
 
 **接口描述**:<p>获取一个AI推荐会话的历史内容</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;role&quot;: &quot;user&quot;,
-      &quot;content&quot;: &quot;我想去北京&quot;
-    },
-    {
-      &quot;role&quot;: &quot;assistant&quot;,
-      &quot;content&quot;: &quot;好的，推荐...&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -7102,21 +6248,6 @@
 
 
 **接口描述**:<p>获取当前用户下的所有AI推荐会话</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;conversationId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;userId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;title&quot;: &quot;北京旅游推荐&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;updatedAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -7223,13 +6354,6 @@
 
 
 **接口描述**:<p>删除一个AI推荐会话</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: true
-}
-</code></pre>
 
 
 
@@ -7340,25 +6464,6 @@
 
 
 **接口描述**:<p>更新非POI项</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;type&quot;: &quot;ACTIVITY&quot;,
-    &quot;title&quot;: &quot;全聚德烤鸭店&quot;,
-    &quot;description&quot;: &quot;正宗北京烤鸭&quot;,
-    &quot;city&quot;: &quot;北京&quot;,
-    &quot;activityTime&quot;: &quot;10:00-22:00&quot;,
-    &quot;estimatedAddress&quot;: &quot;北京市东城区前门大街32号&quot;,
-    &quot;extraInfo&quot;: &quot;人均消费200-300元&quot;,
-    &quot;sourceUrl&quot;: &quot;https://example.com&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;privateUserId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -7493,25 +6598,6 @@
 
 
 **接口描述**:<p>创建非POI项</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: {
-    &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-    &quot;type&quot;: &quot;ACTIVITY&quot;,
-    &quot;title&quot;: &quot;全聚德烤鸭店&quot;,
-    &quot;description&quot;: &quot;正宗北京烤鸭&quot;,
-    &quot;city&quot;: &quot;北京&quot;,
-    &quot;activityTime&quot;: &quot;10:00-22:00&quot;,
-    &quot;estimatedAddress&quot;: &quot;北京市东城区前门大街32号&quot;,
-    &quot;extraInfo&quot;: &quot;人均消费200-300元&quot;,
-    &quot;sourceUrl&quot;: &quot;https://example.com&quot;,
-    &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-    &quot;privateUserId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;
-  }
-}
-</code></pre>
 
 
 
@@ -7646,27 +6732,6 @@
 
 
 **接口描述**:<p>获取用户的非POI项列表</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;type&quot;: &quot;ACTIVITY&quot;,
-      &quot;title&quot;: &quot;全聚德烤鸭店&quot;,
-      &quot;description&quot;: &quot;正宗北京烤鸭&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;activityTime&quot;: &quot;10:00-22:00&quot;,
-      &quot;estimatedAddress&quot;: &quot;北京市东城区前门大街32号&quot;,
-      &quot;extraInfo&quot;: &quot;人均消费200-300元&quot;,
-      &quot;sourceUrl&quot;: &quot;https://example.com&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;privateUserId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -7773,13 +6838,6 @@
 
 
 **接口描述**:<p>删除非POI项</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -7890,13 +6948,6 @@
 
 
 **接口描述**:<p>添加心愿单item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;添加成功&quot;
-}
-</code></pre>
 
 
 
@@ -8005,40 +7056,6 @@
 
 
 **接口描述**:<p>心愿单列表，包括每个item对应的entity信息。按照添加的顺序倒序排序</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;item&quot;: {
-        &quot;itemId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-        &quot;tripId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-        &quot;entityId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-        &quot;isPoi&quot;: true,
-        &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-      },
-      &quot;entity&quot;: {
-        &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174002&quot;,
-        &quot;name&quot;: &quot;故宫博物院&quot;,
-        &quot;type&quot;: &quot;museum&quot;,
-        &quot;city&quot;: &quot;北京&quot;,
-        &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-        &quot;latitude&quot;: 39.9163,
-        &quot;longitude&quot;: 116.3972,
-        &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-        &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-        &quot;avgVisitDuration&quot;: 180,
-        &quot;avgCost&quot;: &quot;60元&quot;,
-        &quot;photos&quot;: [&quot;url1&quot;],
-        &quot;phone&quot;: &quot;010-85007421&quot;,
-        &quot;rating&quot;: &quot;4.8&quot;,
-        &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-      }
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -8145,13 +7162,6 @@
 
 
 **接口描述**:<p>删除心愿单item</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -8261,32 +7271,6 @@
 
 
 **接口描述**:<p>获取会话推荐的pois</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;poiId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;externalApiId&quot;: &quot;B0FFH4XYZ&quot;,
-      &quot;name&quot;: &quot;故宫博物院&quot;,
-      &quot;type&quot;: &quot;museum&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;address&quot;: &quot;北京市东城区景山前街4号&quot;,
-      &quot;latitude&quot;: 39.9163,
-      &quot;longitude&quot;: 116.3972,
-      &quot;description&quot;: &quot;明清两朝的皇宫...&quot;,
-      &quot;openingHours&quot;: &quot;08:30-17:00&quot;,
-      &quot;avgVisitDuration&quot;: 180,
-      &quot;avgCost&quot;: &quot;60元&quot;,
-      &quot;photos&quot;: [&quot;url1&quot;, &quot;url2&quot;],
-      &quot;phone&quot;: &quot;010-85007421&quot;,
-      &quot;rating&quot;: &quot;4.8&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -8395,13 +7379,6 @@
 
 
 **接口描述**:<p>手动添加pois到会话推荐项中</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;添加成功&quot;
-}
-</code></pre>
 
 
 
@@ -8510,13 +7487,6 @@
 
 
 **接口描述**:<p>删除会话推荐中的pois，如果poiIds为空，则删除该会话推荐中的所有</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -8625,27 +7595,6 @@
 
 
 **接口描述**:<p>获取会话推荐的nonPois</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;type&quot;: &quot;ACTIVITY&quot;,
-      &quot;title&quot;: &quot;全聚德烤鸭店&quot;,
-      &quot;description&quot;: &quot;正宗北京烤鸭&quot;,
-      &quot;city&quot;: &quot;北京&quot;,
-      &quot;activityTime&quot;: &quot;10:00-22:00&quot;,
-      &quot;estimatedAddress&quot;: &quot;北京市东城区前门大街32号&quot;,
-      &quot;extraInfo&quot;: &quot;人均消费200-300元&quot;,
-      &quot;sourceUrl&quot;: &quot;https://example.com&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;privateUserId&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
@@ -8754,13 +7703,6 @@
 
 
 **接口描述**:<p>手动添加nonPois到会话推荐项中</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;添加成功&quot;
-}
-</code></pre>
 
 
 
@@ -8869,13 +7811,6 @@
 
 
 **接口描述**:<p>删除会话推荐中的nonPois，如果nonPoiItemIds为空，则删除该会话推荐中的所有</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: &quot;删除成功&quot;
-}
-</code></pre>
 
 
 
@@ -8987,26 +7922,6 @@
 
 
 **接口描述**:<p>获取会话下的所有网页</p>
-<p>Response Example:</p>
-<pre><code class="language-json">{
-  &quot;code&quot;: 200,
-  &quot;message&quot;: &quot;success&quot;,
-  &quot;data&quot;: [
-    {
-      &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
-      &quot;conversationId&quot;: &quot;123e4567-e89b-12d3-a456-426614174001&quot;,
-      &quot;name&quot;: &quot;故宫博物院官网&quot;,
-      &quot;url&quot;: &quot;https://www.dpm.org.cn&quot;,
-      &quot;displayUrl&quot;: &quot;www.dpm.org.cn&quot;,
-      &quot;snippet&quot;: &quot;故宫博物院官方网站...&quot;,
-      &quot;summary&quot;: &quot;详细介绍故宫的历史和文化...&quot;,
-      &quot;siteName&quot;: &quot;故宫博物院&quot;,
-      &quot;datePublished&quot;: &quot;2023-10-01T12:00:00+08:00&quot;,
-      &quot;createdAt&quot;: &quot;2023-10-01T12:00:00+08:00&quot;
-    }
-  ]
-}
-</code></pre>
 
 
 
