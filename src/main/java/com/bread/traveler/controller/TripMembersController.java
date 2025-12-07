@@ -21,43 +21,43 @@ public class TripMembersController {
     private TripMembersService tripMembersService;
 
     @PostMapping("/addRequest")
-    @Operation(summary = "申请加入旅程", description = "向旅程添加成员请求\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"申请成功\"\n}\n```")
+    @Operation(summary = "申请加入旅程", description = "向旅程添加成员请求")
     public Result addMemberRequest(
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId) {
         boolean result = tripMembersService.addMemberRequest(tripId, userId);
-        return result ? Result.success("申请成功") : Result.serverError("申请失败");
+        return result ? Result.success("申请成功", null) : Result.serverError("申请失败");
     }
 
     @PutMapping("/handleRequest")
-    @Operation(summary = "处理成员请求", description = "接受或拒绝成员的加入请求\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"处理成员请求成功\"\n}\n```")
+    @Operation(summary = "处理成员请求", description = "接受或拒绝成员的加入请求")
     public Result handleMemberRequest(
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "处理的用户ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID handleUserId,
             @Schema(description = "当前用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID currentUserId,
             @Schema(description = "是否接受", example = "true") @RequestParam Boolean accept) {
         boolean result = tripMembersService.handleMemberRequest(tripId, currentUserId, handleUserId, accept);
-        return result ? Result.success("处理成员请求成功") : Result.serverError("处理成员请求失败");
+        return result ? Result.success("处理成员请求成功", null) : Result.serverError("处理成员请求失败");
     }
 
     @PostMapping("/invite")
-    @Operation(summary = "邀请用户", description = "邀请用户加入旅程\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"邀请成功\"\n}\n```")
+    @Operation(summary = "邀请用户", description = "邀请用户加入旅程")
     public Result inviteMember(
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "被邀请用户ID列表", example = "[\"123e4567-e89b-12d3-a456-426614174003\", \"123e4567-e89b-12d3-a456-426614174004\"]") @RequestParam List<UUID> inviteUserIds) {
         boolean result = tripMembersService.inviteMembers(tripId, userId, inviteUserIds);
-        return result ? Result.success("邀请成功") : Result.serverError("邀请失败");
+        return result ? Result.success("邀请成功", null) : Result.serverError("邀请失败");
     }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除成员", description = "从旅程中删除指定成员\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"删除成员成功\"\n}\n```")
+    @Operation(summary = "删除成员", description = "从旅程中删除指定成员")
     public Result deleteMember(
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "处理的用户ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID handleUserId,
             @Schema(description = "当前用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID currentUserId) {
         boolean result = tripMembersService.deleteMember(tripId, currentUserId, handleUserId);
-        return result ? Result.success("删除成员成功") : Result.serverError("删除成员失败");
+        return result ? Result.success("删除成员成功", null) : Result.serverError("删除成员失败");
     }
 
     // @PutMapping("/updateRole")
@@ -72,7 +72,7 @@ public class TripMembersController {
     // }
 
     @GetMapping("/list")
-    @Operation(summary = "获取旅程成员列表", description = "获取指定旅程的所有成员列表，支持按审批状态筛选\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": [\n    {\n      \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"tripId\": \"123e4567-e89b-12d3-a456-426614174001\",\n      \"userId\": \"123e4567-e89b-12d3-a456-426614174002\",\n      \"role\": \"VIEWER\",\n      \"isPass\": true,\n      \"createdAt\": \"2023-10-01T12:00:00+08:00\",\n      \"userName\": \"testuser\",\n      \"preferencesText\": \"喜欢历史文化和美食\"\n    }\n  ]\n}\n```")
+    @Operation(summary = "获取旅程成员列表", description = "获取指定旅程的所有成员列表，支持按审批状态筛选")
     public Result getMembers(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,

@@ -25,7 +25,7 @@ public class TripExpensesController {
     private TripExpensesService expensesService;
 
     @PostMapping("/add")
-    @Operation(summary = "添加单笔支出", description = "添加单笔支出\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"expenseId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"amount\": 150.00,\n    \"category\": \"ACCOMMODATION\",\n    \"description\": \"酒店住宿费用\",\n    \"expenseTime\": \"2023-10-01T12:00:00+08:00\"\n  }\n}\n```")
+    @Operation(summary = "添加单笔支出", description = "添加单笔支出")
     public Result addExpense(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
@@ -35,17 +35,17 @@ public class TripExpensesController {
     }
 
     @PostMapping("/batch-add")
-    @Operation(summary = "批量添加支出记录", description = "批量添加支出记录\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"批量添加成功\"\n}\n```")
+    @Operation(summary = "批量添加支出记录", description = "批量添加支出记录")
     public Result batchAddExpenses(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @RequestBody List<TripExpenseCreateUpdateDto> dtos) {
         boolean result = expensesService.batchAddExpenses(userId, tripId, dtos);
-        return result ? Result.success("批量添加成功") : Result.serverError("批量添加失败");
+        return result ? Result.success("批量添加成功", null) : Result.serverError("批量添加失败");
     }
 
     @PutMapping("/update")
-    @Operation(summary = "更新支出记录", description = "更新支出记录\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"expenseId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"amount\": 150.00,\n    \"category\": \"ACCOMMODATION\",\n    \"description\": \"酒店住宿费用\",\n    \"expenseTime\": \"2023-10-01T12:00:00+08:00\"\n  }\n}\n```")
+    @Operation(summary = "更新支出记录", description = "更新支出记录")
     public Result updateExpense(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "支出ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID expenseId,
@@ -55,16 +55,16 @@ public class TripExpensesController {
     }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除支出记录", description = "删除支出记录\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": \"删除成功\"\n}\n```")
+    @Operation(summary = "删除支出记录", description = "删除支出记录")
     public Result deleteExpense(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "支出ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID expenseId) {
         boolean result = expensesService.deleteExpense(userId, expenseId);
-        return result ? Result.success("删除成功") : Result.serverError("删除失败");
+        return result ? Result.success("删除成功", null) : Result.serverError("删除失败");
     }
 
     @GetMapping("/detail")
-    @Operation(summary = "获取单笔支出详情", description = "获取单笔支出详情\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"expenseId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"tripId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"amount\": 150.00,\n    \"category\": \"ACCOMMODATION\",\n    \"description\": \"酒店住宿费用\",\n    \"expenseTime\": \"2023-10-01T12:00:00+08:00\"\n  }\n}\n```")
+    @Operation(summary = "获取单笔支出详情", description = "获取单笔支出详情")
     public Result getExpenseById(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "支出ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID expenseId) {
@@ -73,7 +73,7 @@ public class TripExpensesController {
     }
 
     @GetMapping("/list")
-    @Operation(summary = "获取指定旅程的所有支出记录", description = "获取指定旅程的所有支出记录\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": [\n    {\n      \"expenseId\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"tripId\": \"123e4567-e89b-12d3-a456-426614174001\",\n      \"amount\": 150.00,\n      \"category\": \"ACCOMMODATION\",\n      \"description\": \"酒店住宿费用\",\n      \"expenseTime\": \"2023-10-01T12:00:00+08:00\"\n    }\n  ]\n}\n```")
+    @Operation(summary = "获取指定旅程的所有支出记录", description = "获取指定旅程的所有支出记录")
     public Result getExpensesByTripId(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
@@ -82,7 +82,7 @@ public class TripExpensesController {
     }
 
     @GetMapping("/statistics/total")
-    @Operation(summary = "获取指定旅程的总支出统计信息", description = "获取指定旅程的总支出统计信息\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"count\": 10,\n    \"sum\": 1500.00,\n    \"min\": 50.00,\n    \"average\": 150.00,\n    \"max\": 300.00\n  }\n}\n```")
+    @Operation(summary = "获取指定旅程的总支出统计信息", description = "获取指定旅程的总支出统计信息")
     public Result getTotalExpenseStatisticsByTripId(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
@@ -91,7 +91,7 @@ public class TripExpensesController {
     }
 
     @GetMapping("/statistics/category")
-    @Operation(summary = "获取指定旅程的各类支出统计信息", description = "获取指定旅程的各类支出统计信息\n\nResponse Example:\n```json\n{\n  \"code\": 200,\n  \"message\": \"success\",\n  \"data\": {\n    \"ACCOMMODATION\": {\n      \"count\": 2,\n      \"sum\": 500.00,\n      \"min\": 200.00,\n      \"average\": 250.00,\n      \"max\": 300.00\n    },\n    \"FOOD\": {\n      \"count\": 5,\n      \"sum\": 200.00,\n      \"min\": 20.00,\n      \"average\": 40.00,\n      \"max\": 60.00\n    }\n  }\n}\n```")
+    @Operation(summary = "获取指定旅程的各类支出统计信息", description = "获取指定旅程的各类支出统计信息")
     public Result getCategoryExpenseStatisticsByTripId(
             @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
