@@ -64,6 +64,8 @@ public class Constant {
     public static final String TRIP_MEMBER_REQUEST_EXIST = "已申请，不要重复申请";
     public static final String TRIP_MEMBER_INVITE_USER_NOT_EMPTY = "邀请的用户不能为空";
     public static final String TRIP_MEMBER_INVITE_USER_FAILED = "邀请用户失败";
+    public static final String USERS_PASSWORD_ERROR = "密码错误";
+    public static final String USERS_LOGIN_REDIS_KEY = "login:token:";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等

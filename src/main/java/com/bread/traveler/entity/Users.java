@@ -37,6 +37,10 @@ public class Users implements Serializable {
     @Schema(description = "用户名", example = "testuser")
     private String username;
 
+    @TableField(value = "password")
+    @Schema(description = "密码", example = "123456")
+    private String password;
+
     /**
      * 
      */

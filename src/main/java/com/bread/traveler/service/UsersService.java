@@ -16,24 +16,26 @@ public interface UsersService extends IService<Users> {
     /**
      * 根据用户ID查找用户
      * @param userId
-     * @return
+     * @return 完整用户信息，包括密码
      */
     Users findUserById(UUID userId);
 
     /**
      * 根据用户名查找用户
      * @param username 用户名
-     * @return 用户信息
+     * @return 完整用户信息，包括密码
      */
     Users getUserByUsername(String username);
 
     /**
      * 创建用户
+     *
      * @param username
+     * @param password
      * @param preferencesText
      * @return
      */
-    Users createUser(String username, String preferencesText);
+    void createUser(String username, String password, String preferencesText);
 
     /**
      * 更新用户偏好设置
@@ -52,4 +54,11 @@ public interface UsersService extends IService<Users> {
     List<Users> findSimilarUsers(UUID userId, int limit);
 
 
+    /**
+     * 登录
+     * @param username
+     * @param password
+     * @return
+     */
+    String login(String username, String password);
 }

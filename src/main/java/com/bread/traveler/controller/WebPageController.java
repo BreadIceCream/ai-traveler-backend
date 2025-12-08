@@ -23,7 +23,8 @@ public class WebPageController {
     @GetMapping("/list")
     @Operation(summary = "获取会话下的所有网页", description = "获取会话下的所有网页")
     public Result list(
-            @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID conversationId) {
+            @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001")
+            @RequestParam UUID conversationId) {
         List<WebPage> webPages = webSearchService.listByConversationId(conversationId);
         return Result.success(webPages);
     }

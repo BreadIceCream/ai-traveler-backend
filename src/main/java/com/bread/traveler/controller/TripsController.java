@@ -29,7 +29,7 @@ public class TripsController {
     @PostMapping("/create")
     @Operation(summary = "创建旅程", description = "创建旅程")
     public Result createTrip(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程dto") @RequestBody TripDto dto) {
         Trips trip = tripsService.createTrip(userId, dto);
         return trip == null ? Result.serverError("创建失败") : Result.success("创建成功", trip);
@@ -38,7 +38,7 @@ public class TripsController {
     @PutMapping("/update")
     @Operation(summary = "更新旅程信息", description = "更新旅程信息")
     public Result updateTripInfo(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "旅程dto") @RequestBody TripDto dto) {
         Trips trip = tripsService.updateTripInfo(userId, tripId, dto);
@@ -48,7 +48,7 @@ public class TripsController {
     @PutMapping("/visibility")
     @Operation(summary = "更新旅程可见性", description = "更新旅程可见性")
     public Result updateTripVisibility(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "是否私有", example = "false") @RequestParam Boolean isPrivate) {
         boolean result = tripsService.changeVisibility(userId, tripId, isPrivate);
@@ -58,7 +58,7 @@ public class TripsController {
     @PutMapping("/status")
     @Operation(summary = "更新旅程状态", description = "更新旅程状态")
     public Result updateTripStatus(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "新状态", example = "PLANNING") @RequestParam TripStatus newStatus) {
         boolean result = tripsService.changeStatus(userId, tripId, newStatus);
@@ -68,7 +68,7 @@ public class TripsController {
     @GetMapping("/user")
     @Operation(summary = "获取用户所有旅程", description = "获取用户所有旅程")
     public Result getAllTripsOfUser(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId) {
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId) {
         List<TripWithMemberInfoDto> trips = tripsService.getAllTripsOfUser(userId);
         return trips.isEmpty() ? Result.success("获取成功，暂无旅程", trips) : Result.success("获取成功", trips);
     }
@@ -88,7 +88,7 @@ public class TripsController {
     @GetMapping("/detail")
     @Operation(summary = "获取完整旅程信息", description = "获取完整旅程信息")
     public Result getEntireTrip(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
         EntireTrip entireTrip = tripsService.getEntireTrip(userId, tripId);
         return Result.success("获取成功", entireTrip);
@@ -97,7 +97,7 @@ public class TripsController {
     @PostMapping("/ai-generate")
     @Operation(summary = "AI智能生成完整旅程", description = "AI智能生成完整旅程")
     public Result aiGenerateEntireTrip(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
         EntireTrip result = tripsService.aiGenerateEntireTripPlan(userId, tripId);
         return result == null ? Result.serverError("AI规划失败") : Result.success("AI规划成功", result);
@@ -106,7 +106,7 @@ public class TripsController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除旅程，级联删除所有日程和item", description = "删除旅程，级联删除所有日程和item")
     public Result deleteTrip(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
         boolean result = tripsService.deleteTrip(userId, tripId);
         return result ? Result.success("删除成功", null) : Result.serverError("删除失败");

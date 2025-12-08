@@ -51,7 +51,7 @@ spring:
   data:
     redis:
       host: localhost
-      database: 2
+      database: 1
   profiles:
     active: dev
   servlet:
@@ -70,6 +70,9 @@ aliyun:
     bucket-name: ${ALIYUN_OSS_BUCKET_NAME}
     region: ${ALIYUN_OSS_REGION}
 
+jwt:
+  secret: ${JWT_SECRET}
+  expire: ${JWT_EXPIRE}
 
 mybatis-plus:
   global-config:

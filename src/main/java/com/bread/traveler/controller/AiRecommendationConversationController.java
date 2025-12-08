@@ -25,7 +25,7 @@ public class AiRecommendationConversationController {
     @PostMapping("/create")
     @Operation(summary = "创建AI推荐会话", description = "创建一个AI推荐会话")
     public Result createConversation(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "查询文本", example = "我想去北京旅游") @RequestParam String queryText) {
         AiRecommendationConversation conversation = aiRecommendConversationService.createConversation(userId,
                 queryText);
@@ -35,7 +35,7 @@ public class AiRecommendationConversationController {
     @PutMapping("/rename")
     @Operation(summary = "重命名AI推荐会话", description = "重命名一个AI推荐会话")
     public Result renameConversation(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID conversationId,
             @Schema(description = "新标题", example = "北京之旅") @RequestParam String newTitle) {
         AiRecommendationConversation conversation = aiRecommendConversationService.renameConversation(userId,
@@ -46,7 +46,7 @@ public class AiRecommendationConversationController {
     @GetMapping("/all")
     @Operation(summary = "获取所有AI推荐会话", description = "获取当前用户下的所有AI推荐会话")
     public Result getAllConversations(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId) {
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId) {
         List<AiRecommendationConversation> conversations = aiRecommendConversationService.getAllConversations(userId);
         return Result.success(conversations);
     }
@@ -54,7 +54,7 @@ public class AiRecommendationConversationController {
     @GetMapping("/{conversationId}")
     @Operation(summary = "获取AI推荐会话", description = "获取一个AI推荐会话")
     public Result getConversation(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @PathVariable UUID conversationId) {
         AiRecommendationConversation conversation = aiRecommendConversationService.searchConversationById(userId,
                 conversationId);
@@ -64,7 +64,7 @@ public class AiRecommendationConversationController {
     @GetMapping("/history/{conversationId}")
     @Operation(summary = "获取AI推荐会话历史", description = "获取一个AI推荐会话的历史内容")
     public Result getConversationHistory(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @PathVariable UUID conversationId) {
         List<Message> history = aiRecommendConversationService.getConversationHistory(userId, conversationId);
         return Result.success(history);
@@ -73,7 +73,7 @@ public class AiRecommendationConversationController {
     @PostMapping("/handle")
     @Operation(summary = "处理用户对话", description = "处理用户的当前问题")
     public Result handleQuery(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID conversationId,
             @Schema(description = "查询文本", example = "推荐一些北京的景点") @RequestParam String queryText) {
         AiRecommendResponse response = aiRecommendConversationService.handleQuery(userId, conversationId, queryText);
@@ -83,7 +83,7 @@ public class AiRecommendationConversationController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除AI推荐会话", description = "删除一个AI推荐会话")
     public Result deleteConversation(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "会话ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID conversationId) {
         boolean result = aiRecommendConversationService.deleteConversation(userId, conversationId);
         return Result.success(result);

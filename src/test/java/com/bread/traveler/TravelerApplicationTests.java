@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -170,6 +172,11 @@ class TravelerApplicationTests {
         long end = System.currentTimeMillis();
         System.out.println("耗时：" + (end - start) * 1.0 / 1000 + "s");
         System.out.println(content);
+    }
+
+    @Test
+    void addUsers(){
+        usersService.createUser("admin", "123456", "喜欢电影音乐，对AI应用代码开发感兴趣");
     }
 
 }

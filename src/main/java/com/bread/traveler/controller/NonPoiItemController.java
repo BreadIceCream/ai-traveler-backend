@@ -24,7 +24,7 @@ public class NonPoiItemController {
     @PostMapping("/create")
     @Operation(summary = "创建非POI项", description = "创建非POI项")
     public Result createNonPoiItem(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "非POI项dto") @RequestBody NonPoiItemDto dto) {
         NonPoiItem nonPoiItem = nonPoiItemService.createNonPoiItem(userId, dto);
         return nonPoiItem != null ? Result.success("创建成功", nonPoiItem) : Result.serverError("创建失败");
@@ -33,7 +33,7 @@ public class NonPoiItemController {
     @GetMapping("/list")
     @Operation(summary = "获取用户的非POI项列表", description = "获取用户的非POI项列表")
     public Result getNonPoiItemList(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId) {
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId) {
         List<NonPoiItem> nonPoiItemList = nonPoiItemService.getByUserId(userId);
         return Result.success(nonPoiItemList);
     }
@@ -41,7 +41,7 @@ public class NonPoiItemController {
     @PutMapping("/update")
     @Operation(summary = "更新非POI项", description = "更新非POI项")
     public Result updateNonPoiItem(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "非POI项dto") @RequestBody NonPoiItemDto dto) {
         NonPoiItem nonPoiItem = nonPoiItemService.updateNonPoiItem(userId, dto);
         return nonPoiItem != null ? Result.success("更新成功", nonPoiItem) : Result.serverError("更新失败");
@@ -50,7 +50,7 @@ public class NonPoiItemController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除非POI项", description = "删除非POI项")
     public Result deleteNonPoiItem(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "非POI项ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID nonPoiItemId) {
         boolean success = nonPoiItemService.deleteByIds(userId, List.of(nonPoiItemId));
         return success ? Result.success("删除成功", null) : Result.serverError("删除失败");

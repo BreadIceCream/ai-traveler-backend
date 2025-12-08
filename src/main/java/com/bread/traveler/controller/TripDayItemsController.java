@@ -25,7 +25,7 @@ public class TripDayItemsController {
     @GetMapping("/list")
     @Operation(summary = "获取某个日程的详细item列表", description = "获取某个日程的详细item列表，包括entity信息")
     public Result getEntireItemsByTripDayId(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID tripDayId) {
         List<EntireTripDayItem> items = tripDayItemsService.getEntireItemsByTripDayId(userId, tripId, tripDayId);
@@ -35,7 +35,7 @@ public class TripDayItemsController {
     @PostMapping("/add")
     @Operation(summary = "添加日程item", description = "添加日程item")
     public Result addItems(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "日程ID", example = "123e4567-e89b-12d3-a456-426614174002") @RequestParam UUID tripDayId,
             @Schema(description = "实体ID", example = "123e4567-e89b-12d3-a456-426614174003") @RequestParam UUID entityId,
@@ -48,7 +48,7 @@ public class TripDayItemsController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除日程item", description = "删除日程item")
     public Result deleteItems(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "日程item ID列表") @RequestParam List<UUID> itemIds) {
         boolean result = tripDayItemsService.deleteItems(userId, tripId, itemIds);
@@ -58,7 +58,7 @@ public class TripDayItemsController {
     @PutMapping("/update")
     @Operation(summary = "更新日程item信息", description = "更新日程item信息")
     public Result updateItemInfo(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @RequestBody TripDayItemDto dto) {
         TripDayItems updatedItem = tripDayItemsService.updateItemInfo(userId, tripId, dto);
@@ -68,7 +68,7 @@ public class TripDayItemsController {
     @PutMapping("/transport")
     @Operation(summary = "AI更新日程item的交通建议", description = "AI更新日程item的交通建议")
     public Result updateTransportNote(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "日程item ID", example = "123e4567-e89b-12d3-a456-426614174004") @RequestParam UUID itemId,
             @Schema(description = "起始地址", example = "北京市朝阳区") @RequestParam(required = false) String originAddress) {
@@ -79,7 +79,7 @@ public class TripDayItemsController {
     @PutMapping("/move")
     @Operation(summary = "移动日程item的位置，改变顺序", description = "移动日程item的位置，改变顺序")
     public Result moveItemOrder(
-            @Schema(description = "用户ID", example = "123e4567-e89b-12d3-a456-426614174000") @RequestParam UUID userId,
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
             @Schema(description = "当前item ID", example = "123e4567-e89b-12d3-a456-426614174004") @RequestParam UUID currentId,
             @Schema(description = "前一个item ID", example = "123e4567-e89b-12d3-a456-426614174003") @RequestParam(required = false) UUID prevId,

@@ -481,7 +481,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |preferencesText|偏好文本|query|true|string||
 
 
@@ -564,23 +563,35 @@
 ```
 
 
-## 创建用户
+## 注册用户
 
 
-**接口地址**:`/api/users`
+**接口地址**:`/api/users/register`
 
 
 **请求方式**:`POST`
 
 
-**请求数据类型**:`application/x-www-form-urlencoded`
+**请求数据类型**:`application/x-www-form-urlencoded,application/json`
 
 
 **响应数据类型**:`*/*`
 
 
-**接口描述**:<p>创建用户</p>
+**接口描述**:<p>注册用户</p>
 
+
+
+**请求示例**:
+
+
+```javascript
+{
+  "username": "testuser",
+  "password": "password",
+  "preferencesText": "喜欢历史文化和美食"
+}
+```
 
 
 **请求参数**:
@@ -588,8 +599,131 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|username|用户名|query|true|string||
-|preferencesText|偏好文本|query|true|string||
+|userDto|用户创建信息|body|true|UserDto|UserDto|
+|&emsp;&emsp;username|用户名||false|string||
+|&emsp;&emsp;password|密码||false|string||
+|&emsp;&emsp;preferencesText|偏好文本||false|string||
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+## 用户登录
+
+
+**接口地址**:`/api/users/login`
+
+
+**请求方式**:`POST`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded,application/json`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>用户登录</p>
+
+
+
+**请求示例**:
+
+
+```javascript
+{
+  "username": "testuser",
+  "password": "password",
+  "preferencesText": "喜欢历史文化和美食"
+}
+```
+
+
+**请求参数**:
+
+
+| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
+| -------- | -------- | ----- | -------- | -------- | ------ |
+|userDto|用户创建信息|body|true|UserDto|UserDto|
+|&emsp;&emsp;username|用户名||false|string||
+|&emsp;&emsp;password|密码||false|string||
+|&emsp;&emsp;preferencesText|偏好文本||false|string||
 
 
 **响应状态**:
@@ -907,8 +1041,111 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |limit|限制数量|query|false|integer(int32)||
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+## 获取当前用户信息
+
+
+**接口地址**:`/api/users/me`
+
+
+**请求方式**:`GET`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>获取当前用户信息</p>
+
+
+
+**请求参数**:
+
+
+暂无
 
 
 **响应状态**:
@@ -1017,7 +1254,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |isPrivate|是否私有|query|true|boolean||
 
@@ -1140,7 +1376,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDto|旅程dto|body|true|TripDto|TripDto|
 |&emsp;&emsp;title|标题||false|string||
@@ -1254,7 +1489,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |newStatus|新状态,可用值:PLANNING,IN_PROGRESS,COMPLETED,CANCELLED|query|true|string||
 
@@ -1377,7 +1611,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripDto|旅程dto|body|true|TripDto|TripDto|
 |&emsp;&emsp;title|标题||false|string||
 |&emsp;&emsp;destinationCity|目的地城市||false|string||
@@ -1490,7 +1723,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -1595,9 +1827,7 @@
 **请求参数**:
 
 
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
+暂无
 
 
 **响应状态**:
@@ -1813,7 +2043,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -1920,7 +2149,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -2032,7 +2260,6 @@
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
 |handleUserId|处理的用户ID|query|true|string(uuid)||
-|currentUserId|当前用户ID|query|true|string(uuid)||
 |accept|是否接受|query|true|boolean||
 
 
@@ -2140,7 +2367,6 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
-|userId|用户ID|query|true|string(uuid)||
 |inviteUserIds|被邀请用户ID列表|query|true|array|string|
 
 
@@ -2248,7 +2474,6 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
-|userId|用户ID|query|true|string(uuid)||
 
 
 **响应状态**:
@@ -2354,7 +2579,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |isPass|是否通过审批|query|false|boolean||
 
@@ -2464,7 +2688,6 @@
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
 |handleUserId|处理的用户ID|query|true|string(uuid)||
-|currentUserId|当前用户ID|query|true|string(uuid)||
 
 
 **响应状态**:
@@ -2573,7 +2796,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
 |note|备注|query|true|string||
@@ -2682,7 +2904,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |aTripDayId|第一个日程ID|query|true|string(uuid)||
 |bTripDayId|第二个日程ID|query|true|string(uuid)||
@@ -2791,7 +3012,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |date|日期|query|true|string(date)||
 |note|备注|query|false|string||
@@ -2900,7 +3120,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
 
@@ -3008,7 +3227,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -3115,7 +3333,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
 
@@ -3223,7 +3440,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayIds|日程ID列表|query|true|array|string|
 
@@ -3349,7 +3565,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayItemDto|日程项dto|body|true|TripDayItemDto|TripDayItemDto|
 |&emsp;&emsp;itemId|日程项id||false|string(uuid)||
@@ -3463,7 +3678,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |itemId|日程item ID|query|true|string(uuid)||
 |originAddress|起始地址|query|false|string||
@@ -3572,7 +3786,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |currentId|当前item ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
@@ -3698,7 +3911,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
 |entityId|实体ID|query|true|string(uuid)||
@@ -3815,7 +4027,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripDayId|日程ID|query|true|string(uuid)||
 
@@ -3923,7 +4134,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |itemIds|日程item ID列表|query|true|array|string|
 
@@ -4034,7 +4244,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |logId|日志ID|query|true|string(uuid)||
 |isPublic|是否公开|query|true|boolean||
 
@@ -4153,7 +4362,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripNoteLogCreateDto|创建日志参数|body|true|TripNoteLogCreateDto|TripNoteLogCreateDto|
 |&emsp;&emsp;content|日志内容||true|string||
@@ -4263,7 +4471,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |imgFile|图片文件|query|true|file||
 |isPublic|是否公开|query|false|boolean||
@@ -4372,7 +4579,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -4479,7 +4685,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |type|日志类型,可用值:NOTE,IMAGE|query|true|string||
 
@@ -4587,7 +4792,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -4694,7 +4898,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |logId|日志ID|query|true|string(uuid)||
 
 
@@ -4817,7 +5020,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |expenseId|支出ID|query|true|string(uuid)||
 |tripExpenseCreateUpdateDto|支出创建参数|body|true|TripExpenseCreateUpdateDto|TripExpenseCreateUpdateDto|
 |&emsp;&emsp;amount|金额||true|number||
@@ -4944,7 +5146,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripExpenseCreateUpdateDtos|支出创建参数|body|true|array|TripExpenseCreateUpdateDto|
 |&emsp;&emsp;amount|金额||true|number||
@@ -5069,7 +5270,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 |tripExpenseCreateUpdateDto|支出创建参数|body|true|TripExpenseCreateUpdateDto|TripExpenseCreateUpdateDto|
 |&emsp;&emsp;amount|金额||true|number||
@@ -5181,7 +5381,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -5288,7 +5487,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -5395,7 +5593,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |tripId|旅程ID|query|true|string(uuid)||
 
 
@@ -5502,7 +5699,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |expenseId|支出ID|query|true|string(uuid)||
 
 
@@ -5609,7 +5805,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |expenseId|支出ID|query|true|string(uuid)||
 
 
@@ -5719,7 +5914,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |newTitle|新标题|query|true|string||
 
@@ -5827,7 +6021,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |queryText|查询文本|query|true|string||
 
@@ -5935,7 +6128,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |queryText|查询文本|query|true|string||
 
 
@@ -6042,7 +6234,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|path|true|string(uuid)||
 
 
@@ -6149,7 +6340,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|path|true|string(uuid)||
 
 
@@ -6254,9 +6444,7 @@
 **请求参数**:
 
 
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
+暂无
 
 
 **响应状态**:
@@ -6362,7 +6550,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 
 
@@ -6490,7 +6677,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |nonPoiItemDto|非POI项dto|body|true|NonPoiItemDto|NonPoiItemDto|
 |&emsp;&emsp;id|非POI项ID||false|string(uuid)||
 |&emsp;&emsp;type|非POI项类型,可用值:ACTIVITY,FOOD,CULTURE,OTHER||false|string||
@@ -6624,7 +6810,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |nonPoiItemDto|非POI项dto|body|true|NonPoiItemDto|NonPoiItemDto|
 |&emsp;&emsp;id|非POI项ID||false|string(uuid)||
 |&emsp;&emsp;type|非POI项类型,可用值:ACTIVITY,FOOD,CULTURE,OTHER||false|string||
@@ -6738,9 +6923,7 @@
 **请求参数**:
 
 
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
+暂无
 
 
 **响应状态**:
@@ -6846,7 +7029,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |nonPoiItemId|非POI项ID|query|true|string(uuid)||
 
 
@@ -7279,7 +7461,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |isManual|是否为手动添加|query|false|boolean||
 
@@ -7387,7 +7568,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |poiIds|POI ID列表|query|true|array|string|
 
@@ -7495,7 +7675,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |poiIds|POI ID列表|query|false|array|string|
 
@@ -7603,7 +7782,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |isManual|是否为手动添加|query|false|boolean||
 
@@ -7711,7 +7889,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |nonPoiItemIds|非POI项ID列表|query|true|array|string|
 
@@ -7819,7 +7996,6 @@
 
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
-|userId|用户ID|query|true|string(uuid)||
 |conversationId|会话ID|query|true|string(uuid)||
 |nonPoiItemIds|非POI项ID列表|query|false|array|string|
 
