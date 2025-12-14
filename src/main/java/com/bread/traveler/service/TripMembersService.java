@@ -1,12 +1,14 @@
 package com.bread.traveler.service;
 
 import com.bread.traveler.dto.TripMemberDto;
+import com.bread.traveler.dto.TripMemberPendingRequestDto;
 import com.bread.traveler.entity.TripMembers;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.bread.traveler.enums.MemberRole;
 import jakarta.annotation.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -106,4 +108,10 @@ public interface TripMembersService extends IService<TripMembers> {
     List<TripMembers> getJoinedTrips(UUID userId);
 
 
+    /**
+     * 获取用户创建的所有行程的待处理申请数量
+     * @param userId
+     * @return
+     */
+    List<TripMemberPendingRequestDto> getPendingRequests(UUID userId);
 }

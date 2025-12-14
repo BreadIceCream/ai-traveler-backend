@@ -7,6 +7,7 @@ import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.TripMemberDto;
+import com.bread.traveler.dto.TripMemberPendingRequestDto;
 import com.bread.traveler.entity.TripMembers;
 import com.bread.traveler.entity.Trips;
 import com.bread.traveler.entity.Users;
@@ -25,10 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -160,7 +158,7 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
     @Override
     @TripAccessValidate(lowestRole = MemberRole.OWNER) // 只有OWNER可以删除成员
     public boolean deleteMember(UUID tripId, UUID userId, UUID handleUserId) {
-        log.info("Deleting member: {}, handleUserId {}, userId {}", tripId, handleUserId, userId);
+        log.info("Deleting member: tripId {}, handleUserId {}, userId {}", tripId, handleUserId, userId);
         Assert.notNull(tripId, "tripId cannot be null");
         Assert.notNull(handleUserId, "handleUserId cannot be null");
         Assert.notNull(userId, "userId cannot be null");
@@ -233,6 +231,25 @@ public class TripMembersServiceImpl extends ServiceImpl<TripMembersMapper, TripM
         return allTrips.stream()
                 .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
                 .toList();
+    }
+
+    @Override
+    public List<TripMemberPendingRequestDto> getPendingRequests(UUID userId) {
+        log.info("Get pending requests of user: {}", userId);
+        Assert.notNull(userId, "userId cannot be null");
+        // 获取该用户创建的所有行程
+        List<Trips> trips = tripsService.lambdaQuery().eq(Trips::getUserId, userId).list();
+        if (trips == null || trips.isEmpty()){
+            log.info("No trips of user: {}", userId);
+            return Collections.emptyList();
+        }
+        // 获取所有行程的成员请求
+        Map<UUID, Trips> tripIdToTrip = trips.stream().collect(Collectors.toMap(Trips::getTripId, trip -> trip));
+        List<TripMemberPendingRequestDto> pendingRequestDtos = baseMapper.getPendingCountByTripIds(tripIdToTrip.keySet());
+        pendingRequestDtos.forEach(dto -> {
+            dto.setTitle(tripIdToTrip.get(dto.getTripId()).getTitle());
+        });
+        return pendingRequestDtos;
     }
 
 }

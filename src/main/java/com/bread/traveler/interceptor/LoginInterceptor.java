@@ -3,6 +3,7 @@ package com.bread.traveler.interceptor;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTUtil;
 import com.bread.traveler.constants.Constant;
+import com.bread.traveler.context.TripPermissionContext;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -80,5 +81,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         request.setAttribute("username", username);
         log.info("用户 {} 登录成功. URI {}", userId, requestURI);
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 请求处理完毕（无论成功失败），清理当前线程的权限缓存
+        log.info("Clear Context...");
+        TripPermissionContext.clear();
     }
 }

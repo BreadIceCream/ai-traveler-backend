@@ -47,16 +47,16 @@ spring:
             gaoDeMcp:
               url: https://mcp.amap.com
               sse-endpoint: /sse?key=${gaode.api-key}
-
   data:
     redis:
       host: localhost
-      database: 1
+      database: 0
   profiles:
     active: dev
   servlet:
     multipart:
       max-file-size: 3MB
+      max-request-size: 30MB
       resolve-lazily: true  # 延迟解析，保证MaxUploadSizeExceededException能被ExceptionHandler捕获处理
 
 gaode:
@@ -73,6 +73,10 @@ aliyun:
 jwt:
   secret: ${JWT_SECRET}
   expire: ${JWT_EXPIRE}
+
+chat:
+  memory:
+    max-messages: 50
 
 mybatis-plus:
   global-config:
@@ -107,4 +111,4 @@ server:
   servlet:
     context-path: /api
   tomcat:
-    max-swallow-size: 30MB  # 调整吞吐大小，使得MaxUploadSizeExceededException能被正确处理并返回Result
+    max-swallow-size: 50MB  # 调整吞吐大小，使得MaxUploadSizeExceededException能被正确处理并返回Result

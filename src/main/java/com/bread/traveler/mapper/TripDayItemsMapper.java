@@ -23,6 +23,23 @@ public interface TripDayItemsMapper extends BaseMapper<TripDayItems> {
      */
     @Select("select max(item_order) from trip_day_items where trip_day_id = #{tripDayId}")
     Double getMaxOrder(UUID tripDayId);
+
+    /**
+     * 检查item对应的entity是否在tripDayId日程中存在
+     * @param currentItemId
+     * @param tripDayId
+     * @return
+     */
+
+    @Select("""
+            select count(*) from trip_day_items 
+            where trip_day_id = #{tripDayId} 
+            and (entity_id, is_poi) = (
+                select entity_id, is_poi from trip_day_items where item_id = #{currentItemId}
+            )
+            and item_id != #{currentItemId}
+            """)
+    long checkItemExists(UUID currentItemId, UUID tripDayId);
 }
 
 

@@ -74,7 +74,7 @@ public interface TripDaysService extends IService<TripDays> {
     List<EntireTripDay> getEntireTripDaysByTripId(UUID userId, UUID tripId);
 
     /**
-     * AI智能规划，重新规划某天的旅程，只考虑有地址的item，没有地址的item会被忽略放到最后
+     * AI智能规划，重新规划某天的日程，只考虑有地址的item，没有地址的item会被忽略放到最后
      * 需要获取该天的item并重新规划。
      * 会更新该tripDay的note、tripDayItems的note和estimatedCost（追加的形式，字符串拼接，cost值累加）
      * 4个item总耗时约40s左右

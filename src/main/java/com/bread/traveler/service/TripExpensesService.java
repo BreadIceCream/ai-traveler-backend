@@ -70,12 +70,13 @@ public interface TripExpensesService extends IService<TripExpenses> {
     TripExpenses getExpenseById(UUID userId, UUID expenseId);
 
     /**
-     * 获取当前用户指定旅程下的所有支出记录
+     * 获取当前用户指定旅程下的支出记录，支持按类型过滤
      * @param userId 当前用户ID
      * @param tripId 旅程ID
+     * @param category  支出类型，如果为null则不过滤
      * @return 支出列表，默认按支出时间倒序排列 (最新的在前)。如果无支出则返回空列表
      */
-    List<TripExpenses> getExpensesByTripId(UUID userId, UUID tripId);
+    List<TripExpenses> getExpensesByTripIdAndCategory(UUID userId, UUID tripId, ExpenseType category);
 
     /**
      * 获取当前用户指定旅程的总支出统计信息

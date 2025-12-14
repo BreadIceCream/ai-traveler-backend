@@ -2555,6 +2555,110 @@
 ```
 
 
+## 获取待处理的成员请求数量
+
+
+**接口地址**:`/api/tripMembers/pending`
+
+
+**请求方式**:`GET`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>获取当前用户待处理的成员请求数量</p>
+
+
+
+**请求参数**:
+
+
+暂无
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
 ## 获取旅程成员列表
 
 
@@ -3096,7 +3200,7 @@
 ```
 
 
-## AI智能重新规划某天旅程
+## AI智能重新规划某天日程
 
 
 **接口地址**:`/api/tripDays/aiReplan`
@@ -4327,10 +4431,10 @@
 ```
 
 
-## 创建文本日志
+## 创建日志
 
 
-**接口地址**:`/api/trip-logs/note`
+**接口地址**:`/api/trip-logs/create`
 
 
 **请求方式**:`POST`
@@ -4342,19 +4446,8 @@
 **响应数据类型**:`*/*`
 
 
-**接口描述**:<p>创建文本日志</p>
+**接口描述**:<p>创建日志，支持上传多张照片和添加文本。单个照片不超过3MB，全部照片不超过30MB</p>
 
-
-
-**请求示例**:
-
-
-```javascript
-{
-  "content": "",
-  "isPublic": true
-}
-```
 
 
 **请求参数**:
@@ -4363,117 +4456,10 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
+|strings|string|body|true|array||
 |tripNoteLogCreateDto|创建日志参数|body|true|TripNoteLogCreateDto|TripNoteLogCreateDto|
-|&emsp;&emsp;content|日志内容||true|string||
+|&emsp;&emsp;content|日志文本内容||true|string||
 |&emsp;&emsp;isPublic|是否公开||false|boolean||
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| -------- | -------- | ----- | 
-|200|OK|Result|
-|400|Bad Request|Result|
-|500|Internal Server Error|Result|
-
-
-**响应状态码-200**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-400**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-500**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-## 创建图片日志
-
-
-**接口地址**:`/api/trip-logs/image`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`application/x-www-form-urlencoded,application/json`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:<p>上传图片文件，最大为3MB</p>
-
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|tripId|旅程ID|query|true|string(uuid)||
-|imgFile|图片文件|query|true|file||
-|isPublic|是否公开|query|false|boolean||
 
 
 **响应状态**:
@@ -4580,113 +4566,6 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| -------- | -------- | ----- | 
-|200|OK|Result|
-|400|Bad Request|Result|
-|500|Internal Server Error|Result|
-
-
-**响应状态码-200**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-400**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-500**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-## 获取当前用户某个旅程指定类型日志
-
-
-**接口地址**:`/api/trip-logs/trip/type`
-
-
-**请求方式**:`GET`
-
-
-**请求数据类型**:`application/x-www-form-urlencoded`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:<p>获取当前用户某个旅程指定类型日志</p>
-
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|tripId|旅程ID|query|true|string(uuid)||
-|type|日志类型,可用值:NOTE,IMAGE|query|true|string||
 
 
 **响应状态**:
@@ -5569,7 +5448,7 @@
 ```
 
 
-## 获取指定旅程的所有支出记录
+## 获取指定旅程的支出记录
 
 
 **接口地址**:`/api/trip-expenses/list`
@@ -5584,7 +5463,7 @@
 **响应数据类型**:`*/*`
 
 
-**接口描述**:<p>获取指定旅程的所有支出记录</p>
+**接口描述**:<p>获取指定旅程的所有支出记录，可以指定支出类型</p>
 
 
 
@@ -5594,6 +5473,7 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |tripId|旅程ID|query|true|string(uuid)||
+|category|支出类型,可用值:TRANSPORTATION,ACCOMMODATION,DINING,SIGHTSEEING,SHOPPING,OTHER|query|false|string||
 
 
 **响应状态**:
@@ -6901,10 +6781,10 @@
 ```
 
 
-## 获取用户的非POI项列表
+## 分页获取用户的非POI项列表
 
 
-**接口地址**:`/api/nonPoiItem/list`
+**接口地址**:`/api/nonPoiItem/page`
 
 
 **请求方式**:`GET`
@@ -6916,14 +6796,18 @@
 **响应数据类型**:`*/*`
 
 
-**接口描述**:<p>获取用户的非POI项列表</p>
+**接口描述**:<p>分页获取用户的非POI项列表</p>
 
 
 
 **请求参数**:
 
 
-暂无
+| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
+| -------- | -------- | ----- | -------- | -------- | ------ |
+|pageNum||query|false|integer(int32)||
+|pageSize||query|false|integer(int32)||
+|type|可用值:ACTIVITY,FOOD,CULTURE,OTHER|query|false|string||
 
 
 **响应状态**:
@@ -7353,6 +7237,340 @@
 | 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |itemIds|心愿单item ID列表|query|true|array|string|
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+# 网页管理
+
+
+## 从网页中提取信息
+
+
+**接口地址**:`/api/webPage/extract`
+
+
+**请求方式**:`POST`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded,application/json`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>从网页中提取信息，转为POI和非POI项并保存到AI推荐项当中</p>
+
+
+
+**请求示例**:
+
+
+```javascript
+{
+  "city": "",
+  "webPageIds": []
+}
+```
+
+
+**请求参数**:
+
+
+| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
+| -------- | -------- | ----- | -------- | -------- | ------ |
+|extractWebPageDto|网页提取参数|body|true|ExtractWebPageDto|ExtractWebPageDto|
+|&emsp;&emsp;city|城市||false|string||
+|&emsp;&emsp;webPageIds|网页ID||false|array|string(uuid)|
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+## 获取会话下的所有网页
+
+
+**接口地址**:`/api/webPage/list`
+
+
+**请求方式**:`GET`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>获取会话下的所有网页</p>
+
+
+
+**请求参数**:
+
+
+| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
+| -------- | -------- | ----- | -------- | -------- | ------ |
+|conversationId|会话ID|query|true|string(uuid)||
+
+
+**响应状态**:
+
+
+| 状态码 | 说明 | schema |
+| -------- | -------- | ----- | 
+|200|OK|Result|
+|400|Bad Request|Result|
+|500|Internal Server Error|Result|
+
+
+**响应状态码-200**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-400**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+**响应状态码-500**:
+
+
+**响应参数**:
+
+
+| 参数名称 | 参数说明 | 类型 | schema |
+| -------- | -------- | ----- |----- | 
+|code||integer(int32)|integer(int32)|
+|message||string||
+|data||string||
+
+
+**响应示例**:
+```javascript
+{
+	"code": 0,
+	"message": "",
+	"data": {}
+}
+```
+
+
+## 删除网页
+
+
+**接口地址**:`/api/webPage/delete`
+
+
+**请求方式**:`DELETE`
+
+
+**请求数据类型**:`application/x-www-form-urlencoded`
+
+
+**响应数据类型**:`*/*`
+
+
+**接口描述**:<p>删除网页</p>
+
+
+
+**请求参数**:
+
+
+| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
+| -------- | -------- | ----- | -------- | -------- | ------ |
+|webPageId|网页ID|query|true|string(uuid)||
 
 
 **响应状态**:
@@ -7998,115 +8216,6 @@
 | -------- | -------- | ----- | -------- | -------- | ------ |
 |conversationId|会话ID|query|true|string(uuid)||
 |nonPoiItemIds|非POI项ID列表|query|false|array|string|
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| -------- | -------- | ----- | 
-|200|OK|Result|
-|400|Bad Request|Result|
-|500|Internal Server Error|Result|
-
-
-**响应状态码-200**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-400**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-**响应状态码-500**:
-
-
-**响应参数**:
-
-
-| 参数名称 | 参数说明 | 类型 | schema |
-| -------- | -------- | ----- |----- | 
-|code||integer(int32)|integer(int32)|
-|message||string||
-|data||string||
-
-
-**响应示例**:
-```javascript
-{
-	"code": 0,
-	"message": "",
-	"data": {}
-}
-```
-
-
-# 网页管理
-
-
-## 获取会话下的所有网页
-
-
-**接口地址**:`/api/webPage/list`
-
-
-**请求方式**:`GET`
-
-
-**请求数据类型**:`application/x-www-form-urlencoded`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:<p>获取会话下的所有网页</p>
-
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型    | 是否必须 | 数据类型 | schema |
-| -------- | -------- | ----- | -------- | -------- | ------ |
-|conversationId|会话ID|query|true|string(uuid)||
 
 
 **响应状态**:

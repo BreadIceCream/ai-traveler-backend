@@ -3,6 +3,7 @@ package com.bread.traveler.aspect;
 import com.bread.traveler.annotation.TripAccessValidate;
 import com.bread.traveler.annotation.TripVisibilityValidate;
 import com.bread.traveler.constants.Constant;
+import com.bread.traveler.context.TripPermissionContext;
 import com.bread.traveler.entity.TripMembers;
 import com.bread.traveler.entity.Trips;
 import com.bread.traveler.enums.MemberRole;
@@ -31,7 +32,7 @@ public class TripPermissionAspect {
     @Autowired
     private TripsService tripsService;
 
-    //todo 将检验的状态保存至redis
+    //将检验的状态保存至ThreadLocal中
 
     /**
      * 访问权限校验，主要针对增删改方法。校验在当前方法下，user是否能访问trip：
@@ -53,6 +54,17 @@ public class TripPermissionAspect {
             throw new BusinessException("缺少参数");
         }
 
+        // 从ThreadLocal中获取权限信息
+        MemberRole validatedRole = TripPermissionContext.getValidatedRole(tripId);
+        if (validatedRole != null){
+            // 缓存中存在权限信息，需校验权限是否足够
+            if (validatedRole.hasPermission(requiredRole)){
+                log.info("Permission Check Succeed: Cached. User {} has role {}, needs {} for trip {}", userId, validatedRole, requiredRole, tripId);
+                return; //权限足够，不再查库
+            }
+            // 权限不足，需要重新校验
+        }
+
         // 判断trip是否存在
         Trips trip = tripsService.getById(tripId);
         if (trip == null){
@@ -63,11 +75,14 @@ public class TripPermissionAspect {
         // 判断用户是否为成员
         TripMembers member = validateAndGetMember(tripId, userId);
         // 判断是否满足最低权限
-        if (!member.getRole().hasPermission(requiredRole)){
-            log.warn("Permission Denied: User {} has role {}, but needs {} for trip {}", userId, member.getRole(), requiredRole, tripId);
+        MemberRole actualRole = member.getRole();
+        if (!actualRole.hasPermission(requiredRole)){
+            log.warn("Permission Denied: User {} has role {}, but needs {} for trip {}", userId, actualRole, requiredRole, tripId);
             throw new BusinessException(Constant.TRIP_MEMBER_NO_PERMISSION);
         }
-        log.info("Permission Check Succeed: User {} has role {}, needs {} for trip {}", userId, member.getRole(), requiredRole, tripId);
+        // 缓存权限信息
+        TripPermissionContext.addValidatedTripRole(tripId, actualRole);
+        log.info("Permission Check Succeed: User {} has role {}, needs {} for trip {}", userId, actualRole, requiredRole, tripId);
     }
 
     /**
@@ -87,6 +102,12 @@ public class TripPermissionAspect {
             throw new BusinessException("缺少tripId参数");
         }
 
+        // 从缓存中查看trip对user是否可见
+        if (TripPermissionContext.tripIsVisible(tripId)){
+            log.info("Visit permit: Cached. tripId {}, userId {}", tripId, userId);
+            return;
+        }
+
         // 判断trip是否存在
         Trips trip = tripsService.getById(tripId);
         if (trip == null){
@@ -102,6 +123,8 @@ public class TripPermissionAspect {
             // 验证是否为成员。不是成员，抛出异常
             TripMembers member = validateAndGetMember(tripId, userId);
         }
+        // 缓存可见性信息
+        TripPermissionContext.addVisibleTrip(tripId);
         log.info("Visit permit: tripId {}, userId {}, is private {}", tripId, userId, trip.getIsPrivate());
     }
 

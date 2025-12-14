@@ -17,7 +17,9 @@ import com.bread.traveler.enums.TripStatus;
 import com.bread.traveler.exception.BusinessException;
 import com.bread.traveler.service.*;
 import com.bread.traveler.mapper.TripsMapper;
+import com.bread.traveler.utils.TripLockUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -65,6 +67,8 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     private TransactionTemplate transactionTemplate;
     @Autowired
     private TripMembersService tripMembersService;
+    @Autowired
+    private TripLockUtils tripLockUtils;
 
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
@@ -81,8 +85,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
         trip.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
         trip.setIsPrivate(true);
         // 添加到trip_member表
-        boolean a = tripMembersService.createOwner(trip.getTripId(), userId);
-        if (a && save(trip)) {
+        if (save(trip) && tripMembersService.createOwner(trip.getTripId(), userId)) {
             log.info("Create trip success: {}", trip.getTripId());
             return trip;
         }
@@ -222,124 +225,131 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    @TripAccessValidate
+    @TripAccessValidate //todo 引入分布式锁，避免并发修改
     public EntireTrip aiGenerateEntireTripPlan(UUID userId, UUID tripId) {
         log.info("Ai generate entire trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
-        // 判断旅程是否存在
-        Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).one();
-        if (trip == null) {
-            log.error("Trip not found: {}", tripId);
-            throw new BusinessException(Constant.TRIP_NOT_EXIST);
-        }
-        // 根据wishList智能生成旅程，获取该旅程的所有wishlistItem
-        List<EntireWishlistItem> entireWishlistItems = wishlistItemsService.listEntireByTripId(tripId);
-        Assert.notEmpty(entireWishlistItems, Constant.WISHLIST_EMPTY + "，AI无法规划");
-        // 获取entity，过滤不必要的字段。nonPoiItem只保留有estimatedAddress的
-        List<String> itineraryItemsJson = entireWishlistItems.stream()
-                .filter(entireItem -> {
-                    ItineraryItem entity = entireItem.getEntity();
-                    if (entity instanceof NonPoiItem nonPoi) {
-                        // nonPoi只保留有estimatedAddress的
-                        return StrUtil.isNotBlank(nonPoi.getEstimatedAddress());
-                    }
-                    // poi全部保留（都有address）
-                    return true;
-                })
-                // 转为JSON字符串，过滤不必要的字段和空字段
-                .map(entireItem -> {
-                    ItineraryItem entity = entireItem.getEntity();
-                    Map<String, Object> map = new HashMap<>();
-                    if (entity instanceof Pois poi) {
-                        // entity是poi
-                        map = BeanUtil.beanToMap(poi, map, CopyOptions.create()
-                                .setIgnoreProperties("poiId", "externalApiId", "photos", "phone", "rating", "createdAt")
-                                .ignoreNullValue());
-                    } else {
-                        // entity是nonPoi
-                        assert entity instanceof NonPoiItem;
-                        NonPoiItem nonPoi = (NonPoiItem) entity;
-                        map = BeanUtil.beanToMap(nonPoi, map, CopyOptions.create()
-                                .setIgnoreProperties("id", "sourceUrl", "createdAt", "privateUserId")
-                                .ignoreNullValue());
-                    }
-                    map.put("itemId", entireItem.getItem().getItemId());
-                    return JSONUtil.toJsonStr(map);
-                }).toList();
-        long start = System.currentTimeMillis();
-        Future<AiPlanTrip> aiPlanTripTask = THREAD_POOL.submit(() -> {
-            // 创建prompt。PromptTemplate中有JSON，使用自定义render
-            PromptTemplate promptTemplate = PromptTemplate.builder()
-                    .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
-                    .resource(new ClassPathResource("prompts/AiGenerateTripUserPromptTemplate.md")).build();
-            String date = trip.getStartDate() + "至" + trip.getEndDate();
-            Prompt prompt = promptTemplate.create(Map.of("items", itineraryItemsJson, "date", date));
-            ChatClient client = tripPlanClientProvider.getObject();
-            return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
+        // 1. 获取锁 (开启看门狗机制/Watchdog，确保AI执行期间锁自动续期)
+        RLock rLock = tripLockUtils.lockTrip(tripId);
+        try{
+            // 判断旅程是否存在
+            Trips trip = lambdaQuery().eq(Trips::getTripId, tripId).one();
+            if (trip == null) {
+                log.error("Trip not found: {}", tripId);
+                throw new BusinessException(Constant.TRIP_NOT_EXIST);
+            }
+            // 根据wishList智能生成旅程，获取该旅程的所有wishlistItem
+            List<EntireWishlistItem> entireWishlistItems = wishlistItemsService.listEntireByTripId(tripId);
+            Assert.notEmpty(entireWishlistItems, Constant.WISHLIST_EMPTY + "，AI无法规划");
+            // 获取entity，过滤不必要的字段。nonPoiItem只保留有estimatedAddress的
+            List<String> itineraryItemsJson = entireWishlistItems.stream()
+                    .filter(entireItem -> {
+                        ItineraryItem entity = entireItem.getEntity();
+                        if (entity instanceof NonPoiItem nonPoi) {
+                            // nonPoi只保留有estimatedAddress的
+                            return StrUtil.isNotBlank(nonPoi.getEstimatedAddress());
+                        }
+                        // poi全部保留（都有address）
+                        return true;
+                    })
+                    // 转为JSON字符串，过滤不必要的字段和空字段
+                    .map(entireItem -> {
+                        ItineraryItem entity = entireItem.getEntity();
+                        Map<String, Object> map = new HashMap<>();
+                        if (entity instanceof Pois poi) {
+                            // entity是poi
+                            map = BeanUtil.beanToMap(poi, map, CopyOptions.create()
+                                    .setIgnoreProperties("poiId", "externalApiId", "photos", "phone", "rating", "createdAt")
+                                    .ignoreNullValue());
+                        } else {
+                            // entity是nonPoi
+                            assert entity instanceof NonPoiItem;
+                            NonPoiItem nonPoi = (NonPoiItem) entity;
+                            map = BeanUtil.beanToMap(nonPoi, map, CopyOptions.create()
+                                    .setIgnoreProperties("id", "sourceUrl", "createdAt", "privateUserId")
+                                    .ignoreNullValue());
+                        }
+                        map.put("itemId", entireItem.getItem().getItemId());
+                        return JSONUtil.toJsonStr(map);
+                    }).toList();
+            long start = System.currentTimeMillis();
+            Future<AiPlanTrip> aiPlanTripTask = THREAD_POOL.submit(() -> {
+                // 创建prompt。PromptTemplate中有JSON，使用自定义render
+                PromptTemplate promptTemplate = PromptTemplate.builder()
+                        .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
+                        .resource(new ClassPathResource("prompts/AiGenerateTripUserPromptTemplate.md")).build();
+                String date = trip.getStartDate() + "至" + trip.getEndDate();
+                Prompt prompt = promptTemplate.create(Map.of("items", itineraryItemsJson, "date", date));
+                ChatClient client = tripPlanClientProvider.getObject();
+                return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
+                });
             });
-        });
-        // 将原先的entireWishlistItems转为map，key为itemId，value为entireWishlistItem
-        Map<UUID, EntireWishlistItem> itemIdToEntireWishlistItem = entireWishlistItems.stream().collect(Collectors.toMap(
-                entireWishlistItem -> entireWishlistItem.getItem().getItemId(),
-                entireWishlistItem -> entireWishlistItem
-        ));
-        // 处理结果
-        AiPlanTrip output = null;
-        try {
-            output = aiPlanTripTask.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("AI generate entire trip CLIENT TASK failed", e);
-            throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
-        }
-        if (output == null) {
-            log.error("AI generate entire trip failed, output null: {}", trip);
-            throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
-        }
-        long end = System.currentTimeMillis();
-        log.info("AI generate entire trip success. Use {}s. Start processing: {}", (end - start) * 1.0 / 1000, trip);
-        List<TripDaysService.AiPlanTripDay> aiPlanTripDays = output.getTripDays();
-        AtomicReference<LocalDate> date = new AtomicReference<>(trip.getStartDate());
-        List<EntireTripDay> entireTripDays = aiPlanTripDays.stream().map(aiPlanTripDay -> {
-            // 根据ai创建的当日规划，创建tripDay和EntireTripDayItem
-            // 创建tripDay
-            TripDays tripDay = new TripDays();
-            tripDay.setTripDayId(UUID.randomUUID());
-            tripDay.setTripId(tripId);
-            tripDay.setDayDate(date.getAndUpdate(d -> d.plusDays(1)));
-            tripDay.setNotes(aiPlanTripDay.getSummaryNotes());
-            // 创建List<EntireTripDayItem>
-            List<TripDaysService.AiPlanTripDayItem> aiPlanTripDayItems = aiPlanTripDay.getOrderedItems();
-            AtomicReference<Double> order = new AtomicReference<>(10000.0);
-            List<EntireTripDayItem> entireTripDayItems = aiPlanTripDayItems.stream().map(aiPlanTripDayItem -> {
-                // 返回的aiPlanTripDayItem中的itemId是wishlistItem的id，获取对应的entireWishlistItem
-                EntireWishlistItem entireWishlistItem = itemIdToEntireWishlistItem.get(aiPlanTripDayItem.getItemId());
-                if (entireWishlistItem == null) {
-                    // 无法从map中获取entireWishlistItem，大模型错误，忽略这个item
-                    log.error("AI generate entire trip: WishlistItem not found in map. LLM error: {}", aiPlanTripDayItem.getItemId());
-                    return null;
-                }
-                // 创建tripDayItem
-                WishlistItems wishlistItem = entireWishlistItem.getItem();
-                TripDayItems tripDayItem = TripDayItems.builder()
-                        .itemId(UUID.randomUUID())
-                        .tripDayId(tripDay.getTripDayId())
-                        .entityId(wishlistItem.getEntityId())
-                        .isPoi(wishlistItem.getIsPoi())
-                        .startTime(aiPlanTripDayItem.getStartTime())
-                        .endTime(aiPlanTripDayItem.getEndTime())
-                        .estimatedCost(aiPlanTripDayItem.getEstimatedCost())
-                        .notes(aiPlanTripDayItem.getNotes())
-                        .itemOrder(order.getAndUpdate(value -> value + 10000.0)).build();
-                // 创建EntireTripDayItem，关联entity
-                ItineraryItem itineraryItem = entireWishlistItem.getEntity();
-                return new EntireTripDayItem(tripDayItem, itineraryItem);
-            }).filter(Objects::nonNull).toList();
-            // 创建EntireTripDay并返回
-            return new EntireTripDay(tripDay, entireTripDayItems);
-        }).toList();
-        // 保存至数据库，创建事务
-        Thread.startVirtualThread(() -> {
+            // 将原先的entireWishlistItems转为map，key为itemId，value为entireWishlistItem
+            Map<UUID, EntireWishlistItem> itemIdToEntireWishlistItem = entireWishlistItems.stream().collect(Collectors.toMap(
+                    entireWishlistItem -> entireWishlistItem.getItem().getItemId(),
+                    entireWishlistItem -> entireWishlistItem
+            ));
+            // 处理结果
+            AiPlanTrip output = null;
+            try {
+                output = aiPlanTripTask.get();
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("AI generate entire trip CLIENT TASK failed", e);
+                throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
+            }
+            if (output == null) {
+                log.error("AI generate entire trip failed, output null: {}", trip);
+                throw new RuntimeException(Constant.TRIP_AI_GENERATE_FAILED);
+            }
+            long end = System.currentTimeMillis();
+            log.info("AI generate entire trip success. Use {}s. Start processing: {}", (end - start) * 1.0 / 1000, trip);
+            List<TripDaysService.AiPlanTripDay> aiPlanTripDays = output.getTripDays();
+            AtomicReference<LocalDate> date = new AtomicReference<>(trip.getStartDate());
+            List<EntireTripDay> entireTripDays = aiPlanTripDays.stream().map(aiPlanTripDay -> {
+                // 根据ai创建的当日规划，创建tripDay和EntireTripDayItem
+                // 创建tripDay
+                TripDays tripDay = new TripDays();
+                tripDay.setTripDayId(UUID.randomUUID());
+                tripDay.setTripId(tripId);
+                tripDay.setDayDate(date.getAndUpdate(d -> d.plusDays(1)));
+                tripDay.setNotes(aiPlanTripDay.getSummaryNotes());
+                // 创建List<EntireTripDayItem>
+                List<TripDaysService.AiPlanTripDayItem> aiPlanTripDayItems = aiPlanTripDay.getOrderedItems();
+                AtomicReference<Double> order = new AtomicReference<>(10000.0);
+                List<EntireTripDayItem> entireTripDayItems = aiPlanTripDayItems.stream().map(aiPlanTripDayItem -> {
+                    // 返回的aiPlanTripDayItem中的itemId是wishlistItem的id，获取对应的entireWishlistItem
+                    EntireWishlistItem entireWishlistItem = itemIdToEntireWishlistItem.get(aiPlanTripDayItem.getItemId());
+                    if (entireWishlistItem == null) {
+                        // 无法从map中获取entireWishlistItem，大模型错误，忽略这个item
+                        log.error("AI generate entire trip: WishlistItem not found in map. LLM error: {}", aiPlanTripDayItem.getItemId());
+                        return null;
+                    }
+                    // 创建tripDayItem
+                    WishlistItems wishlistItem = entireWishlistItem.getItem();
+                    TripDayItems tripDayItem = TripDayItems.builder()
+                            .itemId(UUID.randomUUID())
+                            .tripDayId(tripDay.getTripDayId())
+                            .entityId(wishlistItem.getEntityId())
+                            .isPoi(wishlistItem.getIsPoi())
+                            .startTime(aiPlanTripDayItem.getStartTime())
+                            .endTime(aiPlanTripDayItem.getEndTime())
+                            .estimatedCost(aiPlanTripDayItem.getEstimatedCost())
+                            .notes(aiPlanTripDayItem.getNotes())
+                            .itemOrder(order.getAndUpdate(value -> value + 10000.0)).build();
+                    // 创建EntireTripDayItem，关联entity
+                    ItineraryItem itineraryItem = entireWishlistItem.getEntity();
+                    return new EntireTripDayItem(tripDayItem, itineraryItem);
+                }).filter(Objects::nonNull).toList();
+                // 创建EntireTripDay并返回
+                return new EntireTripDay(tripDay, entireTripDayItems);
+            }).toList();
+            // 查看锁是否被当前线程持有
+            if (!rLock.isHeldByCurrentThread()){
+                log.error("Trip lock not held by current thread: {}", trip);
+                throw new RuntimeException(Constant.TRIP_AI_EXECUTE_TIMEOUT);
+            }
+            // 保存至数据库，创建事务
             transactionTemplate.executeWithoutResult(status -> {
                 try {
                     // 需要更新tripDay表和tripDayItem表
@@ -373,9 +383,14 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
                     throw new RuntimeException(e);
                 }
             });
-        });
-        // 返回结果
-        return new EntireTrip(trip, entireTripDays);
+            // 返回结果
+            return new EntireTrip(trip, entireTripDays);
+        }catch (Exception e){
+            log.error("AI generate entire trip failed", e);
+            throw new RuntimeException(e);
+        }finally {
+            tripLockUtils.unlock(rLock);
+        }
     }
 
     @Override
@@ -385,24 +400,29 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
         log.info("Delete trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
-        boolean exists = lambdaQuery().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).exists();
-        Assert.isTrue(exists, Constant.TRIP_NOT_EXIST);
-        // 级联删除该旅程tripId下的所有日程和日程下的所有item
-        List<UUID> tripDayIds = tripDaysService.lambdaQuery()
-                .eq(TripDays::getTripId, tripId)
-                .list().stream().map(TripDays::getTripDayId).toList();
-        // 这个删除方法会自动删除所有日程下的所有item
-        if (!tripDayIds.isEmpty()) {
-            // 日程不为空，删除所有日程
-            tripDaysService.deleteTripDays(userId, tripId, tripDayIds);
-        } else {
-            log.info("Trip days is empty: tripId {}", tripId);
+        RLock rLock = tripLockUtils.lockTrip(tripId);
+        try {
+            boolean exists = lambdaQuery().eq(Trips::getTripId, tripId).eq(Trips::getUserId, userId).exists();
+            Assert.isTrue(exists, Constant.TRIP_NOT_EXIST);
+            // 级联删除该旅程tripId下的所有日程和日程下的所有item
+            List<UUID> tripDayIds = tripDaysService.lambdaQuery()
+                    .eq(TripDays::getTripId, tripId)
+                    .list().stream().map(TripDays::getTripDayId).toList();
+            // 这个删除方法会自动删除所有日程下的所有item
+            if (!tripDayIds.isEmpty()) {
+                // 日程不为空，删除所有日程
+                tripDaysService.deleteTripDays(userId, tripId, tripDayIds);
+            } else {
+                log.info("Trip days is empty: tripId {}", tripId);
+            }
+            // 删除旅程和成员
+            tripMembersService.deleteMembersByTripId(tripId, userId);
+            lambdaUpdate().eq(Trips::getTripId, tripId).remove();
+            log.info("Delete trip success: {}", tripId);
+            return true;
+        } finally {
+            tripLockUtils.unlock(rLock);
         }
-        // 删除旅程和成员
-        lambdaUpdate().eq(Trips::getTripId, tripId).remove();
-        tripMembersService.deleteMembersByTripId(tripId, userId);
-        log.info("Delete trip success: {}", tripId);
-        return true;
     }
 
 }

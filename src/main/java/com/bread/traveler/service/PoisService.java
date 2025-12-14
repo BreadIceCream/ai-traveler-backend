@@ -63,7 +63,7 @@ public interface PoisService extends IService<Pois> {
      * @param queryText 查询文本
      * @param city 城市名称
      * @param topK 要查询的POI数量
-     * @return 匹配的POI列表
+     * @return 匹配的POI列表, 按照分数降序排列
      */
     List<Pois> semanticSearchPois(String queryText, String city, int topK);
 

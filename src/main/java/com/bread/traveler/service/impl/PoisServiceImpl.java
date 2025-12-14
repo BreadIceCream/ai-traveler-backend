@@ -15,7 +15,6 @@ import com.bread.traveler.utils.GaoDeUtils;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
@@ -37,6 +36,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author huang
@@ -54,9 +54,6 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     @Autowired
     @Qualifier("miniTaskClient")
     private ObjectProvider<ChatClient> miniTaskClientProvider;
-    @Autowired
-    @Qualifier("openAiChatClient")
-    private ObjectProvider<ChatClient> openAiChatClientProvider;
 
     @Autowired
     @Lazy
@@ -159,7 +156,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         }).toList();
         log.info("Default generate descriptions for POIs: {}", poisName);
         PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/DefaultGenerateDescriptionTemplate.md"));
-        Prompt prompt = promptTemplate.create(Map.of("poisName", poisName));
+        Prompt prompt = promptTemplate.create(Map.of("poisName", poisName.toString()));
         List<String> descriptions = miniTaskClientProvider.getObject().prompt(prompt)
                 .call().entity(new ParameterizedTypeReference<>() {
                 });
@@ -256,6 +253,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         // 使用vector store进行相似度搜索, 注意''单引号
         String filterExpression = "entity == 'Pois'";
         if (city != null && !city.trim().isEmpty()){
+            city = city.endsWith("市") ? city : city + "市";
             filterExpression += " && city == '%s'".formatted(city);
         }
         log.info("Filter expression: {}", filterExpression);
@@ -265,14 +263,17 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
                 .filterExpression(filterExpression).build();
         List<Document> documents = vectorStore.similaritySearch(searchRequest);
         if (documents == null || documents.isEmpty()) {
-            throw new BusinessException(Constant.POIS_SEARCH_NO_RESULT);
+            log.info("Semantic search pois failed: no results found.");
+            return Collections.emptyList();
         }
         // 从数据库中查询POI信息
         List<UUID> poiIds = documents.stream().map(document -> {
             log.info("Document: {}, score: {}", document.getId(), document.getScore());
             return UUID.fromString(document.getId());
         }).toList();
-        List<Pois> pois = listByIds(poiIds);
+        Map<UUID, Pois> idToPoi = listByIds(poiIds).stream().collect(Collectors.toMap(Pois::getPoiId, pois -> pois));
+        // 按照相似度排序
+        List<Pois> pois = poiIds.stream().map(idToPoi::get).filter(Objects::nonNull).toList();
         log.info("Semantic search pois success: size {}", pois.size());
         return pois;
     }

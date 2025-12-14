@@ -1,8 +1,8 @@
 package com.bread.traveler.controller;
 
+import com.bread.traveler.dto.TripLogsDto;
 import com.bread.traveler.dto.TripNoteLogCreateDto;
 import com.bread.traveler.entity.TripLogs;
-import com.bread.traveler.enums.LogType;
 import com.bread.traveler.service.TripLogsService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,25 +23,15 @@ public class TripLogsController {
     @Autowired
     private TripLogsService tripLogsService;
 
-    @PostMapping("/note")
-    @Operation(summary = "创建文本日志", description = "创建文本日志")
+    @PostMapping("/create")
+    @Operation(summary = "创建日志", description = "创建日志，支持上传多张照片和添加文本。单个照片不超过3MB，全部照片不超过30MB")
     public Result createNoteLog(
             @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
-            @RequestBody TripNoteLogCreateDto dto) {
-        TripLogs log = tripLogsService.createNoteLog(userId, tripId, dto.getContent(), dto.getIsPublic());
-        return log == null ? Result.serverError("创建失败") : Result.success("创建成功", log);
-    }
-
-    @PostMapping("/image")
-    @Operation(summary = "创建图片日志", description = "上传图片文件，最大为3MB")
-    public Result createImgLog(
-            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
-            @Schema(description = "图片文件", example = "图片文件") @RequestParam("imgFile") MultipartFile imgFile,
-            @Schema(description = "是否公开", example = "true") @RequestParam(required = false) Boolean isPublic) {
-        TripLogs log = tripLogsService.createImgLog(userId, tripId, imgFile, isPublic);
-        return log == null ? Result.serverError("创建失败") : Result.success("创建成功", log);
+            @RequestPart(required = false) List<MultipartFile> imgFiles,
+            @RequestPart TripNoteLogCreateDto tripNoteLogCreateDto) {
+        String msg = tripLogsService.createLog(userId, tripId, tripNoteLogCreateDto.getContent(), imgFiles, tripNoteLogCreateDto.getIsPublic());
+        return Result.success(msg);
     }
 
     @PutMapping("/visibility")
@@ -72,22 +62,12 @@ public class TripLogsController {
         return logs.isEmpty() ? Result.success("获取成功，暂无日志", logs) : Result.success("获取成功", logs);
     }
 
-    @GetMapping("/trip/type")
-    @Operation(summary = "获取当前用户某个旅程指定类型日志", description = "获取当前用户某个旅程指定类型日志")
-    public Result getLogsByTripIdAndType(
-            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
-            @Schema(description = "日志类型", example = "NOTE") @RequestParam LogType type) {
-        List<TripLogs> logs = tripLogsService.getLogsOfUserByTripIdAndType(userId, tripId, type);
-        return logs.isEmpty() ? Result.success("获取成功，暂无日志", logs) : Result.success("获取成功", logs);
-    }
-
     @GetMapping("/trip/public")
     @Operation(summary = "获取旅程公开日志", description = "获取旅程公开日志")
     public Result getPublicLogsByTripId(
             @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
-        List<TripLogs> logs = tripLogsService.getPublicLogsByTripId(userId, tripId);
+        List<TripLogsDto> logs = tripLogsService.getPublicLogsByTripId(userId, tripId);
         return logs.isEmpty() ? Result.success("获取成功，暂无日志", logs) : Result.success("获取成功", logs);
     }
 }

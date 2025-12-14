@@ -7,7 +7,7 @@ import lombok.Data;
 @Schema(description = "创建日志参数")
 public class TripNoteLogCreateDto {
 
-    @Schema(description = "日志内容", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "日志文本内容", requiredMode = Schema.RequiredMode.REQUIRED)
     private String content;
     @Schema(description = "是否公开", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Boolean isPublic;

@@ -24,16 +24,18 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
-* @author huang
-* @description 针对表【ai_recommendation_items】的数据库操作Service实现
-* @createDate 2025-11-17 22:29:15
-*/
+ * @author huang
+ * @description 针对表【ai_recommendation_items】的数据库操作Service实现
+ * @createDate 2025-11-17 22:29:15
+ */
 @Service
 @Slf4j
-public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendationItemsMapper, AiRecommendationItems> implements AiRecommendationItemsService{
+public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendationItemsMapper, AiRecommendationItems> implements AiRecommendationItemsService {
 
     @Autowired
     @Lazy
@@ -64,7 +66,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
                     // 按照添加的时间顺序降序排序，最新的添加的排在最前面
                     return o2.getCreatedAt().compareTo(o1.getCreatedAt());
                 }).map(AiRecommendationItems::getEntityId).toList();
-        if (poiIds.isEmpty()){
+        if (poiIds.isEmpty()) {
             log.warn("Get pois items NO RESULTS in ITEM table: conversation {}", conversationId);
             return Collections.emptyList();
         }
@@ -72,7 +74,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
         List<String> poiIdsStr = poiIds.stream().map(poiId -> "'" + poiId + "'").toList();
         List<Pois> result = poisService.lambdaQuery().in(Pois::getPoiId, poiIds)
                 .last("order by (poi_id," + StrUtil.join(",", poiIdsStr) + ")").list();
-        if (result == null || result.isEmpty()){
+        if (result == null || result.isEmpty()) {
             log.warn("Get pois items NO RESULTS in POI table: conversation {}", conversationId);
             return Collections.emptyList();
         }
@@ -96,7 +98,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
                     // 按照添加的时间顺序降序排序，最新的添加的排在最前面
                     return o2.getCreatedAt().compareTo(o1.getCreatedAt());
                 }).map(AiRecommendationItems::getEntityId).toList();
-        if (nonPoiItemIds.isEmpty()){
+        if (nonPoiItemIds.isEmpty()) {
             log.warn("Get non poi items NO RESULTS in ITEM table: conversation {}", conversationId);
             return Collections.emptyList();
         }
@@ -104,7 +106,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
         List<String> nonPoiItemIdsStr = nonPoiItemIds.stream().map(nonPoiItemId -> "'" + nonPoiItemId + "'").toList();
         List<NonPoiItem> result = nonPoiItemService.lambdaQuery().in(NonPoiItem::getId, nonPoiItemIds)
                 .last("order by (id," + StrUtil.join(",", nonPoiItemIdsStr) + ")").list();
-        if (result == null || result.isEmpty()){
+        if (result == null || result.isEmpty()) {
             log.warn("Get non poi items NO RESULTS in NON_POI_ITEM table: conversation {}", conversationId);
             return Collections.emptyList();
         }
@@ -112,26 +114,36 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addPois(UUID userId, UUID conversationId, List<UUID> poiIds, boolean isManual) {
         log.info("Add pois to ITEM table: conversation {}, isManual {}", conversationId, isManual);
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 添加pois到item表中
         // 先从pois表中获取pois记录
         List<Pois> pois = poisService.listByIds(poiIds);
-        if (pois.size() != poiIds.size()){
+        if (pois.size() != poiIds.size()) {
             log.warn("Some poi don't exist: {}", poiIds);
         }
-        List<AiRecommendationItems> items = pois.stream().map(poi -> {
-            // 创建item实体
-            return new AiRecommendationItems(
-                    poi.getPoiId(),
-                    OffsetDateTime.now(ZoneId.systemDefault()),
-                    conversationId,
-                    isManual,
-                    true
-            );
-        }).toList();
-        if (!selfProxy.saveBatch(items)) {
+        // 判断是否已经添加,获取已经添加的entityId
+        List<AiRecommendationItems> addedItems = lambdaQuery()
+                .eq(AiRecommendationItems::getConversationId, conversationId)
+                .in(AiRecommendationItems::getEntityId, poiIds).list();
+        Set<UUID> addedPoiIds = addedItems.stream().map(AiRecommendationItems::getEntityId).collect(Collectors.toSet());
+        List<AiRecommendationItems> items = pois.stream()
+                // 过滤已经添加的pois
+                .filter(poi -> !addedPoiIds.contains(poi.getPoiId()))
+                .map(poi -> {
+                    // 创建item实体
+                    return new AiRecommendationItems(
+                            poi.getPoiId(),
+                            OffsetDateTime.now(ZoneId.systemDefault()),
+                            conversationId,
+                            isManual,
+                            true
+                    );
+                }).toList();
+        // 过滤后的未添加的items不为空时,才保存
+        if (!items.isEmpty() && !selfProxy.saveBatch(items)) {
             log.error("Add pois to ITEM table FAILED: conversation {}, pois {}", conversationId, poiIds);
             return false;
         }
@@ -139,21 +151,35 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addPoisDirect(UUID userId, UUID conversationId, List<UUID> poiIds) {
         log.info("Add pois to ITEM table: conversation {}, isManual false", conversationId);
+        if (poiIds == null || poiIds.isEmpty()) {
+            log.warn("Add pois to ITEM table: conversation {}, pois is empty", conversationId);
+            return true;
+        }
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
+        // 判断是否已经添加,获取已经添加的entityId
+        List<AiRecommendationItems> addedItems = lambdaQuery()
+                .eq(AiRecommendationItems::getConversationId, conversationId)
+                .in(AiRecommendationItems::getEntityId, poiIds).list();
+        Set<UUID> addedPoiIds = addedItems.stream().map(AiRecommendationItems::getEntityId).collect(Collectors.toSet());
         // 添加pois到item表中
-        List<AiRecommendationItems> items = poiIds.stream().map(poiId -> {
-            // 创建item实体
-            return new AiRecommendationItems(
-                    poiId,
-                    OffsetDateTime.now(ZoneId.systemDefault()),
-                    conversationId,
-                    false,
-                    true
-            );
-        }).toList();
-        if (!selfProxy.saveBatch(items)) {
+        List<AiRecommendationItems> items = poiIds.stream()
+                // 过滤已经添加的pois
+                .filter(poiId -> !addedPoiIds.contains(poiId))
+                .map(poiId -> {
+                    // 创建item实体
+                    return new AiRecommendationItems(
+                            poiId,
+                            OffsetDateTime.now(ZoneId.systemDefault()),
+                            conversationId,
+                            false,
+                            true
+                    );
+                }).toList();
+        // 过滤后的未添加的items不为空时,才保存
+        if (!items.isEmpty() && !selfProxy.saveBatch(items)) {
             log.error("Add pois to ITEM table FAILED: conversation {}, pois {}", conversationId, poiIds);
             return false;
         }
@@ -161,25 +187,39 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addNonPoiItems(UUID userId, UUID conversationId, List<UUID> nonPoiItemIds, boolean isManual) {
         log.info("Add non poi items to ITEM table: conversation {}, isManual {}", conversationId, isManual);
+        if (nonPoiItemIds == null || nonPoiItemIds.isEmpty()) {
+            log.warn("Add non poi items to ITEM table: conversation {}, nonPoiItems is empty", conversationId);
+            return true;
+        }
         AiRecommendationConversation conversation = conversationService.searchConversationById(userId, conversationId);
         // 添加nonPoiItem到item表中
         List<NonPoiItem> nonPoiItems = nonPoiItemService.listByIds(nonPoiItemIds);
-        if (nonPoiItems.size() != nonPoiItemIds.size()){
+        if (nonPoiItems.size() != nonPoiItemIds.size()) {
             log.warn("Some non poi item don't exist: {}", nonPoiItemIds);
         }
-        List<AiRecommendationItems> items = nonPoiItems.stream().map(nonPoiItem -> {
-            // 创建item实体
-            return new AiRecommendationItems(
-                    nonPoiItem.getId(),
-                    OffsetDateTime.now(ZoneId.systemDefault()),
-                    conversationId,
-                    isManual,
-                    false
-            );
-        }).toList();
-        if (!selfProxy.saveBatch(items)) {
+        // 判断是否已经添加,获取已经添加的entityId
+        List<AiRecommendationItems> addedItems = lambdaQuery()
+                .eq(AiRecommendationItems::getConversationId, conversationId)
+                .in(AiRecommendationItems::getEntityId, nonPoiItems.stream().map(NonPoiItem::getId).toList()).list();
+        Set<UUID> addedNonPoiItemIds = addedItems.stream().map(AiRecommendationItems::getEntityId).collect(Collectors.toSet());
+        List<AiRecommendationItems> items = nonPoiItems.stream()
+                // 筛选未添加的nonPoiItem
+                .filter(nonPoiItem -> !addedNonPoiItemIds.contains(nonPoiItem.getId()))
+                .map(nonPoiItem -> {
+                    // 创建item实体
+                    return new AiRecommendationItems(
+                            nonPoiItem.getId(),
+                            OffsetDateTime.now(ZoneId.systemDefault()),
+                            conversationId,
+                            isManual,
+                            false
+                    );
+                }).toList();
+        // 过滤后的未添加的items不为空时,才保存
+        if (!items.isEmpty() && !selfProxy.saveBatch(items)) {
             log.error("Add non poi items to ITEM table FAILED: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
             return false;
         }
@@ -198,7 +238,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
             wrapper.in(AiRecommendationItems::getEntityId, poiIds);
         }
         if (!wrapper.remove()) {
-            log.error("Remove pois from ITEM table FAILED: conversation {}, pois {}", conversationId, poiIds);
+            log.warn("Remove pois from ITEM table FAILED. Empty: conversation {}, pois {}", conversationId, poiIds);
             return false;
         }
         return true;
@@ -218,7 +258,7 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
             wrapper.in(AiRecommendationItems::getEntityId, nonPoiItemIds);
         }
         if (!wrapper.remove()) {
-            log.error("Remove non poi items from ITEM table FAILED: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
+            log.warn("Remove non poi items from ITEM table FAILED. Empty: conversation {}, nonPoiItems {}", conversationId, nonPoiItemIds);
             return false;
         }
         return true;
@@ -233,8 +273,8 @@ public class AiRecommendationItemsServiceImpl extends ServiceImpl<AiRecommendati
         boolean a = removePoisFromItems(userId, conversationId, null);
         // 删除该会话推荐的所有nonPoiItem，ids填null
         boolean b = removeNonPoiFromItems(userId, conversationId, null);
-        if (!a || !b){
-            log.error("Remove all items from ITEM table FAILED: conversation {}", conversationId);
+        if (!a || !b) {
+            log.warn("Remove all items from ITEM table FAILED. Maybe Empty: conversation {}", conversationId);
             return false;
         }
         return true;

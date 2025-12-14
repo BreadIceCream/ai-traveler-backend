@@ -10,8 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    restart: always
-
+  redis:
+    image: redis:6.2-alpine
+    container_name: ai-traveler-redis
+    # 开启AOF持久化，已移除 --requirepass 参数
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
 volumes:
   postgres-data:
     name: pg-data

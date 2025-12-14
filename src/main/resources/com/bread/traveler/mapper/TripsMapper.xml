@@ -55,6 +55,7 @@
         SELECT *
         FROM trips
         <include refid="TripQueryConditions"/>
+        ORDER BY created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 </mapper>

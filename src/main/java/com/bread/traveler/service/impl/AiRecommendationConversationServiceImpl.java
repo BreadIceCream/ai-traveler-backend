@@ -1,5 +1,6 @@
 package com.bread.traveler.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.AiRecommendResponse;
@@ -25,6 +26,7 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,8 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
     private WebSearchService webSearchService;
     @Autowired
     private AiRecommendationItemsService aiRecommendationItemsService;
+    @Value("${chat.memory.max-messages}")
+    private int CHAT_MEMORY_MAX_MESSAGES;
 
     @Override
     public AiRecommendationConversation createConversation(UUID userId, String queryText) {
@@ -110,7 +114,7 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
             ChatClient client = recommendChatClientProvider.getObject();
             ChatMemory chatMemory = MessageWindowChatMemory.builder()
                     .chatMemoryRepository(chatMemoryRepository)
-                    .maxMessages(Constant.CHAT_MEMORY_MAX_MESSAGES)
+                    .maxMessages(CHAT_MEMORY_MAX_MESSAGES)
                     .build();
             // 采用user-controlled Tool Execution，添加ToolContext
             ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
@@ -195,6 +199,8 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteConversation(UUID userId, UUID conversationId) {
         AiRecommendationConversation conversation = searchConversationById(userId, conversationId);
+        // 删除springAI记忆
+        chatMemoryRepository.deleteByConversationId(conversation.getConversationId().toString());
         // 删除会话关联的webPage
         boolean aResult = webSearchService.deleteByConversationId(conversationId);
         // 删除会话中的Items

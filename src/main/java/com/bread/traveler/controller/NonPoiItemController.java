@@ -1,7 +1,9 @@
 package com.bread.traveler.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bread.traveler.dto.NonPoiItemDto;
 import com.bread.traveler.entity.NonPoiItem;
+import com.bread.traveler.enums.NonPoiType;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,11 +32,14 @@ public class NonPoiItemController {
         return nonPoiItem != null ? Result.success("创建成功", nonPoiItem) : Result.serverError("创建失败");
     }
 
-    @GetMapping("/list")
-    @Operation(summary = "获取用户的非POI项列表", description = "获取用户的非POI项列表")
+    @GetMapping("/page")
+    @Operation(summary = "分页获取用户的非POI项列表", description = "分页获取用户的非POI项列表")
     public Result getNonPoiItemList(
-            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId) {
-        List<NonPoiItem> nonPoiItemList = nonPoiItemService.getByUserId(userId);
+            @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) NonPoiType type) {
+        Page<NonPoiItem> nonPoiItemList = nonPoiItemService.getPageByUserId(userId, pageNum, pageSize, type);
         return Result.success(nonPoiItemList);
     }
 

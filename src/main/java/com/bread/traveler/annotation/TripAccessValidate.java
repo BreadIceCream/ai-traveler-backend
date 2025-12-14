@@ -13,6 +13,6 @@ import java.lang.annotation.*;
 public @interface TripAccessValidate {
 
     // 对Trip修改的默认访问权限为OWNER
-    MemberRole lowestRole() default MemberRole.OWNER;
+    MemberRole lowestRole() default MemberRole.EDITOR;
 
 }

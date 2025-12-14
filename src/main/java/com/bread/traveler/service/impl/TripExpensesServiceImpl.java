@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author huang
@@ -124,8 +125,8 @@ public class TripExpensesServiceImpl extends ServiceImpl<TripExpensesMapper, Tri
     }
 
     @Override
-    public List<TripExpenses> getExpensesByTripId(UUID userId, UUID tripId) {
-        log.info("Get expenses by trip id: user {}, trip {}", userId, tripId);
+    public List<TripExpenses> getExpensesByTripIdAndCategory(UUID userId, UUID tripId, ExpenseType category) {
+        log.info("Get expenses by trip id: user {}, trip {}, category {}", userId, tripId, category);
         Assert.notNull(userId, "userId cannot be null");
         Assert.notNull(tripId, "tripId cannot be null");
         List<TripExpenses> expensesList = lambdaQuery().eq(TripExpenses::getTripId, tripId).eq(TripExpenses::getUserId, userId).list();
@@ -133,15 +134,18 @@ public class TripExpensesServiceImpl extends ServiceImpl<TripExpensesMapper, Tri
             log.info("Empty expenses of user {} for trip {}", userId, tripId);
             return Collections.emptyList();
         }
-        // 按照花费时间降序排序
-        expensesList.sort(Comparator.comparing(TripExpenses::getExpenseTime).reversed());
-        return expensesList;
+        // 筛选类型，并按照花费时间降序排序
+        Stream<TripExpenses> stream = expensesList.stream();
+        if (category != null){
+            stream = stream.filter(expenses -> category.equals(expenses.getCategory()));
+        }
+        return stream.sorted(Comparator.comparing(TripExpenses::getExpenseTime).reversed()).toList();
     }
 
     @Override
     public DoubleSummaryStatistics getTotalExpenseStatisticsByTripId(UUID userId, UUID tripId) {
         log.info("Get total expense statistics: user {}, trip {}", userId, tripId);
-        List<TripExpenses> allExpenses = getExpensesByTripId(userId, tripId);
+        List<TripExpenses> allExpenses = getExpensesByTripIdAndCategory(userId, tripId, null);
         if (allExpenses.isEmpty()){
             // 没有支出信息，返回null
             return null;
@@ -152,7 +156,7 @@ public class TripExpensesServiceImpl extends ServiceImpl<TripExpensesMapper, Tri
     @Override
     public Map<ExpenseType, DoubleSummaryStatistics> getCategoryExpenseStatisticsByTripId(UUID userId, UUID tripId) {
         log.info("Get expense statistics by category: user {}, trip {}", userId, tripId);
-        List<TripExpenses> allExpenses = getExpensesByTripId(userId, tripId);
+        List<TripExpenses> allExpenses = getExpensesByTripIdAndCategory(userId, tripId, null);
         if (allExpenses.isEmpty()){
             // 没有支出信息，返回空
             return Collections.emptyMap();

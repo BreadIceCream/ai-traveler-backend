@@ -73,11 +73,12 @@ public class TripExpensesController {
     }
 
     @GetMapping("/list")
-    @Operation(summary = "获取指定旅程的所有支出记录", description = "获取指定旅程的所有支出记录")
+    @Operation(summary = "获取指定旅程的支出记录", description = "获取指定旅程的所有支出记录，可以指定支出类型")
     public Result getExpensesByTripId(
             @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
-            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId) {
-        List<TripExpenses> expenses = expensesService.getExpensesByTripId(userId, tripId);
+            @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,
+            @Schema(description = "支出类型", example = "TRANSPORTATION") @RequestParam(required = false) ExpenseType category) {
+        List<TripExpenses> expenses = expensesService.getExpensesByTripIdAndCategory(userId, tripId, category);
         return expenses.isEmpty() ? Result.success("获取成功，暂无支出记录", expenses) : Result.success("获取成功", expenses);
     }
 

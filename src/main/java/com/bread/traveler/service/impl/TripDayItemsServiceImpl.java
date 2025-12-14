@@ -18,8 +18,10 @@ import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.service.PoisService;
 import com.bread.traveler.service.TripDayItemsService;
 import com.bread.traveler.mapper.TripDayItemsMapper;
+import com.bread.traveler.utils.TripLockUtils;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
     private PoisService poisService;
     @Autowired
     private NonPoiItemService nonPoiItemService;
+    @Autowired
+    private TripLockUtils tripLockUtils;
 
     @Override
     @TripAccessValidate
@@ -55,31 +59,40 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
                 tripDayId, entityId, isPoi, dto);
         Assert.notNull(tripDayId, "tripDayId cannot be null");
         Assert.notNull(entityId, "entityId cannot be null");
-        // 检查entity是否存在
-        boolean exists = isPoi ?
-                poisService.lambdaQuery().eq(Pois::getPoiId, entityId).exists() :
-                nonPoiItemService.lambdaQuery().eq(NonPoiItem::getId, entityId).exists();
-        Assert.isTrue(exists, "entity not exists");
-        // 检查item是否已经添加到当前日程，避免重复添加（不同日程允许重复添加）
-        boolean itemExists = lambdaQuery().eq(TripDayItems::getTripDayId, tripDayId).eq(TripDayItems::getEntityId, entityId).eq(TripDayItems::getIsPoi, isPoi).exists();
-        Assert.isTrue(!itemExists, Constant.TRIP_DAY_ITEM_EXISTS);
-        // 创建item
-        TripDayItems item = BeanUtil.copyProperties(dto, TripDayItems.class, "itemId");
-        item.setItemId(UUID.randomUUID());
-        item.setTripDayId(tripDayId);
-        item.setEntityId(entityId);
-        item.setIsPoi(isPoi);
-        // 设置order，默认添加到最后一个
-        // 获取最大的order
-        Double maxOrder = baseMapper.getMaxOrder(tripDayId);
-        double newOrder = getNewOrder(maxOrder, null);
-        item.setItemOrder(newOrder);
-        if (!save(item)) {
-            log.error("Save trip day item failed: {}", item);
-            return null;
+        // 获取tripDay的读锁
+        RLock lock = tripLockUtils.lockDayRead(tripId, tripDayId);
+        try {
+            // 检查entity是否存在
+            boolean exists = isPoi ?
+                    poisService.lambdaQuery().eq(Pois::getPoiId, entityId).exists() :
+                    nonPoiItemService.lambdaQuery().eq(NonPoiItem::getId, entityId).exists();
+            Assert.isTrue(exists, "entity not exists");
+            // 检查item是否已经添加到当前日程，避免重复添加（不同日程允许重复添加）
+            boolean itemExists = lambdaQuery().eq(TripDayItems::getTripDayId, tripDayId).eq(TripDayItems::getEntityId, entityId).eq(TripDayItems::getIsPoi, isPoi).exists();
+            Assert.isTrue(!itemExists, Constant.TRIP_DAY_ITEM_EXISTS);
+            // 创建item
+            TripDayItems item = new TripDayItems();
+            if (dto != null){
+                BeanUtil.copyProperties(dto, item, CopyOptions.create().setIgnoreProperties("itemId").ignoreNullValue());
+            }
+            item.setItemId(UUID.randomUUID());
+            item.setTripDayId(tripDayId);
+            item.setEntityId(entityId);
+            item.setIsPoi(isPoi);
+            // 设置order，默认添加到最后一个
+            // 获取最大的order
+            Double maxOrder = baseMapper.getMaxOrder(tripDayId);
+            double newOrder = getNewOrder(maxOrder, null);
+            item.setItemOrder(newOrder);
+            if (!save(item)) {
+                log.error("Save trip day item failed: {}", item);
+                return null;
+            }
+            log.info("Save trip day item success: {}", item);
+            return item;
+        } finally {
+            tripLockUtils.unlock(lock);
         }
-        log.info("Save trip day item success: {}", item);
-        return item;
     }
 
     @Override
@@ -88,9 +101,15 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
         log.info("Delete items of TRIP_DAY table: {}", itemIds);
         Assert.notNull(itemIds, "itemIds cannot be null");
         Assert.notEmpty(itemIds, "itemIds cannot be empty");
-        lambdaUpdate().in(TripDayItems::getItemId, itemIds).remove();
-        log.info("Delete items of TRIP_DAY table success: {}", itemIds);
-        return true;
+        // 批量获取item锁
+        RLock rLock = tripLockUtils.lockItems(tripId, itemIds);
+        try {
+            lambdaUpdate().in(TripDayItems::getItemId, itemIds).remove();
+            log.info("Delete items of TRIP_DAY table success: {}", itemIds);
+            return true;
+        } finally {
+            tripLockUtils.unlock(rLock);
+        }
     }
 
     @Override
@@ -99,55 +118,71 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
         log.info("Update item info: {}", dto);
         Assert.notNull(dto, "dto cannot be null");
         Assert.notNull(dto.getItemId(), "itemId cannot be null");
-        TripDayItems item = getById(dto.getItemId());
-        if (item == null){
-            log.error("Item not found: {}", dto.getItemId());
-            throw new BusinessException("Item not found");
+        // 获取item锁
+        RLock rLock = tripLockUtils.lockItem(dto.getItemId());
+        try {
+            TripDayItems item = getById(dto.getItemId());
+            if (item == null){
+                log.error("Item not found: {}", dto.getItemId());
+                throw new BusinessException("Item not found");
+            }
+            BeanUtil.copyProperties(dto, item, CopyOptions.create().setIgnoreProperties("itemId").ignoreNullValue());
+            if (updateById(item)) {
+                log.info("Update item info success: {}", dto);
+                return item;
+            }
+            log.error("Update item info failed: {}", dto);
+            throw new RuntimeException("Update item info failed");
+        } finally {
+            tripLockUtils.unlock(rLock);
         }
-        BeanUtil.copyProperties(dto, item, CopyOptions.create().setIgnoreProperties("itemId"));
-        if (updateById(item)) {
-            log.info("Update item info success: {}", dto);
-            return item;
-        }
-        log.error("Update item info failed: {}", dto);
-        throw new RuntimeException("Update item info failed");
     }
 
     @Override
     @TripAccessValidate
     public boolean moveItemOrder(UUID userId, UUID tripId, UUID currentId, UUID prevId, UUID nextId, UUID tripDayId) {
         log.info("Move item order: current {}, prev {}, next {}, NewTripDay {}", currentId, prevId, nextId, tripDayId);
-        // 获取前一个item
-        Double prevOrder = null;
-        if (prevId != null){
-            TripDayItems prev = lambdaQuery().eq(TripDayItems::getItemId, prevId).eq(TripDayItems::getTripDayId, tripDayId).one();
-            prevOrder = prev != null ? prev.getItemOrder() : null;
+        // 应该获取目标tripDay锁
+        RLock rLock = tripLockUtils.lockDay(tripDayId);
+        try {
+            // 针对跨日程移动：检查目标日程存不存在该item，避免重复添加
+            long exists = baseMapper.checkItemExists(currentId, tripDayId);
+            Assert.isTrue(exists == 0, Constant.TRIP_DAY_ITEM_EXISTS);
+            // 获取前一个item
+            Double prevOrder = null;
+            if (prevId != null){
+                TripDayItems prev = lambdaQuery().eq(TripDayItems::getItemId, prevId).eq(TripDayItems::getTripDayId, tripDayId).one();
+                prevOrder = prev != null ? prev.getItemOrder() : null;
+            }
+            // 获取后一个item
+            Double nextOrder = null;
+            if (nextId != null){
+                TripDayItems next = lambdaQuery().eq(TripDayItems::getItemId, nextId).eq(TripDayItems::getTripDayId, tripDayId).one();
+                nextOrder = next != null ? next.getItemOrder() : null;
+            }
+            // 计算新的order
+            double newOrder = getNewOrder(prevOrder, nextOrder);
+            // 更新item的order
+            boolean update = lambdaUpdate()
+                    .eq(TripDayItems::getItemId, currentId)
+                    .set(TripDayItems::getItemOrder, newOrder)
+                    .set(TripDayItems::getTripDayId, tripDayId)
+                    .update();
+            if(update){
+                log.info("Move item order success: {}", currentId);
+                return true;
+            }
+            log.info("Move item order failed: {}", currentId);
+            return false;
+        } finally {
+            tripLockUtils.unlock(rLock);
         }
-        // 获取后一个item
-        Double nextOrder = null;
-        if (nextId != null){
-            TripDayItems next = lambdaQuery().eq(TripDayItems::getItemId, nextId).eq(TripDayItems::getTripDayId, tripDayId).one();
-            nextOrder = next != null ? next.getItemOrder() : null;
-        }
-        // 计算新的order
-        double newOrder = getNewOrder(prevOrder, nextOrder);
-        // 更新item的order
-        boolean update = lambdaUpdate()
-                .eq(TripDayItems::getItemId, currentId)
-                .set(TripDayItems::getItemOrder, newOrder)
-                .set(TripDayItems::getTripDayId, tripDayId)
-                .update();
-        if(update){
-            log.info("Move item order success: {}", currentId);
-            return true;
-        }
-        log.info("Move item order failed: {}", currentId);
-        return false;
     }
 
     @Override //todo 优化性能，提高查询效率
     @TripAccessValidate
     public TripDayItems updateTransportNote(UUID userId, UUID tripId, UUID itemId, @Nullable String originAddress) {
+        // 不获取锁
         log.info("Update transport note: {}", itemId);
         TripDayItems current = getById(itemId);
         Assert.notNull(current, Constant.DESTINATION_ITEM_NOT_FOUND);

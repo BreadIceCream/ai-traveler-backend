@@ -2,6 +2,7 @@ package com.bread.traveler.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -32,10 +33,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -63,6 +67,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     private AiRecommendationItemsService aiRecommendationItemsService;
 
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
+    private static final ExecutorService EXTRACT_THREAD_POOL = Executors.newFixedThreadPool(15);
 
     @Override
     public boolean deleteByConversationId(UUID conversationId) {
@@ -76,8 +81,23 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     }
 
     @Override
+    public boolean deleteById(UUID webPageId) {
+        log.info("Delete web page: {}", webPageId);
+        boolean remove = lambdaUpdate().eq(WebPage::getId, webPageId).remove();
+        if (remove){
+            log.info("Delete web page success");
+            return true;
+        }
+        log.info("Delete web page failed");
+        return false;
+    }
+
+    @Override
     public List<WebPage> listByConversationId(UUID conversationId) {
-        return lambdaQuery().eq(WebPage::getConversationId, conversationId).list();
+        List<WebPage> list = lambdaQuery().eq(WebPage::getConversationId, conversationId).list();
+        // 按创建时间倒序排序
+        list.sort(Comparator.comparing(WebPage::getCreatedAt).reversed());
+        return list;
     }
 
     @Override
@@ -106,7 +126,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
                     WebPage webPage = new WebPage();
                     BeanUtil.copyProperties(item, webPage,
                             CopyOptions.create().setIgnoreProperties("id").ignoreNullValue());
-                    // 设置webPage Id 和 会话ID
+                    // 设置webPage Id 和 会话ID，以及发布时间为UTC+8
                     webPage.setId(UUID.randomUUID());
                     webPage.setConversationId(conversationId);
                     webPage.setCreatedAt(OffsetDateTime.now(ZoneId.systemDefault()));
@@ -120,6 +140,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     @Override
     public ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId) {
         log.info("Extract items from web page: {}", webPageId);
+        String message = "提取成功，已保存至AI推荐项目";
         WebPage webPage = getById(webPageId);
         if (webPage == null) {
             log.warn("Extract: Web page not found: {}", webPageId);
@@ -128,11 +149,19 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
         // 生成prompt
         String prompt = "title:" + webPage.getName() + System.lineSeparator() + "url:" + webPage.getUrl() + System.lineSeparator() + "开始提取";
         ChatClient extractClient = extractItemsClientProvider.getObject();
-        ExtractionIntermediateResultDTO intermediateResult = extractClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {
-        });
-        if (intermediateResult == null) {
-            log.warn("Extract result is null");
-            return null;
+        ExtractionIntermediateResultDTO intermediateResult;
+        try {
+            intermediateResult = extractClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {});
+        } catch (Exception e) {
+            // 提取失败
+            log.error("Extract failed", e);
+            message = "提取失败，可能无法读取网页";
+            return new ExtractResult(message, webPageId, webPage.getName(), Collections.emptyList(), Collections.emptyList());
+        }
+        if (intermediateResult == null || (CollUtil.isEmpty(intermediateResult.getPois()) && CollUtil.isEmpty(intermediateResult.getNonPois()))) {
+            log.error("Extract result is null or empty.");
+            message = "提取失败，可能无法读取网页";
+            return new ExtractResult(message, webPageId, webPage.getName(), Collections.emptyList(), Collections.emptyList());
         }
         log.info("Extract result: {}", intermediateResult);
         // 解析提取的结果，返回Pois集合和NonPoiItem集合。
@@ -184,7 +213,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
             nonPoiItem.setPrivateUserId(userId);
             return nonPoiItem;
         }).toList();
-        Boolean nonPoiItemSaved = false;
+        Boolean nonPoiItemSaved = nonPoiItems.isEmpty(); // 如果非POI项为空，则默认保存成功
         if (!nonPoiItems.isEmpty()){
             // 保存非POI项。将非POI项关联到conversationItem中。采用事务
              nonPoiItemSaved = transactionTemplate.execute(status -> {
@@ -196,25 +225,63 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
                 } catch (Exception e) {
                     log.error("NON POI save failed, rolling back transaction.", e);
                     status.setRollbackOnly();
-                    throw new RuntimeException("Non poi save transaction rolled back", e);
+                    // 不抛出异常，继续返回false
+                    return false;
                 }
             });
         }
         // 等待 pois 解析完成，返回结果
-        String message = "success";
         List<Pois> pois = new ArrayList<>();
         try {
             pois = poisParseTask.get();
         } catch (Exception e) {
             // poi事务已经回滚
             log.error("Extract: Pois parse failed", e);
-            message = "failed";
         }
         if (nonPoiItemSaved == null || !nonPoiItemSaved) {
             log.error("Extract: Non poi save failed");
-            message = "failed";
         }
-        return new ExtractResult(message, pois, nonPoiItems);
+        if (pois.isEmpty() && nonPoiItems.isEmpty()){
+            // 两个都为空,才返回失败
+            log.warn("Extract: Both pois and non poi items are empty");
+            message = "提取失败，可能无法读取网页";
+        }
+        return new ExtractResult(message, webPage.getId(), webPage.getName(), pois, nonPoiItems);
+    }
+
+    @Override
+    public List<ExtractResult> extractItemsFromWebPageAndSave(UUID userId, String city, List<UUID> webPageIds) {
+        Assert.notEmpty(webPageIds, "webPageIds cannot be empty");
+        Assert.isTrue(webPageIds.size() <= 10, Constant.WEB_PAGE_EXTRACT_EXCEED_LIMIT);
+        List<Future<ExtractResult>> futures = webPageIds.stream()
+                .map(webPageId -> EXTRACT_THREAD_POOL.submit(() ->
+                        extractItemsFromWebPageAndSave(userId, city, webPageId)))
+                .toList();
+        List<ExtractResult> results = new ArrayList<>();
+        for (Future<ExtractResult> future : futures) {
+            try {
+                // 阻塞等待结果
+                ExtractResult result = future.get();
+                if (result != null) {
+                    results.add(result);
+                }
+            } catch (ExecutionException e) {
+                // 1. 子任务执行出错（如网络超时），记录日志，但这不影响其他任务的结果
+                // 这种情况下通常选择“忽略错误，继续收集其他结果”
+                log.error("Extract items from web page failed (Task failed)", e);
+            } catch (InterruptedException e) {
+                // 2. 主线程被中断（如服务关闭、用户取消请求）
+                log.error("Extract items interrupted", e);
+                // 【关键修正 1】：恢复中断状态
+                Thread.currentThread().interrupt();
+                // 【关键修正 2】：取消所有还在运行的任务，防止资源浪费
+                // 遍历所有 future，尝试取消。cancel方法对已完成的任务无效，所以可以直接调
+                futures.forEach(f -> f.cancel(true));
+                // 【关键修正 3】：立即跳出循环，不要再去调 get() 了
+                break;
+            }
+        }
+        return results;
     }
 }
 

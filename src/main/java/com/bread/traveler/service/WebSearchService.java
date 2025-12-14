@@ -33,9 +33,16 @@ public interface WebSearchService extends IService<WebPage> {
     boolean deleteByConversationId(UUID conversationId);
 
     /**
+     * 删除网页
+     * @param webPageId
+     * @return
+     */
+    boolean deleteById(UUID webPageId);
+
+    /**
      * 列出会话下的所有网页
      * @param conversationId
-     * @return
+     * @return 按照创建时间倒序排序
      */
     List<WebPage> listByConversationId(UUID conversationId);
 
@@ -58,6 +65,16 @@ public interface WebSearchService extends IService<WebPage> {
      * @return 提取的结果，包含POI和NonPoiItem的集合
      */
     ExtractResult extractItemsFromWebPageAndSave(UUID userId, String city, UUID webPageId);
+
+    /**
+     * 从网页中提取信息,生成POI或NonPoiItem
+     *
+     * @param userId
+     * @param city      城市。但会优先使用提取后得到的城市
+     * @param webPageIds
+     * @return 提取的结果，包含POI和NonPoiItem的集合
+     */
+    List<ExtractResult> extractItemsFromWebPageAndSave(UUID userId, String city, List<UUID> webPageIds);
 
     @Builder
     @Data
@@ -124,6 +141,8 @@ public interface WebSearchService extends IService<WebPage> {
     @NoArgsConstructor
     class ExtractResult {
         String message;
+        UUID webPageId;
+        String webPageTitle;
         List<Pois> pois;
         List<NonPoiItem> nonPois;
     }

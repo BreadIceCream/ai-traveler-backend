@@ -1,6 +1,7 @@
 package com.bread.traveler.controller;
 
 import com.bread.traveler.dto.TripMemberDto;
+import com.bread.traveler.dto.TripMemberPendingRequestDto;
 import com.bread.traveler.service.TripMembersService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -79,6 +81,13 @@ public class TripMembersController {
             @Schema(description = "是否通过审批", example = "true") @RequestParam(required = false) Boolean isPass) {
         List<TripMemberDto> members = tripMembersService.getTripMembers(userId, tripId, isPass);
         return members.isEmpty() ? Result.success("获取成功，暂无成员", members) : Result.success("获取成功", members);
+    }
+
+    @GetMapping("/pending")
+    @Operation(summary = "获取待处理的成员请求数量", description = "获取当前用户待处理的成员请求数量")
+    public Result getPendingRequests(@RequestAttribute("userId") UUID userId){
+        List<TripMemberPendingRequestDto> pendingRequests = tripMembersService.getPendingRequests(userId);
+        return pendingRequests.isEmpty() ? Result.success("暂无待处理的成员请求", pendingRequests) : Result.success("获取成功", pendingRequests);
     }
 
 }

@@ -20,7 +20,6 @@ public class Constant {
     public static final String USERS_FIND_SIMILAR_NO_RESULT = "未找到相似用户";
     public static final String WEB_SEARCH_FAILED = "网页搜索失败";
     public static final Integer WEB_SEARCH_COUNT = 10;
-    public static final int CHAT_MEMORY_MAX_MESSAGES = 50;
     public static final String CONVERSATION_NOT_EXIST = "对话不存在";
     public static final String CONVERSATION_PERMISSION_DENIED = "没有权限查看该对话";
     public static final String PREV_ITEM_NOT_FOUND = "无法获取起点，无法规划路径";
@@ -41,7 +40,7 @@ public class Constant {
     public static final String WISHLIST_EMPTY = "心愿单为空";
     public static final String TRIP_DAY_ITEM_EXISTS = "日程中已存在，不要重复添加";
     public static final String TRIP_AI_GENERATE_FAILED = "AI规划旅程失败";
-    public static final String TRIP_MEMBER_NO_PERMISSION = "没有权限";
+    public static final String TRIP_MEMBER_NO_PERMISSION = "权限不足";
     public static final String TRIP_MEMBER_REQUEST_NOT_EXIST = "不存在该请求，无法处理";
     public static final String TRIP_MEMBER_NOT_EXIST = "该成员不存在";
     public static final String TRIP_MEMBER_EXIST = "已是成员，不要重复添加";
@@ -66,6 +65,10 @@ public class Constant {
     public static final String TRIP_MEMBER_INVITE_USER_FAILED = "邀请用户失败";
     public static final String USERS_PASSWORD_ERROR = "密码错误";
     public static final String USERS_LOGIN_REDIS_KEY = "login:token:";
+    public static final String WEB_PAGE_EXTRACT_EXCEED_LIMIT = "一次提取的网页不能超过10个";
+    public static final String TRIP_DAY_ITEMS_NO_ADDRESS = "当前日程项没有地址";
+    public static final String TRIP_DAY_ITEMS_NOT_EXIST = "日程项不存在";
+    public static final String TRIP_AI_EXECUTE_TIMEOUT = "AI规划超时，请重试";
 
     public static class SHOW_FIELD {
         //设置后返回 poi 商业信息，包括营业时间、评分等

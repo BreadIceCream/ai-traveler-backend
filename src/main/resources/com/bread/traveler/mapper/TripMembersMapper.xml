@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bread.traveler.mapper.TripMembersMapper" >
+
+    <select id="getPendingCountByTripIds" resultType="com.bread.traveler.dto.TripMemberPendingRequestDto">
+        select trip_id as tripId, count(*) as pendingRequestCount
+        from trip_members
+        where trip_id in
+        <foreach item="tripId" collection="tripIds" separator="," open="(" close=")" index="index">
+            #{tripId}
+        </foreach>
+        and is_pass = false
+        group by trip_id
+    </select>
+</mapper>

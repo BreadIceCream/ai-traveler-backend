@@ -100,11 +100,11 @@ public class ChatClientConfig {
     }
 
 
-    @Bean(name = "openAiChatClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient openAiChatClient(OpenAiChatModel openAiChatModel){
-        return ChatClient.builder(openAiChatModel).build();
-    }
+//    @Bean(name = "openAiChatClient")
+//    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//    public ChatClient openAiChatClient(OpenAiChatModel openAiChatModel){
+//        return ChatClient.builder(openAiChatModel).build();
+//    }
 
 
 }

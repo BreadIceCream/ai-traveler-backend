@@ -38,7 +38,7 @@ public class WebPage implements Serializable {
      * 网页标题
      */
     @TableField(value = "name")
-    @Schema(description = "网页名称", example = "故宫博物院官网")
+    @Schema(description = "网页标题")
     private String name;
 
     /**
@@ -52,21 +52,21 @@ public class WebPage implements Serializable {
      * 
      */
     @TableField(value = "display_url")
-    @Schema(description = "显示URL", example = "www.dpm.org.cn")
+    @Schema(description = "展示URL，url decode后的格式", example = "www.dpm.org.cn")
     private String displayUrl;
 
     /**
      * 
      */
     @TableField(value = "snippet")
-    @Schema(description = "网页摘要", example = "故宫博物院官方网站...")
+    @Schema(description = "网页简短描述", example = "故宫博物院官方网站...")
     private String snippet;
 
     /**
      * 
      */
     @TableField(value = "summary")
-    @Schema(description = "网页总结", example = "详细介绍故宫的历史和文化...")
+    @Schema(description = "网页总结、文本摘要", example = "详细介绍故宫的历史和文化...")
     private String summary;
 
     /**

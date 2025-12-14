@@ -1,8 +1,10 @@
 package com.bread.traveler.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bread.traveler.dto.NonPoiItemDto;
 import com.bread.traveler.entity.NonPoiItem;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bread.traveler.enums.NonPoiType;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,9 +41,13 @@ public interface NonPoiItemService extends IService<NonPoiItem> {
     NonPoiItem updateNonPoiItem(UUID userId, NonPoiItemDto dto);
 
     /**
-     * 根据用户ID获取
+     * 根据用户ID分页获取
+     *
      * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @param type
      * @return
      */
-    List<NonPoiItem> getByUserId(UUID userId);
+    Page<NonPoiItem> getPageByUserId(UUID userId, Integer pageNum, Integer pageSize, NonPoiType type);
 }

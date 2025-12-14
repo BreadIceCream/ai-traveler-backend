@@ -64,7 +64,7 @@ public class TripDaysController {
     }
 
     @PostMapping("/aiReplan")
-    @Operation(summary = "AI智能重新规划某天旅程", description = "AI智能重新规划某天旅程")
+    @Operation(summary = "AI智能重新规划某天日程", description = "AI智能重新规划某天旅程")
     public Result aiRePlanTripDay(
             @Schema(description = "用户ID") @RequestAttribute("userId") UUID userId,
             @Schema(description = "旅程ID", example = "123e4567-e89b-12d3-a456-426614174001") @RequestParam UUID tripId,

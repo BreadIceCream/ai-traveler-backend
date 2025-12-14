@@ -3,9 +3,11 @@ package com.bread.traveler.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.dto.NonPoiItemDto;
 import com.bread.traveler.entity.NonPoiItem;
+import com.bread.traveler.enums.NonPoiType;
 import com.bread.traveler.service.NonPoiItemService;
 import com.bread.traveler.mapper.NonPoiItemMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,10 +72,18 @@ public class NonPoiItemServiceImpl extends ServiceImpl<NonPoiItemMapper, NonPoiI
     }
 
     @Override
-    public List<NonPoiItem> getByUserId(UUID userId) {
-        log.info("Get non-poi items by userId: {}", userId);
-        List<NonPoiItem> list = lambdaQuery().eq(NonPoiItem::getPrivateUserId, userId).list();
-        return list != null ? list : Collections.emptyList();
+    public Page<NonPoiItem> getPageByUserId(UUID userId, Integer pageNum, Integer pageSize, NonPoiType type) {
+        log.info("Get non-poi items: userId {}, pageNum {}, pageSize {}, type {}", userId, pageNum, pageSize, type);
+        long total = baseMapper.countNonPois(userId, type == null ? null : type.name());
+        if (total == 0){
+            return Page.of(pageNum, pageSize, total);
+        }
+        long offset = (long) (pageNum - 1) * pageSize;
+        List<NonPoiItem> records = baseMapper.getPage(userId, type == null ? null : type.name(), offset, pageSize);
+        Page<NonPoiItem> page = Page.of(pageNum, pageSize, total);
+        page.setRecords(records);
+        page.setPages((long) Math.ceil(total * 1.0 / pageSize));
+        return page;
     }
 }
 
