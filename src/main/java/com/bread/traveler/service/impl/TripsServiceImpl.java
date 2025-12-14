@@ -225,7 +225,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     }
 
     @Override
-    @TripAccessValidate //todo 引入分布式锁，避免并发修改
+    @TripAccessValidate
     public EntireTrip aiGenerateEntireTripPlan(UUID userId, UUID tripId) {
         log.info("Ai generate entire trip: user {}, trip {}", userId, tripId);
         Assert.notNull(userId, "userId cannot be null");
