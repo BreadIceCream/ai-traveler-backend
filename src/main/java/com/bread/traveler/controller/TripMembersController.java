@@ -2,6 +2,7 @@ package com.bread.traveler.controller;
 
 import com.bread.traveler.dto.TripMemberDto;
 import com.bread.traveler.dto.TripMemberPendingRequestDto;
+import com.bread.traveler.enums.MemberRole;
 import com.bread.traveler.service.TripMembersService;
 import com.bread.traveler.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,16 +63,16 @@ public class TripMembersController {
         return result ? Result.success("删除成员成功", null) : Result.serverError("删除成员失败");
     }
 
-    // @PutMapping("/updateRole")
-    // @Operation(summary = "更新成员角色", description = "更新指定成员在旅程中的角色")
-    // public Result updateMemberRole(@RequestParam UUID tripId,
-    // @RequestAttribute("userId") UUID userId,
-    // @RequestParam UUID handleUserId,
-    // @RequestParam MemberRole newRole) {
-    // boolean result = tripMembersService.updateMemberRole(tripId, userId,
-    // handleUserId, newRole);
-    // return result ? Result.success("更新成员角色成功") : Result.serverError("更新成员角色失败");
-    // }
+    @PutMapping("/updateRole")
+    @Operation(summary = "更新成员角色", description = "更新指定成员在旅程中的角色")
+    public Result updateMemberRole(@RequestParam UUID tripId,
+                                   @RequestAttribute("userId") UUID userId,
+                                   @RequestParam UUID handleUserId,
+                                   @RequestParam MemberRole newRole) {
+        boolean result = tripMembersService.updateMemberRole(tripId, userId,
+                handleUserId, newRole);
+        return result ? Result.success("更新成员角色成功", null) : Result.serverError("更新成员角色失败");
+    }
 
     @GetMapping("/list")
     @Operation(summary = "获取旅程成员列表", description = "获取指定旅程的所有成员列表，支持按审批状态筛选")
@@ -85,7 +86,7 @@ public class TripMembersController {
 
     @GetMapping("/pending")
     @Operation(summary = "获取待处理的成员请求数量", description = "获取当前用户待处理的成员请求数量")
-    public Result getPendingRequests(@RequestAttribute("userId") UUID userId){
+    public Result getPendingRequests(@RequestAttribute("userId") UUID userId) {
         List<TripMemberPendingRequestDto> pendingRequests = tripMembersService.getPendingRequests(userId);
         return pendingRequests.isEmpty() ? Result.success("暂无待处理的成员请求", pendingRequests) : Result.success("获取成功", pendingRequests);
     }
