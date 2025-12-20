@@ -260,10 +260,11 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
                             return null;
                         }
                         // 更新item的相关信息，notes和estimatedCost追加
-                        String aiNotes = orderedItem.getNotes();
+                        String aiNotes = orderedItem.getNotes() == null ? "" : orderedItem.getNotes();
                         String newItemNotes = tripDayItems.getNotes() + System.lineSeparator() + "AI:" + aiNotes;
-                        BigDecimal aiEstimatedCost = orderedItem.getEstimatedCost();
-                        BigDecimal newEstimatedCost = tripDayItems.getEstimatedCost().add(aiEstimatedCost);
+                        BigDecimal aiEstimatedCost = orderedItem.getEstimatedCost() == null ? BigDecimal.ZERO : orderedItem.getEstimatedCost();
+                        BigDecimal oldEstimatedCost = tripDayItems.getEstimatedCost() == null ? BigDecimal.ZERO : tripDayItems.getEstimatedCost();
+                        BigDecimal newEstimatedCost = oldEstimatedCost.add(aiEstimatedCost);
                         tripDayItems.setNotes(newItemNotes);
                         tripDayItems.setEstimatedCost(newEstimatedCost);
                         tripDayItems.setStartTime(orderedItem.getStartTime());
