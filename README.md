@@ -1,6 +1,6 @@
 # **🌍 AI Traveler Backend (AI 旅游助手后端)**
 
-这是一个基于 Spring Boot 3 和 Spring AI 构建的智能旅游规划助手后端系统。它利用大语言模型（LLM）、向量模型、RAG（检索增强生成）、MCP（模型上下文协议）和地理空间数据，为用户提供从灵感激发到行程落地的全流程智能化服务。
+这是一个基于 Spring Boot 3 和 Spring AI 构建的智能旅游规划助手后端系统。它利用大语言模型（LLM）、向量模型、RAG（检索增强生成）、MCP（模型上下文协议）和地理空间数据，为用户提供从灵感激发到行程落地的全流程智能化服务。点击[这里](https://github.com/BreadIceCream/ai-traveler-frontend)查看前端项目效果图。
 
 ## **📖 项目概述**
 
