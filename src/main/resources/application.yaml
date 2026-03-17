@@ -59,6 +59,10 @@ spring:
       max-request-size: 30MB
       resolve-lazily: true  # 延迟解析，保证MaxUploadSizeExceededException能被ExceptionHandler捕获处理
 
+zhipuai:
+  default-model: ${ZHIPUAI_CHAT_MODEL}
+  flash-model: ${ZHIPUAI_FLASH_CHAT_MODEL}
+
 gaode:
   api-key: ${GAODE_API_KEY}
 web-search:

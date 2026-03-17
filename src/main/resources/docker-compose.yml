@@ -1,5 +1,7 @@
 version: '3.8'
 
+name: ai-traveler
+
 services:
   postgres-db:
     image: pgvector/pgvector:pg16
@@ -14,6 +16,7 @@ services:
     image: redis:6.2-alpine
     container_name: ai-traveler-redis
     # 开启AOF持久化，已移除 --requirepass 参数
+    restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
       - "6379:6379"

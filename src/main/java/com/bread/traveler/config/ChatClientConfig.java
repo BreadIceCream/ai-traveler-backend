@@ -4,13 +4,13 @@ import com.bread.traveler.tools.RecommendationTools;
 import com.bread.traveler.tools.ToolNames;
 import com.bread.traveler.tools.WebFetchTools;
 import io.modelcontextprotocol.client.McpSyncClient;
-import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.mcp.*;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
 import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
+import org.springframework.ai.zhipuai.api.ZhiPuAiApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,26 +23,37 @@ import java.util.List;
 @Configuration
 public class ChatClientConfig {
 
+    @Value("${zhipuai.default-model}")
+    String defaultModel;
+    @Value("${zhipuai.flash-model}")
+    String flashModel;
+
     @Bean(name = "miniTaskClient")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient miniTaskClient(ZhiPuAiChatModel zhiPuAiChatModel){
+    public ChatClient miniTaskClient(ZhiPuAiChatModel zhiPuAiChatModel) {
         return ChatClient.builder(zhiPuAiChatModel)
-                .defaultOptions(ChatOptions.builder()
-                        .model("GLM-4-FlashX-250414")
+                .defaultOptions(ZhiPuAiChatOptions.builder()
+                        // 使用快速模型
+                        .model(flashModel)
+                        // 小任务关闭思考模式
+                        .thinking(ZhiPuAiApi.ChatCompletionRequest.Thinking.disabled())
                         .temperature(0.5).build())
                 .build();
+
     }
 
     @Bean(name = "extractItemsClient")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient extractItemsClient(ZhiPuAiChatModel zhiPuAiChatModel){
+    public ChatClient extractItemsClient(ZhiPuAiChatModel zhiPuAiChatModel) {
         return ChatClient.builder(zhiPuAiChatModel)
                 // 系统提示词
                 .defaultSystem(new ClassPathResource("prompts/ExtractItemsSystemPrompt.md"))
                 .defaultTools(new WebFetchTools())
-                // 采用GLM-4.5-AirX模型
-                .defaultOptions(ChatOptions.builder()
-                        .model("GLM-4.5-AirX")
+                // 采用快速模型
+                .defaultOptions(ZhiPuAiChatOptions.builder()
+                        // 使用快速模型
+                        .model(flashModel)
+                        .thinking(ZhiPuAiApi.ChatCompletionRequest.Thinking.disabled())
                         .temperature(0.5).build())
                 .build();
     }
@@ -53,7 +64,7 @@ public class ChatClientConfig {
     public ChatClient recommendChatClient(ZhiPuAiChatModel zhiPuAiChatModel,
                                           RecommendationTools recommendationTools,
                                           List<McpSyncClient> mcpSyncClients,
-                                          McpToolNamePrefixGenerator toolNamePrefixGenerator){
+                                          McpToolNamePrefixGenerator toolNamePrefixGenerator) {
         // 只负责aiRecommendation的对话处理，复杂的extract任务由extractItemsClient处理
         // 提供webSearch、poiSearch和部分高德Mcp工具
         SyncMcpToolCallbackProvider toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
@@ -65,13 +76,16 @@ public class ChatClientConfig {
                 .defaultToolCallbacks(toolCallbackProvider)
                 .defaultTools(recommendationTools)
                 .defaultSystem(new ClassPathResource("prompts/RecommendationSystemPrompt.md"))
-                .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").build())
+                .defaultOptions(ZhiPuAiChatOptions.builder()
+                        .model(defaultModel)
+                        .temperature(0.7)
+                        .thinking(ZhiPuAiApi.ChatCompletionRequest.Thinking.disabled()).build())
                 .build();
     }
 
     @Bean(name = "routePlanClient")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient routePlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator){
+    public ChatClient routePlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator) {
         SyncMcpToolCallbackProvider toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
                 .mcpClients(mcpSyncClients)
                 .toolFilter((mcpConnectionInfo, tool) -> ToolNames.ROUTE_PLAN_CLIENT_GAODE_MCP_TOOLS.contains(tool.name()))
@@ -80,13 +94,16 @@ public class ChatClientConfig {
                 // 添加系统提示词，默认工具，模型选择
                 .defaultToolCallbacks(toolCallbackProvider)
                 .defaultSystem(new ClassPathResource("prompts/RoutePlanClientSystemPrompt.md"))
-                .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").temperature(0.4).build())
+                .defaultOptions(ZhiPuAiChatOptions.builder()
+                        .model(flashModel)
+                        .thinking(ZhiPuAiApi.ChatCompletionRequest.Thinking.disabled())
+                        .temperature(0.5).build())
                 .build();
     }
 
     @Bean(name = "tripPlanClient")
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public ChatClient tripPlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator){
+    public ChatClient tripPlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator) {
         SyncMcpToolCallbackProvider toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
                 .mcpClients(mcpSyncClients)
                 .toolFilter((mcpConnectionInfo, tool) -> ToolNames.TRIP_PLAN_CLIENT_GAODE_MCP_TOOLS.contains(tool.name()))
@@ -95,7 +112,10 @@ public class ChatClientConfig {
                 // 添加系统提示词，默认工具，模型选择
                 .defaultToolCallbacks(toolCallbackProvider)
                 .defaultSystem(new ClassPathResource("prompts/TripPlanClientSystemPrompt.md"))
-                .defaultOptions(ChatOptions.builder().model("GLM-4.5-AirX").temperature(0.7).build())
+                .defaultOptions(ZhiPuAiChatOptions.builder()
+                        .model(defaultModel)
+                        .thinking(ZhiPuAiApi.ChatCompletionRequest.Thinking.disabled())
+                        .temperature(0.6).build())
                 .build();
     }
 

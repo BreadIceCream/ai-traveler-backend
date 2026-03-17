@@ -119,7 +119,6 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
             // 采用user-controlled Tool Execution，添加ToolContext
             ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
             ChatOptions chatOptions = ToolCallingChatOptions.builder()
-                    .model("GLM-4.5-AirX")
                     .internalToolExecutionEnabled(false)
                     .toolContext(Map.of(TOOL_CONTEXT_CONVERSATION_ID, conversationId))
                     .build();
