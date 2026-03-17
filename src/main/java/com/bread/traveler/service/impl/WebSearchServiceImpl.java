@@ -6,7 +6,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.entity.NonPoiItem;
@@ -26,7 +25,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,8 +36,6 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -56,7 +52,7 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
     private String webSearchApiKey;
     @Autowired
     @Qualifier("extractItemsClient")
-    private ObjectProvider<ChatClient> extractItemsClientProvider;
+    private ChatClient extractItemsClient;
     @Autowired
     private PoisService poisService;
     @Autowired
@@ -148,10 +144,9 @@ public class WebSearchServiceImpl extends ServiceImpl<WebPageMapper, WebPage> im
         }
         // 生成prompt
         String prompt = "title:" + webPage.getName() + System.lineSeparator() + "url:" + webPage.getUrl() + System.lineSeparator() + "开始提取";
-        ChatClient extractClient = extractItemsClientProvider.getObject();
         ExtractionIntermediateResultDTO intermediateResult;
         try {
-            intermediateResult = extractClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {});
+            intermediateResult = extractItemsClient.prompt().user(prompt).call().entity(new ParameterizedTypeReference<>() {});
         } catch (Exception e) {
             // 提取失败
             log.error("Extract failed", e);

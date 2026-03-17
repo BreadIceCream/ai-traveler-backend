@@ -20,7 +20,6 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -53,7 +52,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
     private GaoDeUtils gaoDeUtils;
     @Autowired
     @Qualifier("miniTaskClient")
-    private ObjectProvider<ChatClient> miniTaskClientProvider;
+    private ChatClient miniTaskClient;
 
     @Autowired
     @Lazy
@@ -157,7 +156,7 @@ public class PoisServiceImpl extends ServiceImpl<PoisMapper, Pois> implements Po
         log.info("Default generate descriptions for POIs: {}", poisName);
         PromptTemplate promptTemplate = new PromptTemplate(new ClassPathResource("prompts/DefaultGenerateDescriptionTemplate.md"));
         Prompt prompt = promptTemplate.create(Map.of("poisName", poisName.toString()));
-        List<String> descriptions = miniTaskClientProvider.getObject().prompt(prompt)
+        List<String> descriptions = miniTaskClient.prompt(prompt)
                 .call().entity(new ParameterizedTypeReference<>() {
                 });
         log.info("Descriptions generated success!");

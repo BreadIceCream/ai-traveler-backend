@@ -29,7 +29,6 @@ public class ChatClientConfig {
     String flashModel;
 
     @Bean(name = "miniTaskClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient miniTaskClient(ZhiPuAiChatModel zhiPuAiChatModel) {
         return ChatClient.builder(zhiPuAiChatModel)
                 .defaultOptions(ZhiPuAiChatOptions.builder()
@@ -43,7 +42,6 @@ public class ChatClientConfig {
     }
 
     @Bean(name = "extractItemsClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient extractItemsClient(ZhiPuAiChatModel zhiPuAiChatModel) {
         return ChatClient.builder(zhiPuAiChatModel)
                 // 系统提示词
@@ -60,7 +58,6 @@ public class ChatClientConfig {
 
 
     @Bean(name = "recommendChatClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient recommendChatClient(ZhiPuAiChatModel zhiPuAiChatModel,
                                           RecommendationTools recommendationTools,
                                           List<McpSyncClient> mcpSyncClients,
@@ -84,7 +81,6 @@ public class ChatClientConfig {
     }
 
     @Bean(name = "routePlanClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient routePlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator) {
         SyncMcpToolCallbackProvider toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
                 .mcpClients(mcpSyncClients)
@@ -102,7 +98,6 @@ public class ChatClientConfig {
     }
 
     @Bean(name = "tripPlanClient")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ChatClient tripPlanClient(ZhiPuAiChatModel zhiPuAiChatModel, List<McpSyncClient> mcpSyncClients, McpToolNamePrefixGenerator toolNamePrefixGenerator) {
         SyncMcpToolCallbackProvider toolCallbackProvider = SyncMcpToolCallbackProvider.builder()
                 .mcpClients(mcpSyncClients)
@@ -121,7 +116,6 @@ public class ChatClientConfig {
 
 
 //    @Bean(name = "openAiChatClient")
-//    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 //    public ChatClient openAiChatClient(OpenAiChatModel openAiChatModel){
 //        return ChatClient.builder(openAiChatModel).build();
 //    }

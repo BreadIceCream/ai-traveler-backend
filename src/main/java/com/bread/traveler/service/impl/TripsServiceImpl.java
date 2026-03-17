@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.annotation.TripAccessValidate;
@@ -24,7 +23,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,7 +58,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
     private WishlistItemsService wishlistItemsService;
     @Autowired
     @Qualifier("tripPlanClient")
-    private ObjectProvider<ChatClient> tripPlanClientProvider;
+    private ChatClient tripPlanClient;
     @Autowired
     private TripDayItemsService tripDayItemsService;
     @Autowired
@@ -281,8 +279,7 @@ public class TripsServiceImpl extends ServiceImpl<TripsMapper, Trips> implements
                         .resource(new ClassPathResource("prompts/AiGenerateTripUserPromptTemplate.md")).build();
                 String date = trip.getStartDate() + "至" + trip.getEndDate();
                 Prompt prompt = promptTemplate.create(Map.of("items", itineraryItemsJson, "date", date));
-                ChatClient client = tripPlanClientProvider.getObject();
-                return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
+                return tripPlanClient.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
                 });
             });
             // 将原先的entireWishlistItems转为map，key为itemId，value为entireWishlistItem

@@ -23,7 +23,6 @@ import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
 
     @Autowired
     @Qualifier("routePlanClient")
-    private ObjectProvider<ChatClient> routePlanClientProvider;
+    private ChatClient routePlanClient;
     @Autowired
     private PoisService poisService;
     @Autowired
@@ -211,9 +210,8 @@ public class TripDayItemsServiceImpl extends ServiceImpl<TripDayItemsMapper, Tri
         }
         log.info("Original address: {}", originAddress);
         // 调用client智能规划路径
-        ChatClient client = routePlanClientProvider.getObject();
         String prompt = "Origin address:" + originAddress + System.lineSeparator() + "Destination:" + destination;
-        String transportNotes = client.prompt(prompt).call().content();
+        String transportNotes = routePlanClient.prompt(prompt).call().content();
         current.setTransportNotes(transportNotes);
         Thread.startVirtualThread(()->{
             log.info("Update item transport notes: {}", itemId);

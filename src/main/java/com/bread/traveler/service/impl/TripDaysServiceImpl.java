@@ -2,7 +2,6 @@ package com.bread.traveler.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import cn.hutool.core.thread.lock.LockUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,7 +24,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.template.st.StTemplateRenderer;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -59,7 +57,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
     private TripDayItemsService tripDayItemsService;
     @Autowired
     @Qualifier("tripPlanClient")
-    private ObjectProvider<ChatClient> tripPlanClientProvider;
+    private ChatClient tripPlanClient;
     @Autowired
     private TransactionTemplate transactionTemplate;
     @Autowired
@@ -218,8 +216,7 @@ public class TripDaysServiceImpl extends ServiceImpl<TripDaysMapper, TripDays> i
                         .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
                         .resource(new ClassPathResource("prompts/RePlanTripDayUserPromptTemplate.md")).build();
                 Prompt prompt = promptTemplate.create(Map.of("items", itineraryItemsJson, "date", tripDay.getDayDate()));
-                ChatClient client = tripPlanClientProvider.getObject();
-                return client.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
+                return tripPlanClient.prompt(prompt).call().entity(new ParameterizedTypeReference<>() {
                 });
             });
             // 将原先的items变为map，key为tripDayItem的id，value为tripDayItem

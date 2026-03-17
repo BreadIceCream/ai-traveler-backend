@@ -1,6 +1,5 @@
 package com.bread.traveler.service.impl;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bread.traveler.constants.Constant;
 import com.bread.traveler.dto.AiRecommendResponse;
@@ -23,7 +22,6 @@ import org.springframework.ai.content.Content;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.model.tool.ToolExecutionResult;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,10 +45,10 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
 
     @Autowired
     @Qualifier("recommendChatClient")
-    private ObjectProvider<ChatClient> recommendChatClientProvider;
+    private ChatClient recommendChatClient;
     @Autowired
     @Qualifier("miniTaskClient")
-    private ObjectProvider<ChatClient> miniTaskClientProvider;
+    private ChatClient miniTaskClient;
     @Autowired
     private JdbcChatMemoryRepository chatMemoryRepository;
     @Autowired
@@ -63,8 +61,7 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
     @Override
     public AiRecommendationConversation createConversation(UUID userId, String queryText) {
         AiRecommendationConversation conversation = new AiRecommendationConversation();
-        ChatClient client = miniTaskClientProvider.getObject();
-        String title = client.prompt().system(new ClassPathResource("prompts/TitleGenerateSystemPrompt.md"))
+        String title = miniTaskClient.prompt().system(new ClassPathResource("prompts/TitleGenerateSystemPrompt.md"))
                 .user(queryText).call().content();
         conversation.setUserId(userId);
         conversation.setTitle(title);
@@ -109,9 +106,8 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
             // 保存使用的工具及其结果
             Set<String> toolUse = new HashSet<>();
             Map<String, List<String>> toolCallResults = new HashMap<>();
-            // 创建client和memory，手动管理记忆（只有本轮对话正常结束返回时，才会将此轮对话保存到数据库memory当中）
+            // 创建memory，手动管理记忆（只有本轮对话正常结束返回时，才会将此轮对话保存到数据库memory当中）
             // 数据库memory只保存UserMessage和AssistantMessage，不保存ToolMessage，SystemMessage已经配置
-            ChatClient client = recommendChatClientProvider.getObject();
             ChatMemory chatMemory = MessageWindowChatMemory.builder()
                     .chatMemoryRepository(chatMemoryRepository)
                     .maxMessages(CHAT_MEMORY_MAX_MESSAGES)
@@ -130,7 +126,7 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
             history.add(userMessage);
             Prompt prompt = new Prompt(history, chatOptions);
             // 调用client，将输出添加到currentDialogueMessages和history中
-            ChatResponse chatResponse = client.prompt(prompt)
+            ChatResponse chatResponse = recommendChatClient.prompt(prompt)
                     .call().chatResponse();
             addToHistoryAndDialogue(chatResponse, history, currentDialogueMessages);
             while(chatResponse.hasToolCalls()){
@@ -151,7 +147,7 @@ public class AiRecommendationConversationServiceImpl extends ServiceImpl<AiRecom
                 }
                 // 创建新的prompt，继续处理。这里的conversationHistory是全部对话信息
                 prompt = new Prompt(toolExecutionResult.conversationHistory(), chatOptions);
-                chatResponse = client.prompt(prompt)
+                chatResponse = recommendChatClient.prompt(prompt)
                         .call().chatResponse();
                 addToHistoryAndDialogue(chatResponse, history, currentDialogueMessages);
                 // 循环处理，直到不需要工具调用
